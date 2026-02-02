@@ -14,6 +14,12 @@
     <properties>
         <!-- -->
         <main-class>com.cjrequena.command.handler.CommandHandlerMainApplication</main-class>
+        <!---->
+        <postgresql.version>42.7.1</postgresql.version>
+        <postgis-jdbc.version>2.5.1</postgis-jdbc.version>
+        <hibernate-spatial.version>5.6.15.Final</hibernate-spatial.version>
+        <jts.version>1.19.0</jts.version>
+        <hypersistence-utils.version>3.7.0</hypersistence-utils.version>
     </properties>
     <!-- -->
     <dependencies>
@@ -113,6 +119,50 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
+        <!-- PostGIS JDBC Driver for spatial data types -->
+        <dependency>
+            <groupId>net.postgis</groupId>
+            <artifactId>postgis-jdbc</artifactId>
+            <version>${postgis-jdbc.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.postgresql</groupId>
+                    <artifactId>postgresql</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- Hibernate Spatial for PostGIS support -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-spatial</artifactId>
+            <version>${hibernate-spatial.version}</version>
+        </dependency>
+        <!-- JTS Topology Suite for Geometry types -->
+        <dependency>
+            <groupId>org.locationtech.jts</groupId>
+            <artifactId>jts-core</artifactId>
+            <version>${jts.version}</version>
+        </dependency>
+        <!-- JTS I/O for geometry serialization -->
+        <dependency>
+            <groupId>org.locationtech.jts.io</groupId>
+            <artifactId>jts-io-common</artifactId>
+            <version>${jts.version}</version>
+        </dependency>
+        <!-- Hypersistence Utils for JSONB support -->
+        <dependency>
+            <groupId>io.hypersistence</groupId>
+            <artifactId>hypersistence-utils-hibernate-55</artifactId>
+            <version>${hypersistence-utils.version}</version>
+        </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/com.github.f4b6a3/uuid-creator -->
+        <dependency>
+            <groupId>com.github.f4b6a3</groupId>
+            <artifactId>uuid-creator</artifactId>
+            <version>6.1.1</version> <!-- TODO -->
+        </dependency>
+
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>

@@ -1,0 +1,108 @@
+package com.cjrequena.sample.persistence.entity;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import org.locationtech.jts.geom.Point;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+/**
+ * Entity representing a specific point location with coordinates.
+ * Uses PostGIS Point geometry as single source of truth for coordinates.
+ */
+@Entity
+@Table(
+  name = "location",
+  schema = "geo_schema",
+  indexes = {
+    @Index(name = "idx_location_zone", columnList = "zone_id"),
+    @Index(name = "idx_location_geopoint", columnList = "geo_point"),
+    @Index(name = "idx_location_active", columnList = "is_active")
+  }
+)
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class LocationEntity implements Serializable {
+
+  @Serial
+  private static final long serialVersionUID = 1L;
+
+  @Id
+  @Column(name = "id", columnDefinition = "uuid", nullable = false, updatable = false)
+  private UUID id;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "zone_id", foreignKey = @ForeignKey(name = "fk_location_zone"))
+  private ZoneEntity zone;
+
+  @Column(name = "geo_point", nullable = false, columnDefinition = "geometry(Point, 4326)")
+  private Point geoPoint;
+
+  @Column(name = "altitude_meters", precision = 8, scale = 2)
+  private BigDecimal altitudeMeters;
+
+  @Column(name = "accuracy_meters", precision = 8, scale = 2)
+  private BigDecimal accuracyMeters;
+
+  @Column(name = "address", columnDefinition = "TEXT")
+  private String address;
+
+  @Column(name = "postal_code", length = 20)
+  private String postalCode;
+
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "metadata", columnDefinition = "jsonb")
+  private JsonNode metadata;
+
+  @Column(name = "is_active", nullable = false)
+  private Boolean isActive = true;
+
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private LocalDateTime createdAt;
+
+  @Column(name = "updated_at", nullable = false)
+  private LocalDateTime updatedAt;
+
+  @PrePersist
+  protected void onCreate() {
+    if (id == null) {
+      id = com.github.f4b6a3.uuid.UuidCreator.getTimeOrdered();
+    }
+    createdAt = LocalDateTime.now();
+    updatedAt = LocalDateTime.now();
+    if (isActive == null) {
+      isActive = true;
+    }
+  }
+
+  @PreUpdate
+  protected void onUpdate() {
+    updatedAt = LocalDateTime.now();
+  }
+
+  /**
+   * Helper method to get latitude from the geo_point.
+   * @return latitude value
+   */
+  public Double getLatitude() {
+    return geoPoint != null ? geoPoint.getY() : null;
+  }
+
+  /**
+   * Helper method to get longitude from the geo_point.
+   * @return longitude value
+   */
+  public Double getLongitude() {
+    return geoPoint != null ? geoPoint.getX() : null;
+  }
+}

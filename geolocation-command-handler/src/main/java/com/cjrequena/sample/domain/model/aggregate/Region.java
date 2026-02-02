@@ -1,0 +1,167 @@
+package com.cjrequena.sample.domain.model.aggregate;
+
+import com.cjrequena.sample.domain.model.enums.RegionType;
+import com.cjrequena.sample.domain.model.vo.AuditInfo;
+import com.cjrequena.sample.domain.model.vo.PopulationVO;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.TimeZone;
+import java.util.UUID;
+
+/**
+ * Region Domain Aggregate.
+ *
+ * Represents a first-level administrative division (state, province, territory, etc.).
+ * A region belongs to a country and can contain multiple cities.
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Region {
+
+  private UUID id;
+  private UUID countryId;
+  private UUID geoShapeId;
+  private String name;
+  private String code;
+  private RegionType type;
+
+  private PopulationVO population;
+  private TimeZone timezone;
+  private Boolean status;
+  private AuditInfo auditInfo;
+
+  /**
+   * Factory method to create a new region.
+   */
+  public static Region create(
+    UUID id,
+    UUID countryId,
+    String name,
+    String code,
+    RegionType type) {
+
+    validateCreation(id, countryId, name);
+
+    return Region.builder()
+      .id(id)
+      .countryId(countryId)
+      .name(name)
+      .code(code)
+      .type(type != null ? type : RegionType.defaultType())
+      .status(Boolean.TRUE)
+      .auditInfo(AuditInfo.create())
+      .build();
+  }
+
+  /**
+   * Update region information.
+   */
+  public void updateInfo(String name, String code, RegionType type) {
+    if (name != null) {
+      this.name = name;
+    }
+    if (code != null) {
+      this.code = code;
+    }
+    if (type != null) {
+      this.type = type;
+    }
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Assign geographic shape.
+   */
+  public void assignGeoShape(UUID geoShapeId) {
+    this.geoShapeId = geoShapeId;
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Update population.
+   */
+  public void updatePopulation(PopulationVO population) {
+    if (population == null || population.getValue() < 0) {
+      throw new IllegalArgumentException("PopulationVO must be non-negative");
+    }
+    this.population = population;
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Set timezone.
+   */
+  public void setTimezone(TimeZone timezone) {
+    this.timezone = timezone;
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Activate the region.
+   */
+  public void activate() {
+    this.status = Boolean.TRUE;
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Deactivate the region.
+   */
+  public void deactivate() {
+    this.status = Boolean.FALSE;
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Check if region is active.
+   */
+  public boolean isActive() {
+    return this.status != null && this.status.equals(Boolean.TRUE);
+  }
+
+  /**
+   * Check if region has geographic shape assigned.
+   */
+  public boolean hasGeoShape() {
+    return this.geoShapeId != null;
+  }
+
+  /**
+   * Check if region has population data.
+   */
+  public boolean hasPopulationData() {
+    return this.population != null && this.population.getValue() > 0;
+  }
+
+  /**
+   * Get region type as string.
+   */
+  public String getTypeAsString() {
+    return this.type != null ? this.type.getValue() : null;
+  }
+
+  // Validation methods
+
+  private static void validateCreation(UUID id, UUID countryId, String name) {
+    if (id == null) {
+      throw new IllegalArgumentException("Region ID cannot be null");
+    }
+    if (countryId == null) {
+      throw new IllegalArgumentException("Country ID cannot be null");
+    }
+    if (name == null) {
+      throw new IllegalArgumentException("Region name cannot be null");
+    }
+  }
+
+  @Override
+  public String toString() {
+    return String.format("Region{id=%s, name=%s, country=%s, type=%s}",
+      id, name, countryId, type);
+  }
+}

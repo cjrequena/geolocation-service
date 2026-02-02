@@ -1,0 +1,167 @@
+package com.cjrequena.sample.domain.model.aggregate;
+
+import com.cjrequena.sample.domain.model.enums.GeometryType;
+import com.cjrequena.sample.domain.model.vo.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.UUID;
+
+/**
+ * GeoShape Domain Aggregate.
+ *
+ * Represents a geographic shape that can be a point, circle, rectangle, polygon, or line.
+ * This is a rich domain model with business logic and validation.
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class GeoShape {
+
+  private UUID id;
+  private GeometryType geometryType;
+  private GeometryVO geometry;
+  private CoordinateVO centerCoordinates;
+  private RadiusVO radius;
+  private BoundVO bounds;
+  private MetadataVO metadata;
+  private AuditInfo auditInfo;
+
+  /**
+   * Factory method to create a point shape.
+   */
+  public static GeoShape createPoint(UUID id, CoordinateVO coordinates, MetadataVO metadata) {
+    validatePointCreation(coordinates);
+
+    return GeoShape.builder()
+      .id(id)
+      .geometryType(GeometryType.POINT)
+      .geometry(GeometryVO.ofCoordinates(coordinates))
+      .centerCoordinates(null)
+      .radius(null)
+      .bounds(null)
+      .metadata(metadata != null ? metadata : MetadataVO.empty())
+      .auditInfo(AuditInfo.create())
+      .build();
+  }
+
+  /**
+   * Factory method to create a circle shape.
+   */
+  public static GeoShape createCircle(UUID id, CoordinateVO center, RadiusVO radius, MetadataVO metadata) {
+    validateCircleCreation(center, radius);
+
+    return GeoShape.builder()
+      .id(id)
+      .geometryType(GeometryType.CIRCLE)
+      .geometry(GeometryVO.ofCircle(center, radius))
+      .centerCoordinates(center)
+      .radius(radius)
+      .bounds(null)
+      .metadata(metadata != null ? metadata : MetadataVO.empty())
+      .auditInfo(AuditInfo.create())
+      .build();
+  }
+
+  /**
+   * Factory method to create a polygon shape.
+   */
+  public static GeoShape createPolygon(UUID id, GeometryVO geometry, BoundVO bounds, MetadataVO metadata) {
+    validatePolygonCreation(geometry);
+
+    return GeoShape.builder()
+      .id(id)
+      .geometryType(GeometryType.POLYGON)
+      .geometry(geometry)
+      .centerCoordinates(null)
+      .radius(null)
+      .bounds(bounds)
+      .metadata(metadata != null ? metadata : MetadataVO.empty())
+      .auditInfo(AuditInfo.create())
+      .build();
+  }
+
+  /**
+   * Update the shape's geometry.
+   */
+  public void updateGeometry(GeometryVO newGeometry) {
+    validateGeometryUpdate(newGeometry);
+    this.geometry = newGeometry;
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Update metadata.
+   */
+  public void updateMetadata(MetadataVO newMetadata) {
+    if (newMetadata == null) {
+      throw new IllegalArgumentException("Metadata cannot be null");
+    }
+    this.metadata = newMetadata;
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Check if this is a circle shape.
+   */
+  public boolean isCircle() {
+    return GeometryType.CIRCLE.equals(this.geometryType);
+  }
+
+  /**
+   * Check if this is a point shape.
+   */
+  public boolean isPoint() {
+    return GeometryType.POINT.equals(this.geometryType);
+  }
+
+  /**
+   * Check if this is a polygon shape.
+   */
+  public boolean isPolygon() {
+    return GeometryType.POLYGON.equals(this.geometryType);
+  }
+
+  /**
+   * Get the area covered by this shape (if applicable).
+   */
+  public Double getAreaInSquareKm() {
+    if (isCircle() && radius != null) {
+      return Math.PI * Math.pow(radius.getKilometers(), 2);
+    }
+    // For polygons, would need actual geometry calculation
+    return null;
+  }
+
+  // Validation methods
+
+  private static void validatePointCreation(CoordinateVO coordinates) {
+    if (coordinates == null) {
+      throw new IllegalArgumentException("Point must have coordinates");
+    }
+  }
+
+  private static void validateCircleCreation(CoordinateVO center, RadiusVO radius) {
+    if (center == null) {
+      throw new IllegalArgumentException("Circle must have center coordinates");
+    }
+    if (radius == null || radius.getMeters() == null || radius.getMeters().longValue() <= 0) {
+      throw new IllegalArgumentException("Circle must have a positive radius");
+    }
+  }
+
+  private static void validatePolygonCreation(GeometryVO geometry) {
+    if (geometry == null) {
+      throw new IllegalArgumentException("Polygon must have geometry");
+    }
+  }
+
+  private void validateGeometryUpdate(GeometryVO newGeometry) {
+    if (newGeometry == null) {
+      throw new IllegalArgumentException("Geometry cannot be null");
+    }
+  }
+}

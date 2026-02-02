@@ -1,0 +1,43 @@
+package com.cjrequena.sample.domain.model.vo;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
+import java.io.Serial;
+import java.io.Serializable;
+
+/**
+ * Population value object.
+ */
+@Getter
+@EqualsAndHashCode
+public class PopulationVO implements Serializable {
+  @Serial
+  private static final long serialVersionUID = 1L;
+
+  private final Long value;
+
+  private PopulationVO(Long value) {
+    if (value == null || value < 0) {
+      throw new IllegalArgumentException("Population must be non-negative");
+    }
+    this.value = value;
+  }
+
+  public static PopulationVO of(Long value) {
+    return new PopulationVO(value);
+  }
+
+  public boolean isGreaterThan(PopulationVO other) {
+    return this.value > other.value;
+  }
+
+  public boolean isLessThan(PopulationVO other) {
+    return this.value < other.value;
+  }
+
+  @Override
+  public String toString() {
+    return String.format("%,d", value);
+  }
+}

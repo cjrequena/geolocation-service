@@ -1,0 +1,134 @@
+package com.cjrequena.sample.domain.model.aggregate;
+
+import com.cjrequena.sample.domain.model.enums.ZoneType;
+import com.cjrequena.sample.domain.model.vo.AuditInfo;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.UUID;
+
+/**
+ * Zone Domain Aggregate.
+ *
+ * Represents a fine-grained zone within an area (block, sector, precinct).
+ * A zone belongs to an area and contains multiple specific locations.
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Zone {
+
+  private UUID id;
+  private UUID areaId;
+  private UUID geoShapeId;
+  private String name;
+  private ZoneType type;
+  private String postalCode;
+  private Boolean status;
+  private AuditInfo auditInfo;
+
+  /**
+   * Factory method to create a new zone.
+   */
+  public static Zone create(
+    UUID id,
+    UUID areaId,
+    String name,
+    ZoneType type) {
+
+    validateCreation(id, areaId, name);
+
+    return Zone.builder()
+      .id(id)
+      .areaId(areaId)
+      .name(name)
+      .type(type != null ? type : ZoneType.defaultType())
+      .status(Boolean.TRUE)
+      .auditInfo(AuditInfo.create())
+      .build();
+  }
+
+  /**
+   * Update zone information.
+   */
+  public void updateInfo(String name, ZoneType type, String postalCode) {
+    if (name != null) {
+      this.name = name;
+    }
+    if (type != null) {
+      this.type = type;
+    }
+    if (postalCode != null) {
+      this.postalCode = postalCode;
+    }
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Assign geographic shape.
+   */
+  public void assignGeoShape(UUID geoShapeId) {
+    this.geoShapeId = geoShapeId;
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Activate the zone.
+   */
+  public void activate() {
+    this.status = Boolean.TRUE;
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Deactivate the zone.
+   */
+  public void deactivate() {
+    this.status = Boolean.FALSE;
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Check if zone is active.
+   */
+  public boolean isActive() {
+    return this.status != null && this.status.equals(Boolean.TRUE);
+  }
+
+  /**
+   * Check if zone has geographic shape assigned.
+   */
+  public boolean hasGeoShape() {
+    return this.geoShapeId != null;
+  }
+
+  /**
+   * Get zone type as string.
+   */
+  public String getTypeAsString() {
+    return this.type != null ? this.type.getValue() : null;
+  }
+
+  // Validation methods
+
+  private static void validateCreation(UUID id, UUID areaId, String name) {
+    if (id == null) {
+      throw new IllegalArgumentException("Zone ID cannot be null");
+    }
+    if (areaId == null) {
+      throw new IllegalArgumentException("Area ID cannot be null");
+    }
+    if (name == null) {
+      throw new IllegalArgumentException("Zone name cannot be null");
+    }
+  }
+
+  @Override
+  public String toString() {
+    return String.format("Zone{id=%s, name=%s, area=%s, type=%s}",
+      id, name, areaId, type);
+  }
+}
