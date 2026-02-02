@@ -1,7 +1,7 @@
 package com.cjrequena.sample.domain.model.aggregate;
 
 import com.cjrequena.sample.domain.model.enums.ZoneType;
-import com.cjrequena.sample.domain.model.vo.AuditInfo;
+import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,7 +28,7 @@ public class Zone {
   private ZoneType type;
   private String postalCode;
   private Boolean status;
-  private AuditInfo auditInfo;
+  private AuditInfoVO auditInfo;
 
   /**
    * Factory method to create a new zone.
@@ -47,7 +47,7 @@ public class Zone {
       .name(name)
       .type(type != null ? type : ZoneType.defaultType())
       .status(Boolean.TRUE)
-      .auditInfo(AuditInfo.create())
+      .auditInfo(AuditInfoVO.create())
       .build();
   }
 

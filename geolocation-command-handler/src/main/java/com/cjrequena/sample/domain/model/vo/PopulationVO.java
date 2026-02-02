@@ -1,5 +1,6 @@
 package com.cjrequena.sample.domain.model.vo;
 
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -17,6 +18,7 @@ public class PopulationVO implements Serializable {
 
   private final Long value;
 
+  @Builder
   private PopulationVO(Long value) {
     if (value == null || value < 0) {
       throw new IllegalArgumentException("Population must be non-negative");
@@ -25,7 +27,10 @@ public class PopulationVO implements Serializable {
   }
 
   public static PopulationVO of(Long value) {
-    return new PopulationVO(value);
+    return PopulationVO
+      .builder()
+      .value(value)
+      .build();
   }
 
   public boolean isGreaterThan(PopulationVO other) {

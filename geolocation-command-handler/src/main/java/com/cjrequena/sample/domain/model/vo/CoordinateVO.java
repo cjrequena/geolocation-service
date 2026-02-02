@@ -1,5 +1,8 @@
 package com.cjrequena.sample.domain.model.vo;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -38,6 +41,64 @@ public class CoordinateVO implements Serializable {
 
   public static CoordinateVO of(double latitude, double longitude) {
     return new CoordinateVO(BigDecimal.valueOf(latitude), BigDecimal.valueOf(longitude));
+  }
+
+  /**
+   * Creates a CoordinateVO instance from a JsonNode.
+   *
+   * @param jsonNode the JsonNode containing coordinate data
+   * @return a new CoordinateVO instance
+   * @throws IllegalArgumentException if the JsonNode is invalid or missing required fields
+   */
+  public static CoordinateVO ofJsonNode(JsonNode jsonNode) {
+    if (jsonNode == null || jsonNode.isNull()) {
+      throw new IllegalArgumentException("Coordinate JsonNode cannot be null");
+    }
+
+    JsonNode latNode = jsonNode.get("latitude");
+    JsonNode lonNode = jsonNode.get("longitude");
+
+    if (latNode == null || latNode.isNull()) {
+      throw new IllegalArgumentException("Missing required field: latitude");
+    }
+    if (lonNode == null || lonNode.isNull()) {
+      throw new IllegalArgumentException("Missing required field: longitude");
+    }
+
+    BigDecimal latitude = new BigDecimal(latNode.asText());
+    BigDecimal longitude = new BigDecimal(lonNode.asText());
+
+    return CoordinateVO.of(latitude, longitude);
+  }
+
+  /**
+   * Converts a CoordinateVO to a JsonNode.
+   *
+   * @param coordinate the CoordinateVO to convert
+   * @param objectMapper the ObjectMapper to use for creating the JsonNode
+   * @return a JsonNode representation of the coordinate
+   */
+  public static ObjectNode toJsonNode(CoordinateVO coordinate, ObjectMapper objectMapper) {
+    if (coordinate == null) {
+      throw new IllegalArgumentException("Coordinate cannot be null");
+    }
+    if (objectMapper == null) {
+      throw new IllegalArgumentException("ObjectMapper cannot be null");
+    }
+
+    ObjectNode node = objectMapper.createObjectNode();
+    node.put("latitude", coordinate.getLatitude());
+    node.put("longitude", coordinate.getLongitude());
+    return node;
+  }
+
+  /**
+   * Converts this CoordinateVO to a JsonNode using a default ObjectMapper.
+   *
+   * @return a JsonNode representation of this coordinate
+   */
+  public JsonNode toJsonNode() {
+    return toJsonNode(this, new ObjectMapper());
   }
 
   private void validateLatitude(BigDecimal latitude) {

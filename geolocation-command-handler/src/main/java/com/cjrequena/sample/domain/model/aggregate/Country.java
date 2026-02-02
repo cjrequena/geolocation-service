@@ -1,6 +1,6 @@
 package com.cjrequena.sample.domain.model.aggregate;
 
-import com.cjrequena.sample.domain.model.vo.AuditInfo;
+import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import lombok.AllArgsConstructor;
@@ -30,7 +30,7 @@ public class Country {
     private String capital;
     private PopulationVO population;
     private Boolean status;
-    private AuditInfo auditInfo;
+    private AuditInfoVO auditInfo;
 
     /**
      * Factory method to create a new country.
@@ -51,7 +51,7 @@ public class Country {
                 .phoneCode(phoneCode)
                 .currencyCode(currencyCode)
                 .status(Boolean.TRUE)
-                .auditInfo(AuditInfo.create())
+                .auditInfo(AuditInfoVO.create())
                 .build();
     }
 

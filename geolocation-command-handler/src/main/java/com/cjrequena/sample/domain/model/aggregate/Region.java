@@ -1,7 +1,7 @@
 package com.cjrequena.sample.domain.model.aggregate;
 
 import com.cjrequena.sample.domain.model.enums.RegionType;
-import com.cjrequena.sample.domain.model.vo.AuditInfo;
+import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,7 +33,7 @@ public class Region {
   private PopulationVO population;
   private TimeZone timezone;
   private Boolean status;
-  private AuditInfo auditInfo;
+  private AuditInfoVO auditInfo;
 
   /**
    * Factory method to create a new region.
@@ -54,7 +54,7 @@ public class Region {
       .code(code)
       .type(type != null ? type : RegionType.defaultType())
       .status(Boolean.TRUE)
-      .auditInfo(AuditInfo.create())
+      .auditInfo(AuditInfoVO.create())
       .build();
   }
 

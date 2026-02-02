@@ -1,9 +1,10 @@
 package com.cjrequena.sample.persistence.entity;
 
-import com.cjrequena.sample.persistence.entity.enums.GeometryType;
+import com.cjrequena.sample.domain.model.enums.GeometryType;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -13,7 +14,7 @@ import org.locationtech.jts.geom.Geometry;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 /**
@@ -32,6 +33,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class GeoShapeEntity implements Serializable {
 
   @Serial
@@ -66,23 +68,23 @@ public class GeoShapeEntity implements Serializable {
   private JsonNode metadata;
 
   @Column(name = "created_at", nullable = false, updatable = false)
-  private LocalDateTime createdAt;
+  private OffsetDateTime createdAt;
 
   @Column(name = "updated_at", nullable = false)
-  private LocalDateTime updatedAt;
+  private OffsetDateTime updatedAt;
 
   @PrePersist
   protected void onCreate() {
     if (id == null) {
       id = com.github.f4b6a3.uuid.UuidCreator.getTimeOrdered();
     }
-    createdAt = LocalDateTime.now();
-    updatedAt = LocalDateTime.now();
+    createdAt = OffsetDateTime.now();
+    updatedAt = OffsetDateTime.now();
   }
 
   @PreUpdate
   protected void onUpdate() {
-    updatedAt = LocalDateTime.now();
+    updatedAt = OffsetDateTime.now();
   }
 
 }

@@ -8,7 +8,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>booking-order-command-handler</artifactId>
+    <artifactId>geolocation-command-handler</artifactId>
     <packaging>jar</packaging>
     <!-- -->
     <properties>
@@ -47,8 +47,12 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-webflux</artifactId>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -61,10 +65,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework.boot</groupId>-->
+        <!--            <artifactId>spring-boot-starter-data-mongodb</artifactId>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
@@ -101,11 +105,11 @@
             <version>${org.springdoc.version}</version>
         </dependency>
         <!-- -->
-<!--        <dependency>-->
-<!--            <groupId>com.cjrequena.core.eventstore</groupId>-->
-<!--            <artifactId>event-store-core</artifactId>-->
-<!--            <version>${project.version}</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.cjrequena.core.eventstore</groupId>-->
+        <!--            <artifactId>event-store-core</artifactId>-->
+        <!--            <version>${project.version}</version>-->
+        <!--        </dependency>-->
         <!-- -->
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -150,12 +154,11 @@
             <version>${jts.version}</version>
         </dependency>
         <!-- Hypersistence Utils for JSONB support -->
-        <dependency>
-            <groupId>io.hypersistence</groupId>
-            <artifactId>hypersistence-utils-hibernate-55</artifactId>
-            <version>${hypersistence-utils.version}</version>
-        </dependency>
-
+        <!--        <dependency>-->
+        <!--            <groupId>io.hypersistence</groupId>-->
+        <!--            <artifactId>hypersistence-utils-hibernate-55</artifactId>-->
+        <!--            <version>${hypersistence-utils.version}</version>-->
+        <!--        </dependency>-->
         <!-- Source: https://mvnrepository.com/artifact/com.github.f4b6a3/uuid-creator -->
         <dependency>
             <groupId>com.github.f4b6a3</groupId>

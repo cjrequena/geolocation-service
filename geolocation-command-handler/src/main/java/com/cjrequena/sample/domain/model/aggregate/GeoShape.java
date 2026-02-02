@@ -28,7 +28,7 @@ public class GeoShape {
   private RadiusVO radius;
   private BoundVO bounds;
   private MetadataVO metadata;
-  private AuditInfo auditInfo;
+  private AuditInfoVO auditInfo;
 
   /**
    * Factory method to create a point shape.
@@ -44,7 +44,7 @@ public class GeoShape {
       .radius(null)
       .bounds(null)
       .metadata(metadata != null ? metadata : MetadataVO.empty())
-      .auditInfo(AuditInfo.create())
+      .auditInfo(AuditInfoVO.create())
       .build();
   }
 
@@ -62,7 +62,7 @@ public class GeoShape {
       .radius(radius)
       .bounds(null)
       .metadata(metadata != null ? metadata : MetadataVO.empty())
-      .auditInfo(AuditInfo.create())
+      .auditInfo(AuditInfoVO.create())
       .build();
   }
 
@@ -80,7 +80,7 @@ public class GeoShape {
       .radius(null)
       .bounds(bounds)
       .metadata(metadata != null ? metadata : MetadataVO.empty())
-      .auditInfo(AuditInfo.create())
+      .auditInfo(AuditInfoVO.create())
       .build();
   }
 

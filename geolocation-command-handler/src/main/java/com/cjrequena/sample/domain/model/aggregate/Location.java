@@ -29,7 +29,7 @@ public class Location {
   private String postalCode;
   private Boolean status;
   private MetadataVO metadata;
-  private AuditInfo auditInfo;
+  private AuditInfoVO auditInfo;
 
   /**
    * Factory method to create a new location.
@@ -47,7 +47,7 @@ public class Location {
       .address(address)
       .metadata(MetadataVO.empty())
       .status(Boolean.TRUE)
-      .auditInfo(AuditInfo.create())
+      .auditInfo(AuditInfoVO.create())
       .build();
   }
 
@@ -69,7 +69,7 @@ public class Location {
       .address(address)
       .metadata(MetadataVO.empty())
       .status(Boolean.TRUE)
-      .auditInfo(AuditInfo.create())
+      .auditInfo(AuditInfoVO.create())
       .build();
   }
 
