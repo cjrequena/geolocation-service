@@ -25,9 +25,6 @@ import java.math.BigDecimal;
 )
 public abstract class GeoShapeMapper {
 
-//  @Autowired
-//  private ObjectMapper objectMapper;
-
   private final GeometryFactory geometryFactory = new GeometryFactory();
 
   // ==========================================
