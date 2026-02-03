@@ -4,8 +4,9 @@ import com.cjrequena.sample.domain.model.aggregate.GeoShape;
 import com.cjrequena.sample.domain.model.enums.GeometryType;
 import com.cjrequena.sample.domain.model.vo.*;
 import com.cjrequena.sample.persistence.entity.GeoShapeEntity;
+import com.cjrequena.sample.shared.common.util.JsonUtil;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,14 +27,10 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @SpringBootTest
 @DisplayName("GeoShapeMapper Integration Tests")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 class GeoShapeMapperIT {
 
-  @Autowired
-  private GeoShapeMapper mapper;
-
-  @Autowired
-  private ObjectMapper objectMapper;
-
+  private final GeoShapeMapper geoShapeMapper;
   private GeometryFactory geometryFactory;
 
   @BeforeEach
@@ -52,7 +49,7 @@ class GeoShapeMapperIT {
     GeoShapeEntity entity = createTestEntity();
 
     // When
-    GeoShape domain = mapper.toDomain(entity);
+    GeoShape domain = geoShapeMapper.toDomain(entity);
 
     // Then
     assertNotNull(domain);
@@ -94,7 +91,7 @@ class GeoShapeMapperIT {
   @DisplayName("Should handle null entity gracefully")
   void testEntityToDomain_WithNullEntity() {
     // When
-    GeoShape domain = mapper.toDomain(null);
+    GeoShape domain = geoShapeMapper.toDomain(null);
 
     // Then
     assertNull(domain);
@@ -111,7 +108,7 @@ class GeoShapeMapperIT {
     entity.setGeometry(geometryFactory.createPoint(new Coordinate(-74.0, 40.7)));
 
     // When
-    GeoShape domain = mapper.toDomain(entity);
+    GeoShape domain = geoShapeMapper.toDomain(entity);
 
     // Then
     assertNotNull(domain);
@@ -136,7 +133,7 @@ class GeoShapeMapperIT {
     GeoShape domain = createTestDomain();
 
     // When
-    GeoShapeEntity entity = mapper.toEntity(domain);
+    GeoShapeEntity entity = geoShapeMapper.toEntity(domain);
 
     // Then
     assertNotNull(entity);
@@ -176,7 +173,7 @@ class GeoShapeMapperIT {
   @DisplayName("Should handle null domain gracefully")
   void testDomainToEntity_WithNullDomain() {
     // When
-    GeoShapeEntity entity = mapper.toEntity(null);
+    GeoShapeEntity entity = geoShapeMapper.toEntity(null);
 
     // Then
     assertNull(entity);
@@ -194,7 +191,7 @@ class GeoShapeMapperIT {
       .build();
 
     // When
-    GeoShapeEntity entity = mapper.toEntity(domain);
+    GeoShapeEntity entity = geoShapeMapper.toEntity(domain);
 
     // Then
     assertNotNull(entity);
@@ -219,8 +216,8 @@ class GeoShapeMapperIT {
     GeoShapeEntity originalEntity = createTestEntity();
 
     // When
-    GeoShape domain = mapper.toDomain(originalEntity);
-    GeoShapeEntity mappedEntity = mapper.toEntity(domain);
+    GeoShape domain = geoShapeMapper.toDomain(originalEntity);
+    GeoShapeEntity mappedEntity = geoShapeMapper.toEntity(domain);
 
     // Then
     assertEquals(originalEntity.getId(), mappedEntity.getId());
@@ -243,8 +240,8 @@ class GeoShapeMapperIT {
     GeoShape originalDomain = createTestDomain();
 
     // When
-    GeoShapeEntity entity = mapper.toEntity(originalDomain);
-    GeoShape mappedDomain = mapper.toDomain(entity);
+    GeoShapeEntity entity = geoShapeMapper.toEntity(originalDomain);
+    GeoShape mappedDomain = geoShapeMapper.toDomain(entity);
 
     // Then
     assertEquals(originalDomain.getId(), mappedDomain.getId());
@@ -287,7 +284,7 @@ class GeoShapeMapperIT {
       .build();
 
     // When
-    GeoShapeEntity entity = mapper.toEntity(domain);
+    GeoShapeEntity entity = geoShapeMapper.toEntity(domain);
 
     // Then
     assertNotNull(entity);
@@ -315,7 +312,7 @@ class GeoShapeMapperIT {
   void testBoundsMapping_EntityToDomain() throws Exception {
     // Given
     UUID id = UUID.randomUUID();
-    JsonNode boundsJson = objectMapper.readTree("""
+    JsonNode boundsJson = JsonUtil.getObjectMapper().readTree("""
       {
         "north_east": {"latitude": 40.75, "longitude": -73.98},
         "south_west": {"latitude": 40.74, "longitude": -73.99}
@@ -329,7 +326,7 @@ class GeoShapeMapperIT {
     entity.setBounds(boundsJson);
 
     // When
-    GeoShape domain = mapper.toDomain(entity);
+    GeoShape domain = geoShapeMapper.toDomain(entity);
 
     // Then
     assertNotNull(domain.getBounds());
@@ -360,7 +357,7 @@ class GeoShapeMapperIT {
       .build();
 
     // When
-    GeoShapeEntity entity = mapper.toEntity(domain);
+    GeoShapeEntity entity = geoShapeMapper.toEntity(domain);
 
     // Then
     assertNotNull(entity.getBounds());
@@ -380,7 +377,7 @@ class GeoShapeMapperIT {
   @DisplayName("Should correctly map complex metadata from entity to domain")
   void testMetadataMapping_EntityToDomain() throws Exception {
     // Given
-    JsonNode metadataJson = objectMapper.readTree("""
+    JsonNode metadataJson = JsonUtil.getObjectMapper().readTree("""
       {
         "source": "GPS",
         "accuracy": 10.5,
@@ -399,7 +396,7 @@ class GeoShapeMapperIT {
     entity.setMetadata(metadataJson);
 
     // When
-    GeoShape domain = mapper.toDomain(entity);
+    GeoShape domain = geoShapeMapper.toDomain(entity);
 
     // Then
     assertNotNull(domain.getMetadata());
@@ -432,7 +429,7 @@ class GeoShapeMapperIT {
       .build();
 
     // When
-    GeoShapeEntity entity = mapper.toEntity(domain);
+    GeoShapeEntity entity = geoShapeMapper.toEntity(domain);
 
     // Then
     assertNotNull(entity.getMetadata());
@@ -467,7 +464,7 @@ class GeoShapeMapperIT {
 
     // Set bounds
     try {
-      entity.setBounds(objectMapper.readTree("""
+      entity.setBounds(JsonUtil.getObjectMapper().readTree("""
         {
           "north_east": {"latitude": 40.76, "longitude": -73.97},
           "south_west": {"latitude": 40.73, "longitude": -74.00}
@@ -479,7 +476,7 @@ class GeoShapeMapperIT {
 
     // Set metadata
     try {
-      entity.setMetadata(objectMapper.readTree("""
+      entity.setMetadata(JsonUtil.getObjectMapper().readTree("""
         {
           "source": "test-source",
           "description": "Test location"
