@@ -1,5 +1,6 @@
 package com.cjrequena.sample.domain.model.vo;
 
+import com.cjrequena.sample.shared.common.util.JsonUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -75,30 +76,17 @@ public class CoordinateVO implements Serializable {
    * Converts a CoordinateVO to a JsonNode.
    *
    * @param coordinate the CoordinateVO to convert
-   * @param objectMapper the ObjectMapper to use for creating the JsonNode
    * @return a JsonNode representation of the coordinate
    */
-  public static ObjectNode toJsonNode(CoordinateVO coordinate, ObjectMapper objectMapper) {
+  public static ObjectNode toJsonNode(CoordinateVO coordinate) {
     if (coordinate == null) {
       throw new IllegalArgumentException("Coordinate cannot be null");
     }
-    if (objectMapper == null) {
-      throw new IllegalArgumentException("ObjectMapper cannot be null");
-    }
-
+    final ObjectMapper objectMapper = JsonUtil.getObjectMapper();
     ObjectNode node = objectMapper.createObjectNode();
     node.put("latitude", coordinate.getLatitude());
     node.put("longitude", coordinate.getLongitude());
     return node;
-  }
-
-  /**
-   * Converts this CoordinateVO to a JsonNode using a default ObjectMapper.
-   *
-   * @return a JsonNode representation of this coordinate
-   */
-  public JsonNode toJsonNode() {
-    return toJsonNode(this, new ObjectMapper());
   }
 
   private void validateLatitude(BigDecimal latitude) {

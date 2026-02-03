@@ -25,7 +25,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests bidirectional mapping between domain and entity layers.
  */
 @SpringBootTest
-class GeoShapeMapperTest {
+@DisplayName("GeoShapeMapper Integration Tests")
+class GeoShapeMapperIT {
 
   @Autowired
   private GeoShapeMapper mapper;
@@ -57,32 +58,32 @@ class GeoShapeMapperTest {
     assertNotNull(domain);
     assertEquals(entity.getId(), domain.getId());
     assertEquals(entity.getGeometryType(), domain.getGeometryType());
-    
+
     // Verify geometry mapping
     assertNotNull(domain.getGeometry());
     assertTrue(domain.getGeometry().isPoint());
-    
+
     // Verify coordinates
     CoordinateVO coords = domain.getGeometry().getPoint().getCoordinates();
     assertEquals(-73.985428, coords.getLongitudeAsDouble(), 0.000001);
     assertEquals(40.748817, coords.getLatitudeAsDouble(), 0.000001);
-    
+
     // Verify center coordinates
     assertNotNull(domain.getCenterCoordinates());
     assertEquals(entity.getCenterLatitude(), domain.getCenterCoordinates().getLatitude());
     assertEquals(entity.getCenterLongitude(), domain.getCenterCoordinates().getLongitude());
-    
+
     // Verify radius
     assertNotNull(domain.getRadius());
     assertEquals(entity.getRadiusMeters().toBigIntegerExact(), domain.getRadius().getMeters().toBigIntegerExact());
-    
+
     // Verify bounds
     assertNotNull(domain.getBounds());
-    
+
     // Verify metadata
     assertNotNull(domain.getMetadata());
     assertEquals("test-source", domain.getMetadata().getString("source"));
-    
+
     // Verify audit info
     assertNotNull(domain.getAuditInfo());
     assertEquals(entity.getCreatedAt(), domain.getAuditInfo().getCreatedAt());
@@ -141,31 +142,31 @@ class GeoShapeMapperTest {
     assertNotNull(entity);
     assertEquals(domain.getId(), entity.getId());
     assertEquals(domain.getGeometryType(), entity.getGeometryType());
-    
+
     // Verify geometry mapping
     assertNotNull(entity.getGeometry());
     assertTrue(entity.getGeometry() instanceof org.locationtech.jts.geom.Point);
     Coordinate coord = entity.getGeometry().getCoordinate();
     assertEquals(-73.985428, coord.x, 0.000001); // x = longitude
     assertEquals(40.748817, coord.y, 0.000001);  // y = latitude
-    
+
     // Verify center coordinates
     assertEquals(domain.getCenterCoordinates().getLatitude(), entity.getCenterLatitude());
     assertEquals(domain.getCenterCoordinates().getLongitude(), entity.getCenterLongitude());
-    
+
     // Verify radius
     assertEquals(domain.getRadius().getMeters(), entity.getRadiusMeters());
-    
+
     // Verify bounds (stored as JsonNode)
     assertNotNull(entity.getBounds());
-    assertTrue(entity.getBounds().has("northEast"));
-    assertTrue(entity.getBounds().has("southWest"));
-    
+    assertTrue(entity.getBounds().has("north_east"));
+    assertTrue(entity.getBounds().has("south_west"));
+
     // Verify metadata (stored as JsonNode)
     assertNotNull(entity.getMetadata());
     assertEquals("test-source", entity.getMetadata().get("source").asText());
     assertEquals("Test location", entity.getMetadata().get("description").asText());
-    
+
     // Verify audit info
     assertEquals(domain.getAuditInfo().getCreatedAt(), entity.getCreatedAt());
     assertEquals(domain.getAuditInfo().getUpdatedAt(), entity.getUpdatedAt());
@@ -227,7 +228,7 @@ class GeoShapeMapperTest {
     assertEquals(originalEntity.getCenterLatitude(), mappedEntity.getCenterLatitude());
     assertEquals(originalEntity.getCenterLongitude(), mappedEntity.getCenterLongitude());
     assertEquals(originalEntity.getRadiusMeters().toBigIntegerExact(), mappedEntity.getRadiusMeters().toBigIntegerExact());
-    
+
     // Compare geometry coordinates
     Coordinate origCoord = originalEntity.getGeometry().getCoordinate();
     Coordinate mappedCoord = mappedEntity.getGeometry().getCoordinate();
@@ -250,13 +251,13 @@ class GeoShapeMapperTest {
     assertEquals(originalDomain.getGeometryType(), mappedDomain.getGeometryType());
     assertEquals(originalDomain.getCenterCoordinates(), mappedDomain.getCenterCoordinates());
     assertEquals(originalDomain.getRadius(), mappedDomain.getRadius());
-    
+
     // Verify geometry
     CoordinateVO origCoords = originalDomain.getGeometry().getPoint().getCoordinates();
     CoordinateVO mappedCoords = mappedDomain.getGeometry().getPoint().getCoordinates();
     assertEquals(origCoords.getLatitude(), mappedCoords.getLatitude());
     assertEquals(origCoords.getLongitude(), mappedCoords.getLongitude());
-    
+
     // Verify metadata
     assertEquals(
       originalDomain.getMetadata().getString("source"),
@@ -276,7 +277,7 @@ class GeoShapeMapperTest {
     CoordinateVO center = CoordinateVO.of(40.748817, -73.985428);
     RadiusVO radius = RadiusVO.of(BigDecimal.valueOf(500));
     CircleVO circle = CircleVO.of(center, radius);
-    
+
     GeoShape domain = GeoShape.builder()
       .id(id)
       .geometryType(GeometryType.CIRCLE)
@@ -291,16 +292,16 @@ class GeoShapeMapperTest {
     // Then
     assertNotNull(entity);
     assertEquals(GeometryType.CIRCLE, entity.getGeometryType());
-    
+
     // Should store circle's center as Point geometry
     Coordinate coord = entity.getGeometry().getCoordinate();
     assertEquals(center.getLongitudeAsDouble(), coord.x, 0.000001);
     assertEquals(center.getLatitudeAsDouble(), coord.y, 0.000001);
-    
+
     // Should preserve center coordinates
     assertEquals(center.getLatitude(), entity.getCenterLatitude());
     assertEquals(center.getLongitude(), entity.getCenterLongitude());
-    
+
     // Should preserve radius
     assertEquals(radius.getMeters(), entity.getRadiusMeters());
   }
@@ -316,11 +317,11 @@ class GeoShapeMapperTest {
     UUID id = UUID.randomUUID();
     JsonNode boundsJson = objectMapper.readTree("""
       {
-        "northEast": {"latitude": 40.75, "longitude": -73.98},
-        "southWest": {"latitude": 40.74, "longitude": -73.99}
+        "north_east": {"latitude": 40.75, "longitude": -73.98},
+        "south_west": {"latitude": 40.74, "longitude": -73.99}
       }
       """);
-    
+
     GeoShapeEntity entity = new GeoShapeEntity();
     entity.setId(id);
     entity.setGeometryType(GeometryType.POINT);
@@ -350,7 +351,7 @@ class GeoShapeMapperTest {
     CoordinateVO northEast = CoordinateVO.of(40.75, -73.98);
     CoordinateVO southWest = CoordinateVO.of(40.74, -73.99);
     BoundVO bounds = BoundVO.of(northEast, southWest);
-    
+
     GeoShape domain = GeoShape.builder()
       .id(id)
       .geometryType(GeometryType.RECTANGLE)
@@ -363,10 +364,10 @@ class GeoShapeMapperTest {
 
     // Then
     assertNotNull(entity.getBounds());
-    assertTrue(entity.getBounds().has("northEast"));
-    assertTrue(entity.getBounds().has("southWest"));
-    
-    JsonNode neNode = entity.getBounds().get("northEast");
+    assertTrue(entity.getBounds().has("north_east"));
+    assertTrue(entity.getBounds().has("south_west"));
+
+    JsonNode neNode = entity.getBounds().get("north_east");
     assertEquals(northEast.getLatitude().doubleValue(), neNode.get("latitude").asDouble(), 0.000001);
     assertEquals(northEast.getLongitude().doubleValue(), neNode.get("longitude").asDouble(), 0.000001);
   }
@@ -406,7 +407,7 @@ class GeoShapeMapperTest {
     assertEquals(10.5, domain.getMetadata().getDouble("accuracy"), 0.01);
     assertEquals(1234567890L, domain.getMetadata().getLong("timestamp"));
     assertEquals(2, domain.getMetadata().getStringList("tags").size());
-    
+
     MetadataVO nested = domain.getMetadata().getObject("nested");
     assertEquals("value1", nested.getString("level1"));
   }
@@ -422,7 +423,7 @@ class GeoShapeMapperTest {
       .withBoolean("verified", true)
       .withStringList("categories", java.util.Arrays.asList("retail", "commercial"))
       .withObject("properties", MetadataVO.empty().with("type", "store"));
-    
+
     GeoShape domain = GeoShape.builder()
       .id(id)
       .geometryType(GeometryType.POINT)
@@ -451,31 +452,31 @@ class GeoShapeMapperTest {
     GeoShapeEntity entity = new GeoShapeEntity();
     entity.setId(id);
     entity.setGeometryType(GeometryType.POINT);
-    
+
     // Create JTS Point geometry
     entity.setGeometry(geometryFactory.createPoint(
       new Coordinate(-73.985428, 40.748817) // x=longitude, y=latitude
     ));
-    
+
     // Set center coordinates
     entity.setCenterLatitude(BigDecimal.valueOf(40.748817));
     entity.setCenterLongitude(BigDecimal.valueOf(-73.985428));
-    
+
     // Set radius
     entity.setRadiusMeters(BigDecimal.valueOf(1000));
-    
+
     // Set bounds
     try {
       entity.setBounds(objectMapper.readTree("""
         {
-          "northEast": {"latitude": 40.76, "longitude": -73.97},
-          "southWest": {"latitude": 40.73, "longitude": -74.00}
+          "north_east": {"latitude": 40.76, "longitude": -73.97},
+          "south_west": {"latitude": 40.73, "longitude": -74.00}
         }
         """));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    
+
     // Set metadata
     try {
       entity.setMetadata(objectMapper.readTree("""
@@ -487,11 +488,11 @@ class GeoShapeMapperTest {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    
+
     // Set audit info
     entity.setCreatedAt(OffsetDateTime.now().minusDays(1));
     entity.setUpdatedAt(OffsetDateTime.now());
-    
+
     return entity;
   }
 
@@ -500,7 +501,7 @@ class GeoShapeMapperTest {
     CoordinateVO coordinates = CoordinateVO.of(40.748817, -73.985428);
     CoordinateVO northEast = CoordinateVO.of(40.76, -73.97);
     CoordinateVO southWest = CoordinateVO.of(40.73, -74.00);
-    
+
     return GeoShape.builder()
       .id(id)
       .geometryType(GeometryType.POINT)

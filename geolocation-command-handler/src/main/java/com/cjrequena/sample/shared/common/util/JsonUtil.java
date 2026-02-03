@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.Getter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,6 +18,7 @@ import java.util.Base64;
 public final class  JsonUtil {
 
   // region === ObjectMapper Initialization ===
+  @Getter
   private static final ObjectMapper objectMapper = ApplicationContextProvider.getContext().getBean("objectMapper", ObjectMapper.class);
 
   private JsonUtil() {

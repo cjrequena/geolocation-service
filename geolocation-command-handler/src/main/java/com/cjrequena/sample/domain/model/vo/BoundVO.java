@@ -1,8 +1,9 @@
 package com.cjrequena.sample.domain.model.vo;
 
+import com.cjrequena.sample.shared.common.util.JsonUtil;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -13,11 +14,12 @@ import java.io.Serializable;
  * Bounds value object for bounding box.
  */
 @Getter
+@Builder
 @EqualsAndHashCode
 public class BoundVO implements Serializable {
+
   @Serial
   private static final long serialVersionUID = 1L;
-
   private final CoordinateVO northEast;
   private final CoordinateVO southWest;
 
@@ -45,8 +47,8 @@ public class BoundVO implements Serializable {
       throw new IllegalArgumentException("JsonNode cannot be null");
     }
 
-    JsonNode northEastNode = jsonNode.get("northEast");
-    JsonNode southWestNode = jsonNode.get("southWest");
+    JsonNode northEastNode = jsonNode.get("north_east");
+    JsonNode southWestNode = jsonNode.get("south_west");
 
     if (northEastNode == null || northEastNode.isNull()) {
       throw new IllegalArgumentException("Missing required field: northEast");
@@ -63,31 +65,15 @@ public class BoundVO implements Serializable {
 
   /**
    * Converts this BoundVO to a JsonNode.
-   *
-   * @param objectMapper the ObjectMapper to use for creating the JsonNode
-   * @return a JsonNode representation of this BoundVO
-   */
-  public JsonNode toJsonNode(ObjectMapper objectMapper) {
-    if (objectMapper == null) {
-      throw new IllegalArgumentException("ObjectMapper cannot be null");
-    }
-
-    ObjectNode node = objectMapper.createObjectNode();
-    node.set("northEast", CoordinateVO.toJsonNode(northEast, objectMapper));
-    node.set("southWest", CoordinateVO.toJsonNode(southWest, objectMapper));
-
-    return node;
-  }
-
-  /**
-   * Converts this BoundVO to a JsonNode using a default ObjectMapper.
-   *
    * @return a JsonNode representation of this BoundVO
    */
   public JsonNode toJsonNode() {
-    return toJsonNode(new ObjectMapper());
-  }
+    ObjectNode node = JsonUtil.getObjectMapper().createObjectNode();
+    node.set("north_east", CoordinateVO.toJsonNode(northEast));
+    node.set("south_west", CoordinateVO.toJsonNode(southWest));
 
+    return node;
+  }
 
   public boolean contains(CoordinateVO point) {
     if (point == null) {
