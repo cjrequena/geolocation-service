@@ -27,7 +27,7 @@ public class Location {
   private GpsAccuracyVO accuracy;
   private String address;
   private String postalCode;
-  private Boolean status;
+  private Boolean active;
   private MetadataVO metadata;
   private AuditInfoVO auditInfo;
 
@@ -46,7 +46,7 @@ public class Location {
       .point(geoPoint)
       .address(address)
       .metadata(MetadataVO.empty())
-      .status(Boolean.TRUE)
+      .active(Boolean.TRUE)
       .auditInfo(AuditInfoVO.create())
       .build();
   }
@@ -68,7 +68,7 @@ public class Location {
       .point(geoPoint)
       .address(address)
       .metadata(MetadataVO.empty())
-      .status(Boolean.TRUE)
+      .active(Boolean.TRUE)
       .auditInfo(AuditInfoVO.create())
       .build();
   }
@@ -144,7 +144,7 @@ public class Location {
    * Activate the location.
    */
   public void activate() {
-    this.status = Boolean.TRUE;
+    this.active = Boolean.TRUE;
     this.auditInfo = this.auditInfo.update();
   }
 
@@ -152,7 +152,7 @@ public class Location {
    * Deactivate the location.
    */
   public void deactivate() {
-    this.status = Boolean.FALSE;
+    this.active = Boolean.FALSE;
     this.auditInfo = this.auditInfo.update();
   }
 
@@ -160,7 +160,7 @@ public class Location {
    * Check if location is active.
    */
   public boolean isActive() {
-    return this.status != null && this.status.equals(Boolean.TRUE);
+    return this.active != null && this.active.equals(Boolean.TRUE);
   }
 
   /**

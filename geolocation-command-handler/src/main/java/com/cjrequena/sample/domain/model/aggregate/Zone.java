@@ -27,7 +27,7 @@ public class Zone {
   private String name;
   private ZoneType type;
   private String postalCode;
-  private Boolean status;
+  private Boolean active;
   private AuditInfoVO auditInfo;
 
   /**
@@ -46,7 +46,7 @@ public class Zone {
       .areaId(areaId)
       .name(name)
       .type(type != null ? type : ZoneType.defaultType())
-      .status(Boolean.TRUE)
+      .active(Boolean.TRUE)
       .auditInfo(AuditInfoVO.create())
       .build();
   }
@@ -79,7 +79,7 @@ public class Zone {
    * Activate the zone.
    */
   public void activate() {
-    this.status = Boolean.TRUE;
+    this.active = Boolean.TRUE;
     this.auditInfo = this.auditInfo.update();
   }
 
@@ -87,7 +87,7 @@ public class Zone {
    * Deactivate the zone.
    */
   public void deactivate() {
-    this.status = Boolean.FALSE;
+    this.active = Boolean.FALSE;
     this.auditInfo = this.auditInfo.update();
   }
 
@@ -95,7 +95,7 @@ public class Zone {
    * Check if zone is active.
    */
   public boolean isActive() {
-    return this.status != null && this.status.equals(Boolean.TRUE);
+    return this.active != null && this.active.equals(Boolean.TRUE);
   }
 
   /**

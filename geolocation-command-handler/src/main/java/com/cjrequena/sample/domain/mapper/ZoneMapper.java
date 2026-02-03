@@ -1,12 +1,11 @@
 package com.cjrequena.sample.domain.mapper;
 
-import com.cjrequena.sample.domain.model.aggregate.Area;
-import com.cjrequena.sample.domain.model.enums.AreaType;
+import com.cjrequena.sample.domain.model.aggregate.Zone;
+import com.cjrequena.sample.domain.model.enums.ZoneType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
-import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import com.cjrequena.sample.persistence.entity.AreaEntity;
-import com.cjrequena.sample.persistence.entity.CityEntity;
 import com.cjrequena.sample.persistence.entity.GeoShapeEntity;
+import com.cjrequena.sample.persistence.entity.ZoneEntity;
 import org.mapstruct.*;
 
 import java.util.UUID;
@@ -16,14 +15,14 @@ import java.util.UUID;
  * @author cjrequena
  */
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface AreaMapper {
+public interface ZoneMapper {
 
   // ================================================================
   // Domain  →  Entity
   // ================================================================
 
   /**
-   * Converts an {@link Area} domain aggregate into an {@link AreaEntity}.
+   * Converts an {@link Zone} domain aggregate into an {@link ZoneEntity}.
    *
    * <p>{@code active} shares the same name on both sides so it is wired
    * declaratively alongside the other direct scalars.  Everything that needs
@@ -34,30 +33,26 @@ public interface AreaMapper {
   @Mapping(target = "postalCode", source = "postalCode")
   @Mapping(target = "active",     source = "active")
   // Handled in @AfterMapping:
-  @Mapping(target = "city",       ignore = true)   // UUID       → shell CityEntity
+  @Mapping(target = "area",   ignore = true)   // UUID       → shell Area
   @Mapping(target = "geoShape",   ignore = true)   // UUID       → shell GeoShapeEntity
-  @Mapping(target = "areaType",   ignore = true)   // AreaType   → String
-  @Mapping(target = "population", ignore = true)   // PopulationVO → Long
+  @Mapping(target = "zoneType",   ignore = true)   // ZoneType   → String
   @Mapping(target = "createdAt",  ignore = true)   // AuditInfoVO  → OffsetDateTime
   @Mapping(target = "updatedAt",  ignore = true)
-  AreaEntity toEntity(Area domain);
+  ZoneEntity toEntity(Zone domain);
 
-  /** Fills every field on {@link AreaEntity} that requires a helper conversion. */
+  /** Fills every field on {@link ZoneEntity} that requires a helper conversion. */
   @AfterMapping
-  default void populateEntityFields(Area domain, @MappingTarget AreaEntity entity) {
+  default void populateEntityFields(Zone domain, @MappingTarget ZoneEntity entity) {
     if (domain == null) {
       return;
     }
 
     // ── FK shell entities ──────────────────────────────────────────
-    entity.setCity(uuidToCityEntity(domain.getCityId()));
+    entity.setArea(uuidToAreaEntity(domain.getAreaId()));
     entity.setGeoShape(uuidToGeoShapeEntity(domain.getGeoShapeId()));
 
-    // ── AreaType enum  →  String ───────────────────────────────────
-    entity.setAreaType(areaTypeToString(domain.getType()));
-
-    // ── PopulationVO  →  Long ──────────────────────────────────────
-    entity.setPopulation(populationVOToLong(domain.getPopulation()));
+    // ── ZoneType enum  →  String ───────────────────────────────────
+    entity.setZoneType(zoneTypeToString(domain.getType()));
 
     // ── AuditInfoVO  →  createdAt / updatedAt ──────────────────────
     if (domain.getAuditInfo() != null) {
@@ -71,38 +66,34 @@ public interface AreaMapper {
   // ================================================================
 
   /**
-   * Converts an {@link AreaEntity} into an {@link Area} domain aggregate.
+   * Converts an {@link ZoneEntity} into an {@link Zone} domain aggregate.
    */
   @Mapping(target = "id",         source = "id")
   @Mapping(target = "name",       source = "name")
   @Mapping(target = "postalCode", source = "postalCode")
   @Mapping(target = "active",     source = "active")
   // Handled in @AfterMapping:
-  @Mapping(target = "cityId",     ignore = true)   // CityEntity      → UUID
+  @Mapping(target = "areaId",     ignore = true)   // AreaEntity      → UUID
   @Mapping(target = "geoShapeId", ignore = true)   // GeoShapeEntity  → UUID
-  @Mapping(target = "type",       ignore = true)   // String          → AreaType
-  @Mapping(target = "population", ignore = true)   // Long            → PopulationVO
+  @Mapping(target = "type",       ignore = true)   // String          → ZoneType
   @Mapping(target = "auditInfo",  ignore = true)   // timestamps      → AuditInfoVO
-  Area toDomain(AreaEntity entity);
+  Zone toDomain(ZoneEntity entity);
 
-  /** Fills every value-object / derived field on {@link Area} that requires a helper. */
+  /** Fills every value-object / derived field on {@link Zone} that requires a helper. */
   @AfterMapping
-  default void populateDomainFields(AreaEntity entity, @MappingTarget Area domain) {
+  default void populateDomainFields(ZoneEntity entity, @MappingTarget Zone domain) {
     if (entity == null) {
       return;
     }
 
-    // ── CityEntity  →  UUID ────────────────────────────────────────
-    domain.setCityId(cityEntityToUuid(entity.getCity()));
+    // ── AreaEntity  →  UUID ────────────────────────────────────────
+    domain.setAreaId(areaEntityToUuid(entity.getArea()));
 
     // ── GeoShapeEntity  →  UUID ────────────────────────────────────
     domain.setGeoShapeId(geoShapeEntityToUuid(entity.getGeoShape()));
 
-    // ── String  →  AreaType enum ───────────────────────────────────
-    domain.setType(stringToAreaType(entity.getAreaType()));
-
-    // ── Long  →  PopulationVO ──────────────────────────────────────
-    domain.setPopulation(longToPopulationVO(entity.getPopulation()));
+    // ── String  →  ZoneType enum ───────────────────────────────────
+    domain.setType(stringToZoneType(entity.getZoneType()));
 
     // ── createdAt / updatedAt  →  AuditInfoVO ──────────────────────
     if (entity.getCreatedAt() != null || entity.getUpdatedAt() != null) {
@@ -117,15 +108,15 @@ public interface AreaMapper {
   // ── FK shell entities ──────────────────────────────────────────────────────
 
   /**
-   * Wraps a bare {@link UUID} into a {@link CityEntity} shell.
+   * Wraps a bare {@link UUID} into a {@link AreaEntity} shell.
    * JPA uses the shell to persist the FK column without loading the full row.
    */
-  static CityEntity uuidToCityEntity(UUID cityId) {
-    if (cityId == null) {
+  static AreaEntity uuidToAreaEntity(UUID areaId) {
+    if (areaId == null) {
       return null;
     }
-    CityEntity shell = new CityEntity();
-    shell.setId(cityId);
+    AreaEntity shell = new AreaEntity();
+    shell.setId(areaId);
     return shell;
   }
 
@@ -142,9 +133,9 @@ public interface AreaMapper {
     return shell;
   }
 
-  /** Extracts the {@code id} from a {@link CityEntity}, null-safe. */
-  static UUID cityEntityToUuid(CityEntity city) {
-    return city != null ? city.getId() : null;
+  /** Extracts the {@code id} from a {@link AreaEntity}, null-safe. */
+  static UUID areaEntityToUuid(AreaEntity area) {
+    return area != null ? area.getId() : null;
   }
 
   /** Extracts the {@code id} from a {@link GeoShapeEntity}, null-safe. */
@@ -152,39 +143,25 @@ public interface AreaMapper {
     return geoShape != null ? geoShape.getId() : null;
   }
 
-  // ── AreaType ↔ String ─────────────────────────────────────────────────────
+  // ── ZoneType ↔ String ─────────────────────────────────────────────────────
 
   /**
-   * Converts an {@link AreaType} enum to its persistence string via
-   * {@link AreaType#getValue()}.
+   * Converts an {@link ZoneType} enum to its persistence string via
+   * {@link ZoneType#getValue()}.
    */
-  static String areaTypeToString(AreaType type) {
+  static String zoneTypeToString(ZoneType type) {
     return type != null ? type.getValue() : null;
   }
 
   /**
-   * Recovers an {@link AreaType} from its persistence string via
-   * {@link AreaType#valueOf(String)}.
+   * Recovers an {@link ZoneType} from its persistence string via
+   * {@link ZoneType#valueOf(String)}.
    *
-   * <p>Replace with {@code AreaType.valueOf(string)} if your enum does not
+   * <p>Replace with {@code ZoneType.valueOf(string)} if your enum does not
    * expose a {@code fromValue} factory.</p>
    */
-  static AreaType stringToAreaType(String areaType) {
-    return areaType != null ? AreaType.valueOf(areaType) : null;
+  static ZoneType stringToZoneType(String zoneType) {
+    return zoneType != null ? ZoneType.valueOf(zoneType) : null;
   }
 
-  // ── PopulationVO ↔ Long ────────────────────────────────────────────────────
-
-  /** Extracts the numeric value from a {@link PopulationVO}, null-safe. */
-  static Long populationVOToLong(PopulationVO population) {
-    return population != null ? population.getValue() : null;
-  }
-
-  /**
-   * Wraps a {@code Long} into a {@link PopulationVO}.
-   * {@code null} input produces {@code null} — population is optional.
-   */
-  static PopulationVO longToPopulationVO(Long population) {
-    return population != null ? PopulationVO.of(population) : null;
-  }
 }

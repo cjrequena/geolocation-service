@@ -196,7 +196,7 @@ CREATE TABLE location (
     address           TEXT,
     postal_code       VARCHAR(20),
     metadata          JSONB DEFAULT '{}',
-    active         BOOLEAN NOT NULL DEFAULT TRUE,
+    active            BOOLEAN NOT NULL DEFAULT TRUE,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
