@@ -1,5 +1,8 @@
 ## Postgres (Postgis) sql script
 ```sql
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 ----------------------------------------------------
 -- IMPROVED VERSION - Current Structure Enhanced
 ----------------------------------------------------
@@ -14,7 +17,7 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 -- GeoShape (Improved)
 ----------------------------------------------------
 CREATE TABLE geoshape (
-    id                BIGINT PRIMARY KEY,
+    id                UUID         PRIMARY KEY,
     shape_type        VARCHAR(20) NOT NULL CHECK (shape_type IN ('point','circle','rectangle','polygon','line')),
     geometry          geometry NOT NULL,
     
@@ -50,7 +53,7 @@ COMMENT ON CONSTRAINT chk_circle_has_radius ON geoshape IS 'Circles must have ra
 -- Country (Improved)
 ----------------------------------------------------
 CREATE TABLE country (
-    id                BIGINT PRIMARY KEY,
+    id                UUID         PRIMARY KEY,
     name              VARCHAR(255) NOT NULL,
     iso_code_alpha2   CHAR(2) NOT NULL UNIQUE,
     iso_code_alpha3   CHAR(3) UNIQUE,
@@ -76,12 +79,12 @@ COMMENT ON TABLE country IS 'Countries with ISO codes and basic metadata';
 -- Region (Improved)
 ----------------------------------------------------
 CREATE TABLE region (
-    id                BIGINT PRIMARY KEY,
-    country_id        BIGINT NOT NULL,
+    id                UUID         PRIMARY KEY,
+    country_id        UUID NOT NULL,
     name              VARCHAR(255) NOT NULL,
     code              VARCHAR(50),
     region_type       VARCHAR(50), -- state, province, prefecture, etc.
-    geoshape_id       BIGINT,
+    geoshape_id       UUID,
     population        BIGINT,
     timezone          VARCHAR(50),
     is_active         BOOLEAN NOT NULL DEFAULT TRUE,
@@ -104,10 +107,10 @@ COMMENT ON TABLE region IS 'First-level administrative divisions (states, provin
 -- City (Improved)
 ----------------------------------------------------
 CREATE TABLE city (
-    id                BIGINT PRIMARY KEY,
-    region_id         BIGINT NOT NULL,
+    id                UUID         PRIMARY KEY,
+    region_id         UUID,
     name              VARCHAR(255) NOT NULL,
-    geoshape_id       BIGINT,
+    geoshape_id       UUID,
     population        BIGINT,
     timezone          VARCHAR(50),
     postal_code       VARCHAR(20),
@@ -132,11 +135,11 @@ COMMENT ON TABLE city IS 'Cities and municipalities';
 -- Area (Improved)
 ----------------------------------------------------
 CREATE TABLE area (
-    id                BIGINT PRIMARY KEY,
-    city_id           BIGINT NOT NULL,
+    id                UUID         PRIMARY KEY,
+    city_id           UUID NOT NULL,
     name              VARCHAR(255) NOT NULL,
     area_type         VARCHAR(50), -- district, borough, neighborhood, etc.
-    geoshape_id       BIGINT,
+    geoshape_id       UUID,
     population        BIGINT,
     postal_code       VARCHAR(20),
     is_active         BOOLEAN NOT NULL DEFAULT TRUE,
@@ -159,11 +162,11 @@ COMMENT ON TABLE area IS 'Sub-city areas (districts, boroughs, neighborhoods)';
 -- Zone (Improved)
 ----------------------------------------------------
 CREATE TABLE zone (
-    id                BIGINT PRIMARY KEY,
-    area_id           BIGINT NOT NULL,
+    id                UUID         PRIMARY KEY,
+    area_id           UUID NOT NULL,
     name              VARCHAR(255) NOT NULL,
     zone_type         VARCHAR(50), -- block, sector, precinct, etc.
-    geoshape_id       BIGINT,
+    geoshape_id       UUID,
     postal_code       VARCHAR(20),
     is_active         BOOLEAN NOT NULL DEFAULT TRUE,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -185,8 +188,8 @@ COMMENT ON TABLE zone IS 'Fine-grained zones within areas';
 -- Location (Improved)
 ----------------------------------------------------
 CREATE TABLE location (
-    id                BIGINT PRIMARY KEY,
-    zone_id           BIGINT, -- Made nullable to allow flexible assignment
+    id                UUID         PRIMARY KEY,
+    zone_id           UUID, -- Made nullable to allow flexible assignment
     geo_point         geometry(Point, 4326) NOT NULL,
     altitude_meters   DECIMAL(8,2),
     accuracy_meters   DECIMAL(8,2),
