@@ -30,7 +30,7 @@ public interface CountryMapper {
   @Mapping(target = "phoneCode",    source = "phoneCode")
   @Mapping(target = "currencyCode", source = "currencyCode")
   @Mapping(target = "capital",      source = "capital")
-  @Mapping(target = "isActive",     source = "status")
+  @Mapping(target = "active",     source = "active")
   // Handled in @AfterMapping:
   @Mapping(target = "isoCodeAlpha2",   ignore = true)   // IsoCodeVO  →  three columns
   @Mapping(target = "isoCodeAlpha3",   ignore = true)
@@ -78,7 +78,7 @@ public interface CountryMapper {
   @Mapping(target = "phoneCode",    source = "phoneCode")
   @Mapping(target = "currencyCode", source = "currencyCode")
   @Mapping(target = "capital",      source = "capital")
-  @Mapping(target = "status",       source = "isActive")
+  @Mapping(target = "active",       source = "active")
   // Handled in @AfterMapping:
   @Mapping(target = "isoCode",      ignore = true)   // three columns  →  IsoCodeVO
   @Mapping(target = "population",   ignore = true)   // Long           →  PopulationVO

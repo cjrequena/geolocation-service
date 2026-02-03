@@ -23,7 +23,7 @@ import java.util.UUID;
   indexes = {
     @Index(name = "idx_city_region", columnList = "region_id"),
     @Index(name = "idx_city_geoshape", columnList = "geoshape_id"),
-    @Index(name = "idx_city_active", columnList = "is_active"),
+    @Index(name = "idx_city_active", columnList = "active"),
     @Index(name = "idx_city_name", columnList = "name")
   }
 )
@@ -59,11 +59,11 @@ public class CityEntity implements Serializable {
   @Column(name = "postal_code", length = 20)
   private String postalCode;
 
-  @Column(name = "is_capital")
-  private Boolean isCapital = false;
+  @Column(name = "capital")
+  private Boolean capital = false;
 
-  @Column(name = "is_active", nullable = false)
-  private Boolean isActive = true;
+  @Column(name = "active", nullable = false)
+  private Boolean active = true;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   private OffsetDateTime createdAt;
@@ -78,11 +78,11 @@ public class CityEntity implements Serializable {
     }
     createdAt = OffsetDateTime.now();
     updatedAt = OffsetDateTime.now();
-    if (isActive == null) {
-      isActive = true;
+    if (active == null) {
+      active = true;
     }
-    if (isCapital == null) {
-      isCapital = false;
+    if (capital == null) {
+      capital = false;
     }
   }
 

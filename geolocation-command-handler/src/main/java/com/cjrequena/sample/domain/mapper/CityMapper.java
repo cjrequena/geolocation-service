@@ -28,8 +28,8 @@ public interface CityMapper {
   @Mapping(target = "id",         source = "id")
   @Mapping(target = "name",       source = "name")
   @Mapping(target = "postalCode", source = "postalCode")
-  @Mapping(target = "isActive",   source = "status")
-  @Mapping(target = "isCapital",  source = "capital")
+  @Mapping(target = "active",   source = "active")
+  @Mapping(target = "capital",  source = "capital")
   // Handled in @AfterMapping:
   @Mapping(target = "region",     ignore = true)   // UUID          → shell RegionEntity
   @Mapping(target = "geoShape",   ignore = true)   // UUID          → shell GeoShapeEntity
@@ -75,8 +75,8 @@ public interface CityMapper {
   @Mapping(target = "id",         source = "id")
   @Mapping(target = "name",       source = "name")
   @Mapping(target = "postalCode", source = "postalCode")
-  @Mapping(target = "status",     source = "isActive")
-  @Mapping(target = "capital",    source = "isCapital")
+  @Mapping(target = "active",     source = "active")
+  @Mapping(target = "capital",    source = "capital")
   // Handled in @AfterMapping:
   @Mapping(target = "regionId",      ignore = true)   // RegionEntity   → UUID
   @Mapping(target = "geoShapeId",    ignore = true)   // GeoShapeEntity → UUID

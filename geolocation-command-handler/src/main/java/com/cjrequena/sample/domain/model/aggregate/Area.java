@@ -30,7 +30,7 @@ public class Area {
 
   private PopulationVO population;
   private String postalCode;
-  private Boolean status;
+  private Boolean active;
   private AuditInfoVO auditInfo;
 
   /**
@@ -49,7 +49,7 @@ public class Area {
       .cityId(cityId)
       .name(name)
       .type(type != null ? type : AreaType.defaultType())
-      .status(Boolean.TRUE)
+      .active(Boolean.TRUE)
       .auditInfo(AuditInfoVO.create())
       .build();
   }
@@ -93,7 +93,7 @@ public class Area {
    * Activate the area.
    */
   public void activate() {
-    this.status = Boolean.TRUE;
+    this.active = Boolean.TRUE;
     this.auditInfo = this.auditInfo.update();
   }
 
@@ -101,7 +101,7 @@ public class Area {
    * Deactivate the area.
    */
   public void deactivate() {
-    this.status = Boolean.FALSE;
+    this.active = Boolean.FALSE;
     this.auditInfo = this.auditInfo.update();
   }
 
@@ -109,7 +109,7 @@ public class Area {
    * Check if area is active.
    */
   public boolean isActive() {
-    return this.status != null && this.status.equals(Boolean.TRUE);
+    return this.active != null && this.active.equals(Boolean.TRUE);
   }
 
   /**

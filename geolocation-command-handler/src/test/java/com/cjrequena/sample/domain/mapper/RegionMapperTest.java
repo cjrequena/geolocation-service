@@ -97,7 +97,7 @@ class RegionMapperTest {
     entity.setRegionType(TYPE_STRING);
     entity.setPopulation(POPULATION_VAL);
     entity.setTimezone(TZ);
-    entity.setIsActive(Boolean.TRUE);
+    entity.setActive(Boolean.TRUE);
     entity.setCreatedAt(CREATED_AT);
     entity.setUpdatedAt(UPDATED_AT);
     return entity;
@@ -136,7 +136,7 @@ class RegionMapperTest {
     @DisplayName("maps isActive=false to status=false")
     void inactiveStatus() {
       RegionEntity entity = fullEntity();
-      entity.setIsActive(Boolean.FALSE);
+      entity.setActive(Boolean.FALSE);
 
       Region domain = mapper.toDomain(entity);
 
@@ -191,7 +191,7 @@ class RegionMapperTest {
       assertThat(entity.getRegionType())                .isEqualTo(TYPE_STRING);
       assertThat(entity.getPopulation())                .isEqualTo(POPULATION_VAL);
       assertThat(entity.getTimezone())                  .isEqualTo(TZ);
-      assertThat(entity.getIsActive())                  .isTrue();
+      assertThat(entity.getActive())                  .isTrue();
       assertThat(entity.getCreatedAt())                 .isEqualTo(CREATED_AT);
       assertThat(entity.getUpdatedAt())                 .isEqualTo(UPDATED_AT);
     }
@@ -226,7 +226,7 @@ class RegionMapperTest {
 
       RegionEntity entity = mapper.toEntity(domain);
 
-      assertThat(entity.getIsActive()).isFalse();
+      assertThat(entity.getActive()).isFalse();
     }
   }
 

@@ -62,7 +62,7 @@ CREATE TABLE country (
     currency_code     CHAR(3),
     capital           VARCHAR(255),
     population        BIGINT,
-    is_active         BOOLEAN NOT NULL DEFAULT TRUE,
+    active         BOOLEAN NOT NULL DEFAULT TRUE,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
@@ -71,7 +71,7 @@ CREATE TABLE country (
 );
 
 CREATE INDEX idx_country_name ON country(name);
-CREATE INDEX idx_country_active ON country(is_active) WHERE is_active = TRUE;
+CREATE INDEX idx_country_active ON country(active) WHERE active = TRUE;
 
 COMMENT ON TABLE country IS 'Countries with ISO codes and basic metadata';
 
@@ -87,7 +87,7 @@ CREATE TABLE region (
     geoshape_id       UUID,
     population        BIGINT,
     timezone          VARCHAR(50),
-    is_active         BOOLEAN NOT NULL DEFAULT TRUE,
+    active         BOOLEAN NOT NULL DEFAULT TRUE,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
@@ -98,7 +98,7 @@ CREATE TABLE region (
 
 CREATE INDEX idx_region_country ON region(country_id);
 CREATE INDEX idx_region_geoshape ON region(geoshape_id);
-CREATE INDEX idx_region_active ON region(is_active) WHERE is_active = TRUE;
+CREATE INDEX idx_region_active ON region(active) WHERE active = TRUE;
 CREATE INDEX idx_region_name ON region(name);
 
 COMMENT ON TABLE region IS 'First-level administrative divisions (states, provinces, etc.)';
@@ -114,8 +114,8 @@ CREATE TABLE city (
     population        BIGINT,
     timezone          VARCHAR(50),
     postal_code       VARCHAR(20),
-    is_capital        BOOLEAN DEFAULT FALSE,
-    is_active         BOOLEAN NOT NULL DEFAULT TRUE,
+    capital        BOOLEAN DEFAULT FALSE,
+    active         BOOLEAN NOT NULL DEFAULT TRUE,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
@@ -126,7 +126,7 @@ CREATE TABLE city (
 
 CREATE INDEX idx_city_region ON city(region_id);
 CREATE INDEX idx_city_geoshape ON city(geoshape_id);
-CREATE INDEX idx_city_active ON city(is_active) WHERE is_active = TRUE;
+CREATE INDEX idx_city_active ON city(active) WHERE active = TRUE;
 CREATE INDEX idx_city_name ON city(name);
 
 COMMENT ON TABLE city IS 'Cities and municipalities';
@@ -142,7 +142,7 @@ CREATE TABLE area (
     geoshape_id       UUID,
     population        BIGINT,
     postal_code       VARCHAR(20),
-    is_active         BOOLEAN NOT NULL DEFAULT TRUE,
+    active         BOOLEAN NOT NULL DEFAULT TRUE,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
@@ -153,7 +153,7 @@ CREATE TABLE area (
 
 CREATE INDEX idx_area_city ON area(city_id);
 CREATE INDEX idx_area_geoshape ON area(geoshape_id);
-CREATE INDEX idx_area_active ON area(is_active) WHERE is_active = TRUE;
+CREATE INDEX idx_area_active ON area(active) WHERE active = TRUE;
 CREATE INDEX idx_area_name ON area(name);
 
 COMMENT ON TABLE area IS 'Sub-city areas (districts, boroughs, neighborhoods)';
@@ -168,7 +168,7 @@ CREATE TABLE zone (
     zone_type         VARCHAR(50), -- block, sector, precinct, etc.
     geoshape_id       UUID,
     postal_code       VARCHAR(20),
-    is_active         BOOLEAN NOT NULL DEFAULT TRUE,
+    active         BOOLEAN NOT NULL DEFAULT TRUE,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
@@ -179,7 +179,7 @@ CREATE TABLE zone (
 
 CREATE INDEX idx_zone_area ON zone(area_id);
 CREATE INDEX idx_zone_geoshape ON zone(geoshape_id);
-CREATE INDEX idx_zone_active ON zone(is_active) WHERE is_active = TRUE;
+CREATE INDEX idx_zone_active ON zone(active) WHERE active = TRUE;
 CREATE INDEX idx_zone_name ON zone(name);
 
 COMMENT ON TABLE zone IS 'Fine-grained zones within areas';
@@ -196,7 +196,7 @@ CREATE TABLE location (
     address           TEXT,
     postal_code       VARCHAR(20),
     metadata          JSONB DEFAULT '{}',
-    is_active         BOOLEAN NOT NULL DEFAULT TRUE,
+    active         BOOLEAN NOT NULL DEFAULT TRUE,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
@@ -205,7 +205,7 @@ CREATE TABLE location (
 
 CREATE INDEX idx_location_zone ON location(zone_id);
 CREATE INDEX idx_location_geopoint ON location USING GIST(geo_point);
-CREATE INDEX idx_location_active ON location(is_active) WHERE is_active = TRUE;
+CREATE INDEX idx_location_active ON location(active) WHERE active = TRUE;
 
 COMMENT ON TABLE location IS 'Specific point locations with coordinates';
 COMMENT ON COLUMN location.geo_point IS 'PostGIS point geometry - single source of truth for coordinates';

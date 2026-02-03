@@ -26,7 +26,7 @@ import java.util.UUID;
   indexes = {
     @Index(name = "idx_location_zone", columnList = "zone_id"),
     @Index(name = "idx_location_geopoint", columnList = "geo_point"),
-    @Index(name = "idx_location_active", columnList = "is_active")
+    @Index(name = "idx_location_active", columnList = "active")
   }
 )
 @Data
@@ -64,8 +64,8 @@ public class LocationEntity implements Serializable {
   @Column(name = "metadata", columnDefinition = "jsonb")
   private JsonNode metadata;
 
-  @Column(name = "is_active", nullable = false)
-  private Boolean isActive = true;
+  @Column(name = "active", nullable = false)
+  private Boolean active = true;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   private OffsetDateTime createdAt;
@@ -80,8 +80,8 @@ public class LocationEntity implements Serializable {
     }
     createdAt = OffsetDateTime.now();
     updatedAt = OffsetDateTime.now();
-    if (isActive == null) {
-      isActive = true;
+    if (active == null) {
+      active = true;
     }
   }
 

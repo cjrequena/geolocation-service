@@ -23,7 +23,7 @@ import java.util.UUID;
   },
   indexes = {
     @Index(name = "idx_country_name", columnList = "name"),
-    @Index(name = "idx_country_active", columnList = "is_active")
+    @Index(name = "idx_country_active", columnList = "active")
   }
 )
 @Data
@@ -62,8 +62,8 @@ public class CountryEntity implements Serializable {
   @Column(name = "population")
   private Long population;
 
-  @Column(name = "is_active", nullable = false)
-  private Boolean isActive = true;
+  @Column(name = "active", nullable = false)
+  private Boolean active = true;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   private OffsetDateTime createdAt;
@@ -78,8 +78,8 @@ public class CountryEntity implements Serializable {
     }
     createdAt = OffsetDateTime.now();
     updatedAt = OffsetDateTime.now();
-    if (isActive == null) {
-      isActive = true;
+    if (active == null) {
+      active = true;
     }
   }
 

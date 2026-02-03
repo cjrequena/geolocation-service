@@ -74,7 +74,7 @@ class CityMapperTest {
       .population(PopulationVO.of(POPULATION_VAL))
       .timezone(TZ)
       .capital(Boolean.TRUE)
-      .status(Boolean.TRUE)
+      .active(Boolean.TRUE)
       .auditInfo(AuditInfoVO.of(CREATED_AT, UPDATED_AT))
       .build();
   }
@@ -95,8 +95,8 @@ class CityMapperTest {
     entity.setPostalCode(POSTAL_CODE);
     entity.setPopulation(POPULATION_VAL);
     entity.setTimezone(TZ_ID);
-    entity.setIsCapital(Boolean.TRUE);
-    entity.setIsActive(Boolean.TRUE);
+    entity.setCapital(Boolean.TRUE);
+    entity.setActive(Boolean.TRUE);
     entity.setCreatedAt(CREATED_AT);
     entity.setUpdatedAt(UPDATED_AT);
     return entity;
@@ -125,7 +125,7 @@ class CityMapperTest {
       assertThat(domain.getPopulation().getValue())       .isEqualTo(POPULATION_VAL);
       assertThat(domain.getTimezone())                    .isEqualTo(TZ);
       assertThat(domain.getCapital())                     .isTrue();
-      assertThat(domain.getStatus())                      .isTrue();
+      assertThat(domain.getActive())                      .isTrue();
       assertThat(domain.getAuditInfo())                   .isNotNull();
       assertThat(domain.getAuditInfo().getCreatedAt())    .isEqualTo(CREATED_AT);
       assertThat(domain.getAuditInfo().getUpdatedAt())    .isEqualTo(UPDATED_AT);
@@ -135,16 +135,16 @@ class CityMapperTest {
     @DisplayName("maps isActive=false  →  status=false")
     void inactiveStatus() {
       CityEntity entity = fullEntity();
-      entity.setIsActive(Boolean.FALSE);
+      entity.setActive(Boolean.FALSE);
 
-      assertThat(mapper.toDomain(entity).getStatus()).isFalse();
+      assertThat(mapper.toDomain(entity).getActive()).isFalse();
     }
 
     @Test
     @DisplayName("maps isCapital=false  →  capital=false")
     void notCapital() {
       CityEntity entity = fullEntity();
-      entity.setIsCapital(Boolean.FALSE);
+      entity.setCapital(Boolean.FALSE);
 
       assertThat(mapper.toDomain(entity).getCapital()).isFalse();
     }
@@ -197,8 +197,8 @@ class CityMapperTest {
       assertThat(entity.getPostalCode())             .isEqualTo(POSTAL_CODE);
       assertThat(entity.getPopulation())             .isEqualTo(POPULATION_VAL);
       assertThat(entity.getTimezone())               .isEqualTo(TZ_ID);
-      assertThat(entity.getIsCapital())              .isTrue();
-      assertThat(entity.getIsActive())               .isTrue();
+      assertThat(entity.getCapital())              .isTrue();
+      assertThat(entity.getActive())               .isTrue();
       assertThat(entity.getCreatedAt())              .isEqualTo(CREATED_AT);
       assertThat(entity.getUpdatedAt())              .isEqualTo(UPDATED_AT);
     }
@@ -228,9 +228,9 @@ class CityMapperTest {
     @DisplayName("maps status=false  →  isActive=false")
     void inactiveStatus() {
       City domain = fullDomain();
-      domain.setStatus(Boolean.FALSE);
+      domain.setActive(Boolean.FALSE);
 
-      assertThat(mapper.toEntity(domain).getIsActive()).isFalse();
+      assertThat(mapper.toEntity(domain).getActive()).isFalse();
     }
 
     @Test
@@ -239,7 +239,7 @@ class CityMapperTest {
       City domain = fullDomain();
       domain.setCapital(Boolean.FALSE);
 
-      assertThat(mapper.toEntity(domain).getIsCapital()).isFalse();
+      assertThat(mapper.toEntity(domain).getCapital()).isFalse();
     }
 
     @Test
@@ -322,7 +322,7 @@ class CityMapperTest {
     @DisplayName("toDomain: isCapital=null  →  capital=null")
     void toDomain_isCapitalNull() {
       CityEntity entity = fullEntity();
-      entity.setIsCapital(null);
+      entity.setCapital(null);
 
       assertThat(mapper.toDomain(entity).getCapital()).isNull();
     }
@@ -390,7 +390,7 @@ class CityMapperTest {
       City domain = fullDomain();
       domain.setCapital(null);
 
-      assertThat(mapper.toEntity(domain).getIsCapital()).isNull();
+      assertThat(mapper.toEntity(domain).getCapital()).isNull();
     }
 
     @Test
@@ -436,7 +436,7 @@ class CityMapperTest {
       assertThat(recovered.getName())                        .isEqualTo(original.getName());
       assertThat(recovered.getPostalCode())                  .isEqualTo(original.getPostalCode());
       assertThat(recovered.getCapital())                     .isEqualTo(original.getCapital());
-      assertThat(recovered.getStatus())                      .isEqualTo(original.getStatus());
+      assertThat(recovered.getActive())                      .isEqualTo(original.getActive());
       assertThat(recovered.getTimezone())                    .isEqualTo(original.getTimezone());
       assertThat(recovered.getPopulation().getValue())       .isEqualTo(original.getPopulation().getValue());
       assertThat(recovered.getAuditInfo().getCreatedAt())    .isEqualTo(original.getAuditInfo().getCreatedAt());
@@ -450,7 +450,7 @@ class CityMapperTest {
         .id(CITY_ID)
         .regionId(REGION_ID)
         .name(NAME)
-        .status(Boolean.TRUE)
+        .active(Boolean.TRUE)
         .capital(Boolean.FALSE)
         .build();
 
@@ -459,7 +459,7 @@ class CityMapperTest {
       assertThat(recovered.getId())         .isEqualTo(CITY_ID);
       assertThat(recovered.getRegionId())   .isEqualTo(REGION_ID);
       assertThat(recovered.getName())       .isEqualTo(NAME);
-      assertThat(recovered.getStatus())     .isTrue();
+      assertThat(recovered.getActive())     .isTrue();
       assertThat(recovered.getCapital())    .isFalse();
       // optional fields stay null
       assertThat(recovered.getGeoShapeId()) .isNull();

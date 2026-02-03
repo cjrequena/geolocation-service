@@ -29,7 +29,7 @@ public class Country {
     private String currencyCode;
     private String capital;
     private PopulationVO population;
-    private Boolean status;
+    private Boolean active;
     private AuditInfoVO auditInfo;
 
     /**
@@ -50,7 +50,7 @@ public class Country {
                 .isoCode(isoCode)
                 .phoneCode(phoneCode)
                 .currencyCode(currencyCode)
-                .status(Boolean.TRUE)
+                .active(Boolean.TRUE)
                 .auditInfo(AuditInfoVO.create())
                 .build();
     }
@@ -94,7 +94,7 @@ public class Country {
      * Activate the country.
      */
     public void activate() {
-        this.status = Boolean.TRUE;
+        this.active = Boolean.TRUE;
         this.auditInfo = this.auditInfo.update();
     }
 
@@ -102,7 +102,7 @@ public class Country {
      * Deactivate the country.
      */
     public void deactivate() {
-        this.status = Boolean.FALSE;
+        this.active = Boolean.FALSE;
         this.auditInfo = this.auditInfo.update();
     }
 
@@ -110,7 +110,7 @@ public class Country {
      * Check if country is active.
      */
     public boolean isActive() {
-        return this.status != null && this.status.equals(Boolean.TRUE);
+        return this.active != null && this.active.equals(Boolean.TRUE);
     }
 
     /**

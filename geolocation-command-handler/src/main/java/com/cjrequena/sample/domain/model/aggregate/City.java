@@ -31,7 +31,7 @@ public class City {
   private TimeZone timezone;
   private String postalCode;
   private Boolean capital;
-  private Boolean status;
+  private Boolean active;
   private AuditInfoVO auditInfo;
 
   /**
@@ -49,7 +49,7 @@ public class City {
       .regionId(regionId)
       .name(name)
       .capital(Boolean.FALSE)
-      .status(Boolean.TRUE)
+      .active(Boolean.TRUE)
       .auditInfo(AuditInfoVO.create())
       .build();
   }
@@ -109,7 +109,7 @@ public class City {
    * Activate the city.
    */
   public void activate() {
-    this.status = Boolean.TRUE;
+    this.active = Boolean.TRUE;
     this.auditInfo = this.auditInfo.update();
   }
 
@@ -117,7 +117,7 @@ public class City {
    * Deactivate the city.
    */
   public void deactivate() {
-    this.status = Boolean.FALSE;
+    this.active = Boolean.FALSE;
     this.auditInfo = this.auditInfo.update();
   }
 
@@ -125,7 +125,7 @@ public class City {
    * Check if city is active.
    */
   public boolean isActive() {
-    return this.status != null && this.status.equals(Boolean.TRUE);
+    return this.active != null && this.active.equals(Boolean.TRUE);
   }
 
   /**

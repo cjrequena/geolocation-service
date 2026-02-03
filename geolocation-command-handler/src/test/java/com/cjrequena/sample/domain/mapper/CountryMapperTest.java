@@ -59,7 +59,7 @@ class CountryMapperTest {
       .currencyCode(CURRENCY_CODE)
       .capital(CAPITAL)
       .population(PopulationVO.of(POPULATION_VAL))
-      .status(Boolean.TRUE)
+      .active(Boolean.TRUE)
       .auditInfo(AuditInfoVO.of(CREATED_AT, UPDATED_AT))
       .build();
   }
@@ -76,7 +76,7 @@ class CountryMapperTest {
     entity.setCurrencyCode(CURRENCY_CODE);
     entity.setCapital(CAPITAL);
     entity.setPopulation(POPULATION_VAL);
-    entity.setIsActive(Boolean.TRUE);
+    entity.setActive(Boolean.TRUE);
     entity.setCreatedAt(CREATED_AT);
     entity.setUpdatedAt(UPDATED_AT);
     return entity;
@@ -101,7 +101,7 @@ class CountryMapperTest {
       assertThat(domain.getPhoneCode())                   .isEqualTo(PHONE_CODE);
       assertThat(domain.getCurrencyCode())                .isEqualTo(CURRENCY_CODE);
       assertThat(domain.getCapital())                     .isEqualTo(CAPITAL);
-      assertThat(domain.getStatus())                      .isTrue();
+      assertThat(domain.getActive())                      .isTrue();
       assertThat(domain.getPopulation())                  .isNotNull();
       assertThat(domain.getPopulation().getValue())       .isEqualTo(POPULATION_VAL);
       assertThat(domain.getAuditInfo())                   .isNotNull();
@@ -124,9 +124,9 @@ class CountryMapperTest {
     @DisplayName("maps isActive=false  →  status=false")
     void inactiveStatus() {
       CountryEntity entity = fullEntity();
-      entity.setIsActive(Boolean.FALSE);
+      entity.setActive(Boolean.FALSE);
 
-      assertThat(mapper.toDomain(entity).getStatus()).isFalse();
+      assertThat(mapper.toDomain(entity).getActive()).isFalse();
     }
   }
 
@@ -153,7 +153,7 @@ class CountryMapperTest {
       assertThat(entity.getCurrencyCode())    .isEqualTo(CURRENCY_CODE);
       assertThat(entity.getCapital())         .isEqualTo(CAPITAL);
       assertThat(entity.getPopulation())      .isEqualTo(POPULATION_VAL);
-      assertThat(entity.getIsActive())        .isTrue();
+      assertThat(entity.getActive())        .isTrue();
       assertThat(entity.getCreatedAt())       .isEqualTo(CREATED_AT);
       assertThat(entity.getUpdatedAt())       .isEqualTo(UPDATED_AT);
     }
@@ -172,9 +172,9 @@ class CountryMapperTest {
     @DisplayName("maps status=false  →  isActive=false")
     void inactiveStatus() {
       Country domain = fullDomain();
-      domain.setStatus(Boolean.FALSE);
+      domain.setActive(Boolean.FALSE);
 
-      assertThat(mapper.toEntity(domain).getIsActive()).isFalse();
+      assertThat(mapper.toEntity(domain).getActive()).isFalse();
     }
   }
 
@@ -392,7 +392,7 @@ class CountryMapperTest {
       assertThat(recovered.getPhoneCode())                   .isEqualTo(original.getPhoneCode());
       assertThat(recovered.getCurrencyCode())                .isEqualTo(original.getCurrencyCode());
       assertThat(recovered.getCapital())                     .isEqualTo(original.getCapital());
-      assertThat(recovered.getStatus())                      .isEqualTo(original.getStatus());
+      assertThat(recovered.getActive())                      .isEqualTo(original.getActive());
       assertThat(recovered.getIsoCode().getAlpha2())         .isEqualTo(original.getIsoCode().getAlpha2());
       assertThat(recovered.getIsoCode().getAlpha3())         .isEqualTo(original.getIsoCode().getAlpha3());
       assertThat(recovered.getIsoCode().getNumeric())        .isEqualTo(original.getIsoCode().getNumeric());
@@ -408,14 +408,14 @@ class CountryMapperTest {
         .id(COUNTRY_ID)
         .name(NAME)
         .isoCode(IsoCodeVO.of(ALPHA_2, ALPHA_3, NUMERIC))
-        .status(Boolean.TRUE)
+        .active(Boolean.TRUE)
         .build();
 
       Country recovered = mapper.toDomain(mapper.toEntity(minimal));
 
       assertThat(recovered.getId())                  .isEqualTo(COUNTRY_ID);
       assertThat(recovered.getName())                .isEqualTo(NAME);
-      assertThat(recovered.getStatus())              .isTrue();
+      assertThat(recovered.getActive())              .isTrue();
       assertThat(recovered.getIsoCode().getAlpha2()) .isEqualTo(ALPHA_2);
       assertThat(recovered.getIsoCode().getAlpha3()) .isEqualTo(ALPHA_3);
       assertThat(recovered.getIsoCode().getNumeric()).isEqualTo(NUMERIC);
@@ -434,7 +434,7 @@ class CountryMapperTest {
         .id(COUNTRY_ID)
         .name(NAME)
         .isoCode(IsoCodeVO.of(ALPHA_2, null, null))
-        .status(Boolean.TRUE)
+        .active(Boolean.TRUE)
         .build();
 
       Country recovered = mapper.toDomain(mapper.toEntity(original));

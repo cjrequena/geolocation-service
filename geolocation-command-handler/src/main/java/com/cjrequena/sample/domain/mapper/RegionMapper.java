@@ -30,7 +30,7 @@ public interface RegionMapper {
   @Mapping(target = "name", source = "name")
   @Mapping(target = "code", source = "code")
   @Mapping(target = "timezone", source = "timezone")
-  @Mapping(target = "isActive", source = "status")
+  @Mapping(target = "active", source = "status")
   // Handled in @AfterMapping – no direct path available:
   @Mapping(target = "country", ignore = true)   // UUID  → shell CountryEntity
   @Mapping(target = "geoShape", ignore = true)   // UUID  → shell GeoShapeEntity
@@ -82,7 +82,7 @@ public interface RegionMapper {
   @Mapping(target = "name", source = "name")
   @Mapping(target = "code", source = "code")
   @Mapping(target = "timezone", source = "timezone")
-  @Mapping(target = "status", source = "isActive")
+  @Mapping(target = "status", source = "active")
   // Handled in @AfterMapping:
   @Mapping(target = "countryId", ignore = true)   // CountryEntity  → UUID
   @Mapping(target = "geoShapeId", ignore = true)   // GeoShapeEntity → UUID
