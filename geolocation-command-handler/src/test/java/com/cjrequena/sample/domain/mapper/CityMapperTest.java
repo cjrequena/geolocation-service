@@ -22,21 +22,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link CityMapper}.
  *
- * <p>Uses the MapStruct-generated implementation obtained via
- * {@link Mappers#getMapper(Class)} — no Spring context required.</p>
- *
- * <h3>Structure</h3>
- * <ul>
- *   <li>{@link ToDomain}       – Entity → Domain happy-path.</li>
- *   <li>{@link ToEntity}       – Domain → Entity happy-path + shell verification.</li>
- *   <li>{@link NullInputs}     – Both directions with a {@code null} source.</li>
- *   <li>{@link NullableFields} – Every optional field {@code null} in isolation.</li>
- *   <li>{@link RoundTrip}      – Domain → Entity → Domain fidelity (full + minimal).</li>
- *   <li>{@link StaticHelpers}  – Every public static helper exercised directly,
- *                                 including the {@code TimeZone} edge cases.</li>
- * </ul>
+ * @author cjrequena
  */
 @ExtendWith(MockitoExtension.class)
 class CityMapperTest {

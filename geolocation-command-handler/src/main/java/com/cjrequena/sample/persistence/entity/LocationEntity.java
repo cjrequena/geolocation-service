@@ -18,6 +18,8 @@ import java.util.UUID;
 /**
  * Entity representing a specific point location with coordinates.
  * Uses PostGIS Point geometry as single source of truth for coordinates.
+ *
+ * @author cjrequena
  */
 @Entity
 @Table(

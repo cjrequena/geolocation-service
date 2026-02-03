@@ -11,6 +11,10 @@ import org.mapstruct.*;
 import java.util.TimeZone;
 import java.util.UUID;
 
+/**
+ *
+ * @author cjrequena
+ */
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CityMapper {
 

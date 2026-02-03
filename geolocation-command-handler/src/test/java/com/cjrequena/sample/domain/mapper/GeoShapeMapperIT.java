@@ -22,8 +22,8 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Comprehensive test suite for GeoShapeMapper.
- * Tests bidirectional mapping between domain and entity layers.
+ *
+ * @author cjrequena
  */
 @SpringBootTest
 @DisplayName("GeoShapeMapper Integration Tests")

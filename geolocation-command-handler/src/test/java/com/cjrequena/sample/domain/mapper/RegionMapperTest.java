@@ -23,20 +23,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link RegionMapper}.
  *
- * <p>Uses the MapStruct-generated implementation obtained via
- * {@link Mappers#getMapper(Class)} — no Spring context required.</p>
- *
- * <h3>Structure</h3>
- * <ul>
- *   <li>{@link ToDomain}      – Entity → Domain conversion.</li>
- *   <li>{@link ToEntity}      – Domain → Entity conversion.</li>
- *   <li>{@link NullInputs}    – Both directions with {@code null} source.</li>
- *   <li>{@link NullableFields}– Each optional field {@code null} in isolation.</li>
- *   <li>{@link RoundTrip}     – Domain → Entity → Domain fidelity.</li>
- *   <li>{@link StaticHelpers} – The public static conversion helpers exercised directly.</li>
- * </ul>
+ * @author cjrequena
  */
 @ExtendWith(MockitoExtension.class)
 class RegionMapperTest {

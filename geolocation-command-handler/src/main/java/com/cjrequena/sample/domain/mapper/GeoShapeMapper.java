@@ -10,13 +10,8 @@ import org.mapstruct.*;
 import java.math.BigDecimal;
 
 /**
- * Pure MapStruct interface mapper for bidirectional conversion between
- * {@link GeoShape} domain aggregates and {@link GeoShapeEntity} persistence entities.
  *
- * <p>All field-level mappings are declared via {@code @Mapping}. Conversions that
- * cannot be expressed as simple source→target path expressions (e.g. JTS geometry
- * construction, JsonNode serialization) are handled by {@code @AfterMapping} hooks
- * that receive the partially-built target and fill in the remaining fields.</p>
+ * @author cjrequena
  */
 @Mapper(
   componentModel = "spring",
