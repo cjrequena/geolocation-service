@@ -121,7 +121,7 @@ class CountryMapperTest {
     }
 
     @Test
-    @DisplayName("maps isActive=false  →  status=false")
+    @DisplayName("maps isActive=false  →  active=false")
     void inactiveStatus() {
       CountryEntity entity = fullEntity();
       entity.setActive(Boolean.FALSE);
@@ -169,7 +169,7 @@ class CountryMapperTest {
     }
 
     @Test
-    @DisplayName("maps status=false  →  isActive=false")
+    @DisplayName("maps active=false  →  isActive=false")
     void inactiveStatus() {
       Country domain = fullDomain();
       domain.setActive(Boolean.FALSE);

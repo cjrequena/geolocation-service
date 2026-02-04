@@ -10,7 +10,7 @@ import java.math.RoundingMode;
 import java.util.Objects;
 
 /**
- * GeoPoint value object representing a precise geographic point.
+ * Point value object representing a precise geographic point.
  */
 @Getter
 @EqualsAndHashCode
@@ -74,7 +74,7 @@ public final class PointVO implements Serializable {
   }
 
   /**
-   * Calculate distance to another GeoPoint using the Haversine formula.
+   * Calculate distance to another Point using the Haversine formula.
    */
   public DistanceVO distanceTo(PointVO other) {
     Objects.requireNonNull(other, "Other point cannot be null");
@@ -131,7 +131,7 @@ public final class PointVO implements Serializable {
   @Override
   public String toString() {
     return String.format(
-      "GeoPoint(%s, %s)",
+      "Point(%s, %s)",
       coordinates.getLatitude().setScale(6, RoundingMode.HALF_UP),
       coordinates.getLongitude().setScale(6, RoundingMode.HALF_UP)
     );

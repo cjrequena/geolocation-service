@@ -27,7 +27,7 @@ import java.util.UUID;
   schema = "geo_schema",
   indexes = {
     @Index(name = "idx_location_zone", columnList = "zone_id"),
-    @Index(name = "idx_location_geopoint", columnList = "geo_point"),
+    @Index(name = "idx_location_point", columnList = "point"),
     @Index(name = "idx_location_active", columnList = "active")
   }
 )
@@ -47,8 +47,8 @@ public class LocationEntity implements Serializable {
   @JoinColumn(name = "zone_id", foreignKey = @ForeignKey(name = "fk_location_zone"))
   private ZoneEntity zone;
 
-  @Column(name = "geo_point", nullable = false, columnDefinition = "geometry(Point, 4326)")
-  private Point geoPoint;
+  @Column(name = "point", nullable = false, columnDefinition = "geometry(Point, 4326)")
+  private Point point;
 
   @Column(name = "altitude_meters", precision = 8, scale = 2)
   private BigDecimal altitudeMeters;
@@ -93,18 +93,18 @@ public class LocationEntity implements Serializable {
   }
 
   /**
-   * Helper method to get latitude from the geo_point.
+   * Helper method to get latitude from the point.
    * @return latitude value
    */
   public Double getLatitude() {
-    return geoPoint != null ? geoPoint.getY() : null;
+    return point != null ? point.getY() : null;
   }
 
   /**
-   * Helper method to get longitude from the geo_point.
+   * Helper method to get longitude from the point.
    * @return longitude value
    */
   public Double getLongitude() {
-    return geoPoint != null ? geoPoint.getX() : null;
+    return point != null ? point.getX() : null;
   }
 }

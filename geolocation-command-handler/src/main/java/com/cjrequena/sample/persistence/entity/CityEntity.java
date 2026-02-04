@@ -53,8 +53,8 @@ public class CityEntity implements Serializable {
   @Column(name = "population")
   private Long population;
 
-  @Column(name = "timezone", length = 50)
-  private String timezone;
+  @Column(name = "timeZone", length = 50)
+  private String timeZone;
 
   @Column(name = "postal_code", length = 20)
   private String postalCode;

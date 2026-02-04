@@ -28,7 +28,7 @@ public class City {
   private String name;
 
   private PopulationVO population;
-  private TimeZone timezone;
+  private TimeZone timeZone;
   private String postalCode;
   private Boolean capital;
   private Boolean active;
@@ -57,15 +57,15 @@ public class City {
   /**
    * Update city information.
    */
-  public void updateInfo(String name, String postalCode, TimeZone timezone) {
+  public void updateInfo(String name, String postalCode, TimeZone timeZone) {
     if (name != null) {
       this.name = name;
     }
     if (postalCode != null) {
       this.postalCode = postalCode;
     }
-    if (timezone != null) {
-      this.timezone = timezone;
+    if (timeZone != null) {
+      this.timeZone = timeZone;
     }
     this.auditInfo = this.auditInfo.update();
   }
@@ -150,10 +150,10 @@ public class City {
   }
 
   /**
-   * Check if city has timezone defined.
+   * Check if city has timeZone defined.
    */
   public boolean hasTimezone() {
-    return this.timezone != null;
+    return this.timeZone != null;
   }
 
   // Validation methods

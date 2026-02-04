@@ -190,7 +190,7 @@ COMMENT ON TABLE zone IS 'Fine-grained zones within areas';
 CREATE TABLE location (
     id                UUID         PRIMARY KEY,
     zone_id           UUID, -- Made nullable to allow flexible assignment
-    geo_point         geometry(Point, 4326) NOT NULL,
+    point         geometry(Point, 4326) NOT NULL,
     altitude_meters   DECIMAL(8,2),
     accuracy_meters   DECIMAL(8,2),
     address           TEXT,
@@ -204,17 +204,17 @@ CREATE TABLE location (
 );
 
 CREATE INDEX idx_location_zone ON location(zone_id);
-CREATE INDEX idx_location_geopoint ON location USING GIST(geo_point);
+CREATE INDEX idx_location_point ON location USING GIST(point);
 CREATE INDEX idx_location_active ON location(active) WHERE active = TRUE;
 
 COMMENT ON TABLE location IS 'Specific point locations with coordinates';
-COMMENT ON COLUMN location.geo_point IS 'PostGIS point geometry - single source of truth for coordinates';
+COMMENT ON COLUMN location.point IS 'PostGIS point geometry - single source of truth for coordinates';
 
 ----------------------------------------------------
 -- Helper Functions
 ----------------------------------------------------
 
--- Function to extract latitude from geo_point
+-- Function to extract latitude from point
 CREATE OR REPLACE FUNCTION get_latitude(geom geometry)
 RETURNS DECIMAL(10,7) AS $$
 BEGIN
@@ -222,7 +222,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
--- Function to extract longitude from geo_point
+-- Function to extract longitude from point
 CREATE OR REPLACE FUNCTION get_longitude(geom geometry)
 RETURNS DECIMAL(10,7) AS $$
 BEGIN
@@ -269,9 +269,9 @@ CREATE TRIGGER update_location_updated_at BEFORE UPDATE ON location
 CREATE OR REPLACE VIEW v_location_hierarchy AS
 SELECT 
     l.id AS location_id,
-    l.geo_point,
-    get_latitude(l.geo_point) AS latitude,
-    get_longitude(l.geo_point) AS longitude,
+    l.point,
+    get_latitude(l.point) AS latitude,
+    get_longitude(l.point) AS longitude,
     l.address,
     l.postal_code AS location_postal_code,
     z.id AS zone_id,

@@ -31,8 +31,8 @@ public class Region {
   private RegionType type;
 
   private PopulationVO population;
-  private TimeZone timezone;
-  private Boolean status;
+  private TimeZone timeZone;
+  private Boolean active;
   private AuditInfoVO auditInfo;
 
   /**
@@ -53,7 +53,7 @@ public class Region {
       .name(name)
       .code(code)
       .type(type != null ? type : RegionType.defaultType())
-      .status(Boolean.TRUE)
+      .active(Boolean.TRUE)
       .auditInfo(AuditInfoVO.create())
       .build();
   }
@@ -94,10 +94,10 @@ public class Region {
   }
 
   /**
-   * Set timezone.
+   * Set timeZone.
    */
-  public void setTimezone(TimeZone timezone) {
-    this.timezone = timezone;
+  public void setTimeZone(TimeZone timeZone) {
+    this.timeZone = timeZone;
     this.auditInfo = this.auditInfo.update();
   }
 
@@ -105,7 +105,7 @@ public class Region {
    * Activate the region.
    */
   public void activate() {
-    this.status = Boolean.TRUE;
+    this.active = Boolean.TRUE;
     this.auditInfo = this.auditInfo.update();
   }
 
@@ -113,7 +113,7 @@ public class Region {
    * Deactivate the region.
    */
   public void deactivate() {
-    this.status = Boolean.FALSE;
+    this.active = Boolean.FALSE;
     this.auditInfo = this.auditInfo.update();
   }
 
@@ -121,7 +121,7 @@ public class Region {
    * Check if region is active.
    */
   public boolean isActive() {
-    return this.status != null && this.status.equals(Boolean.TRUE);
+    return this.active != null && this.active.equals(Boolean.TRUE);
   }
 
   /**

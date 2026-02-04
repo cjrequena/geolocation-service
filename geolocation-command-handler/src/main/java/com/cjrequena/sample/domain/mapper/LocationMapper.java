@@ -39,7 +39,7 @@ public abstract class LocationMapper {
   @Mapping(target = "active",     source = "active")
   // Handled in @AfterMapping:
   @Mapping(target = "zone",            ignore = true)   // UUID           → shell ZoneEntity
-  @Mapping(target = "geoPoint",        ignore = true)   // PointVO        → JTS Point
+  @Mapping(target = "point",        ignore = true)   // PointVO        → JTS Point
   @Mapping(target = "altitudeMeters",  ignore = true)   // AltitudeVO     → BigDecimal
   @Mapping(target = "accuracyMeters",  ignore = true)   // GpsAccuracyVO  → BigDecimal
   @Mapping(target = "metadata",        ignore = true)   // MetadataVO     → JsonNode
@@ -66,7 +66,7 @@ public abstract class LocationMapper {
     entity.setZone(uuidToZoneEntity(domain.getZoneId()));
 
     // ── PointVO  →  JTS Point ──────────────────────────────────────
-    entity.setGeoPoint(pointVOToJTS(domain.getPoint()));
+    entity.setPoint(pointVOToJTS(domain.getPoint()));
 
     // ── AltitudeVO  →  BigDecimal ──────────────────────────────────
     entity.setAltitudeMeters(altitudeVOToBigDecimal(domain.getAltitude()));
@@ -120,7 +120,7 @@ public abstract class LocationMapper {
     domain.setZoneId(zoneEntityToUuid(entity.getZone()));
 
     // ── JTS Point  →  PointVO ──────────────────────────────────────
-    domain.setPoint(jtsToPointVO(entity.getGeoPoint()));
+    domain.setPoint(jtsToPointVO(entity.getPoint()));
 
     // ── BigDecimal  →  AltitudeVO ──────────────────────────────────
     domain.setAltitude(bigDecimalToAltitudeVO(entity.getAltitudeMeters()));

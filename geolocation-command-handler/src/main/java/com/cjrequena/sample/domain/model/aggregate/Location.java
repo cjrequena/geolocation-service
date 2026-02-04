@@ -36,14 +36,14 @@ public class Location {
    */
   public static Location create(
     UUID id,
-    PointVO geoPoint,
+    PointVO point,
     String address) {
 
-    validateCreation(id, geoPoint);
+    validateCreation(id, point);
 
     return Location.builder()
       .id(id)
-      .point(geoPoint)
+      .point(point)
       .address(address)
       .metadata(MetadataVO.empty())
       .active(Boolean.TRUE)
@@ -57,15 +57,15 @@ public class Location {
   public static Location createWithZone(
     UUID id,
     UUID zoneId,
-    PointVO geoPoint,
+    PointVO point,
     String address) {
 
-    validateCreation(id, geoPoint);
+    validateCreation(id, point);
 
     return Location.builder()
       .id(id)
       .zoneId(zoneId)
-      .point(geoPoint)
+      .point(point)
       .address(address)
       .metadata(MetadataVO.empty())
       .active(Boolean.TRUE)
@@ -221,11 +221,11 @@ public class Location {
 
   // Validation methods
 
-  private static void validateCreation(UUID id, PointVO geoPoint) {
+  private static void validateCreation(UUID id, PointVO point) {
     if (id == null) {
       throw new IllegalArgumentException("Location ID cannot be null");
     }
-    if (geoPoint == null) {
+    if (point == null) {
       throw new IllegalArgumentException("Point cannot be null");
     }
   }

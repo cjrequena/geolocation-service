@@ -62,8 +62,8 @@ class RegionMapperTest {
       .code(CODE)
       .type(TYPE)
       .population(PopulationVO.of(POPULATION_VAL))
-      .timezone(TZ)
-      .status(Boolean.TRUE)
+      .timeZone(TZ)
+      .active(Boolean.TRUE)
       .auditInfo(AuditInfoVO.of(CREATED_AT, UPDATED_AT))
       .build();
   }
@@ -84,7 +84,7 @@ class RegionMapperTest {
     entity.setCode(CODE);
     entity.setRegionType(TYPE_STRING);
     entity.setPopulation(POPULATION_VAL);
-    entity.setTimezone(TZ);
+    entity.setTimeZone(TZ);
     entity.setActive(Boolean.TRUE);
     entity.setCreatedAt(CREATED_AT);
     entity.setUpdatedAt(UPDATED_AT);
@@ -113,22 +113,22 @@ class RegionMapperTest {
       assertThat(domain.getType())          .isEqualTo(TYPE);
       assertThat(domain.getPopulation())    .isNotNull();
       assertThat(domain.getPopulation().getValue()).isEqualTo(POPULATION_VAL);
-      assertThat(domain.getTimezone())      .isEqualTo(TZ);
-      assertThat(domain.getStatus())        .isTrue();
+      assertThat(domain.getTimeZone())      .isEqualTo(TZ);
+      assertThat(domain.isActive())        .isTrue();
       assertThat(domain.getAuditInfo())     .isNotNull();
       assertThat(domain.getAuditInfo().getCreatedAt()).isEqualTo(CREATED_AT);
       assertThat(domain.getAuditInfo().getUpdatedAt()).isEqualTo(UPDATED_AT);
     }
 
     @Test
-    @DisplayName("maps isActive=false to status=false")
+    @DisplayName("maps isActive=false to active=false")
     void inactiveStatus() {
       RegionEntity entity = fullEntity();
       entity.setActive(Boolean.FALSE);
 
       Region domain = mapper.toDomain(entity);
 
-      assertThat(domain.getStatus()).isFalse();
+      assertThat(domain.isActive()).isFalse();
     }
 
     @Test
@@ -178,7 +178,7 @@ class RegionMapperTest {
       assertThat(entity.getCode())                      .isEqualTo(CODE);
       assertThat(entity.getRegionType())                .isEqualTo(TYPE_STRING);
       assertThat(entity.getPopulation())                .isEqualTo(POPULATION_VAL);
-      assertThat(entity.getTimezone())                  .isEqualTo(TZ);
+      assertThat(entity.getTimeZone())                  .isEqualTo(TZ);
       assertThat(entity.getActive())                  .isTrue();
       assertThat(entity.getCreatedAt())                 .isEqualTo(CREATED_AT);
       assertThat(entity.getUpdatedAt())                 .isEqualTo(UPDATED_AT);
@@ -207,10 +207,10 @@ class RegionMapperTest {
     }
 
     @Test
-    @DisplayName("maps status=false to isActive=false")
+    @DisplayName("maps active=false to isActive=false")
     void inactiveStatus() {
       Region domain = fullDomain();
-      domain.setStatus(Boolean.FALSE);
+      domain.setActive(Boolean.FALSE);
 
       RegionEntity entity = mapper.toEntity(domain);
 
@@ -295,14 +295,14 @@ class RegionMapperTest {
     }
 
     @Test
-    @DisplayName("toDomain: timezone=null  →  timezone=null")
-    void toDomain_timezoneNull() {
+    @DisplayName("toDomain: timeZone=null  →  timeZone=null")
+    void toDomain_timeZoneNull() {
       RegionEntity entity = fullEntity();
-      entity.setTimezone(null);
+      entity.setTimeZone(null);
 
       Region domain = mapper.toDomain(entity);
 
-      assertThat(domain.getTimezone()).isNull();
+      assertThat(domain.getTimeZone()).isNull();
     }
 
     @Test
@@ -364,14 +364,14 @@ class RegionMapperTest {
     }
 
     @Test
-    @DisplayName("toEntity: timezone=null  →  timezone=null")
-    void toEntity_timezoneNull() {
+    @DisplayName("toEntity: timeZone=null  →  timeZone=null")
+    void toEntity_timeZoneNull() {
       Region domain = fullDomain();
-      domain.setTimezone(null);
+      domain.setTimeZone(null);
 
       RegionEntity entity = mapper.toEntity(domain);
 
-      assertThat(entity.getTimezone()).isNull();
+      assertThat(entity.getTimeZone()).isNull();
     }
 
     @Test
@@ -407,8 +407,8 @@ class RegionMapperTest {
       assertThat(recovered.getName())          .isEqualTo(original.getName());
       assertThat(recovered.getCode())          .isEqualTo(original.getCode());
       assertThat(recovered.getType())          .isEqualTo(original.getType());
-      assertThat(recovered.getTimezone())      .isEqualTo(original.getTimezone());
-      assertThat(recovered.getStatus())        .isEqualTo(original.getStatus());
+      assertThat(recovered.getTimeZone())      .isEqualTo(original.getTimeZone());
+      assertThat(recovered.isActive())        .isEqualTo(original.isActive());
       assertThat(recovered.getPopulation().getValue())
                                                .isEqualTo(original.getPopulation().getValue());
       assertThat(recovered.getAuditInfo().getCreatedAt())
@@ -424,7 +424,7 @@ class RegionMapperTest {
         .id(REGION_ID)
         .countryId(COUNTRY_ID)
         .name(NAME)
-        .status(Boolean.TRUE)
+        .active(Boolean.TRUE)
         .build();
 
       Region recovered = mapper.toDomain(mapper.toEntity(minimal));
@@ -432,14 +432,14 @@ class RegionMapperTest {
       assertThat(recovered.getId())         .isEqualTo(REGION_ID);
       assertThat(recovered.getCountryId())  .isEqualTo(COUNTRY_ID);
       assertThat(recovered.getName())       .isEqualTo(NAME);
-      assertThat(recovered.getStatus())     .isTrue();
+      assertThat(recovered.isActive())     .isTrue();
       // optional fields stay null
       assertThat(recovered.getGeoShapeId()) .isNull();
       assertThat(recovered.getCode())       .isNull();
       assertThat(recovered.getType())       .isNull();
       assertThat(recovered.getPopulation()) .isNull();
       assertThat(recovered.getAuditInfo())  .isNull();
-      assertThat(recovered.getTimezone())   .isNull();
+      assertThat(recovered.getTimeZone())   .isNull();
     }
   }
 

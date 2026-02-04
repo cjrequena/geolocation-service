@@ -59,7 +59,7 @@ class CityMapperTest {
       .name(NAME)
       .postalCode(POSTAL_CODE)
       .population(PopulationVO.of(POPULATION_VAL))
-      .timezone(TZ)
+      .timeZone(TZ)
       .capital(Boolean.TRUE)
       .active(Boolean.TRUE)
       .auditInfo(AuditInfoVO.of(CREATED_AT, UPDATED_AT))
@@ -81,7 +81,7 @@ class CityMapperTest {
     entity.setName(NAME);
     entity.setPostalCode(POSTAL_CODE);
     entity.setPopulation(POPULATION_VAL);
-    entity.setTimezone(TZ_ID);
+    entity.setTimeZone(TZ_ID);
     entity.setCapital(Boolean.TRUE);
     entity.setActive(Boolean.TRUE);
     entity.setCreatedAt(CREATED_AT);
@@ -110,7 +110,7 @@ class CityMapperTest {
       assertThat(domain.getPostalCode())                  .isEqualTo(POSTAL_CODE);
       assertThat(domain.getPopulation())                  .isNotNull();
       assertThat(domain.getPopulation().getValue())       .isEqualTo(POPULATION_VAL);
-      assertThat(domain.getTimezone())                    .isEqualTo(TZ);
+      assertThat(domain.getTimeZone())                    .isEqualTo(TZ);
       assertThat(domain.getCapital())                     .isTrue();
       assertThat(domain.getActive())                      .isTrue();
       assertThat(domain.getAuditInfo())                   .isNotNull();
@@ -119,7 +119,7 @@ class CityMapperTest {
     }
 
     @Test
-    @DisplayName("maps isActive=false  →  status=false")
+    @DisplayName("maps isActive=false  →  active=false")
     void inactiveStatus() {
       CityEntity entity = fullEntity();
       entity.setActive(Boolean.FALSE);
@@ -154,10 +154,10 @@ class CityMapperTest {
 
     @Test
     @DisplayName("converts the IANA zone-id string back to the matching TimeZone")
-    void timezoneConversion() {
+    void timeZoneConversion() {
       City domain = mapper.toDomain(fullEntity());
 
-      assertThat(domain.getTimezone().getID()).isEqualTo(TZ_ID);
+      assertThat(domain.getTimeZone().getID()).isEqualTo(TZ_ID);
     }
   }
 
@@ -183,7 +183,7 @@ class CityMapperTest {
       assertThat(entity.getName())                   .isEqualTo(NAME);
       assertThat(entity.getPostalCode())             .isEqualTo(POSTAL_CODE);
       assertThat(entity.getPopulation())             .isEqualTo(POPULATION_VAL);
-      assertThat(entity.getTimezone())               .isEqualTo(TZ_ID);
+      assertThat(entity.getTimeZone())               .isEqualTo(TZ_ID);
       assertThat(entity.getCapital())              .isTrue();
       assertThat(entity.getActive())               .isTrue();
       assertThat(entity.getCreatedAt())              .isEqualTo(CREATED_AT);
@@ -212,7 +212,7 @@ class CityMapperTest {
     }
 
     @Test
-    @DisplayName("maps status=false  →  isActive=false")
+    @DisplayName("maps active=false  →  isActive=false")
     void inactiveStatus() {
       City domain = fullDomain();
       domain.setActive(Boolean.FALSE);
@@ -231,10 +231,10 @@ class CityMapperTest {
 
     @Test
     @DisplayName("converts TimeZone to its IANA zone-id string")
-    void timezoneConversion() {
+    void timeZoneConversion() {
       CityEntity entity = mapper.toEntity(fullDomain());
 
-      assertThat(entity.getTimezone()).isEqualTo(TZ_ID);
+      assertThat(entity.getTimeZone()).isEqualTo(TZ_ID);
     }
   }
 
@@ -288,12 +288,12 @@ class CityMapperTest {
     }
 
     @Test
-    @DisplayName("toDomain: timezone=null  →  timezone=null")
-    void toDomain_timezoneNull() {
+    @DisplayName("toDomain: timeZone=null  →  timeZone=null")
+    void toDomain_timeZoneNull() {
       CityEntity entity = fullEntity();
-      entity.setTimezone(null);
+      entity.setTimeZone(null);
 
-      assertThat(mapper.toDomain(entity).getTimezone()).isNull();
+      assertThat(mapper.toDomain(entity).getTimeZone()).isNull();
     }
 
     @Test
@@ -354,12 +354,12 @@ class CityMapperTest {
     }
 
     @Test
-    @DisplayName("toEntity: timezone=null  →  timezone column=null")
-    void toEntity_timezoneNull() {
+    @DisplayName("toEntity: timeZone=null  →  timeZone column=null")
+    void toEntity_timeZoneNull() {
       City domain = fullDomain();
-      domain.setTimezone(null);
+      domain.setTimeZone(null);
 
-      assertThat(mapper.toEntity(domain).getTimezone()).isNull();
+      assertThat(mapper.toEntity(domain).getTimeZone()).isNull();
     }
 
     @Test
@@ -424,7 +424,7 @@ class CityMapperTest {
       assertThat(recovered.getPostalCode())                  .isEqualTo(original.getPostalCode());
       assertThat(recovered.getCapital())                     .isEqualTo(original.getCapital());
       assertThat(recovered.getActive())                      .isEqualTo(original.getActive());
-      assertThat(recovered.getTimezone())                    .isEqualTo(original.getTimezone());
+      assertThat(recovered.getTimeZone())                    .isEqualTo(original.getTimeZone());
       assertThat(recovered.getPopulation().getValue())       .isEqualTo(original.getPopulation().getValue());
       assertThat(recovered.getAuditInfo().getCreatedAt())    .isEqualTo(original.getAuditInfo().getCreatedAt());
       assertThat(recovered.getAuditInfo().getUpdatedAt())    .isEqualTo(original.getAuditInfo().getUpdatedAt());
@@ -452,7 +452,7 @@ class CityMapperTest {
       assertThat(recovered.getGeoShapeId()) .isNull();
       assertThat(recovered.getPostalCode()) .isNull();
       assertThat(recovered.getPopulation()) .isNull();
-      assertThat(recovered.getTimezone())   .isNull();
+      assertThat(recovered.getTimeZone())   .isNull();
       assertThat(recovered.getAuditInfo())  .isNull();
     }
   }

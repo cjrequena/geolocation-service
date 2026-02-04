@@ -61,7 +61,7 @@ public class RegionEntity implements Serializable {
   private Long population;
 
   @Column(name = "timezone", length = 50)
-  private TimeZone timezone;
+  private TimeZone timeZone;
 
   @Column(name = "active", nullable = false)
   private Boolean active = true;

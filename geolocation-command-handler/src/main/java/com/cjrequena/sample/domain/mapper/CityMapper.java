@@ -38,7 +38,7 @@ public interface CityMapper {
   @Mapping(target = "region",     ignore = true)   // UUID          → shell RegionEntity
   @Mapping(target = "geoShape",   ignore = true)   // UUID          → shell GeoShapeEntity
   @Mapping(target = "population", ignore = true)   // PopulationVO  → Long
-  @Mapping(target = "timezone",   ignore = true)   // TimeZone      → String (IANA id)
+  @Mapping(target = "timeZone",   ignore = true)   // TimeZone      → String (IANA id)
   @Mapping(target = "createdAt",  ignore = true)   // AuditInfoVO   → OffsetDateTime
   @Mapping(target = "updatedAt",  ignore = true)   // AuditInfoVO   → OffsetDateTime
   CityEntity toEntity(City domain);
@@ -60,7 +60,7 @@ public interface CityMapper {
     entity.setPopulation(populationVOToLong(domain.getPopulation()));
 
     // ── TimeZone  →  String ────────────────────────────────────────
-    entity.setTimezone(timeZoneToString(domain.getTimezone()));
+    entity.setTimeZone(timeZoneToString(domain.getTimeZone()));
 
     // ── AuditInfoVO  →  createdAt / updatedAt ──────────────────────
     if (domain.getAuditInfo() != null) {
@@ -85,7 +85,7 @@ public interface CityMapper {
   @Mapping(target = "regionId",      ignore = true)   // RegionEntity   → UUID
   @Mapping(target = "geoShapeId",    ignore = true)   // GeoShapeEntity → UUID
   @Mapping(target = "population",    ignore = true)   // Long           → PopulationVO
-  @Mapping(target = "timezone",      ignore = true)   // String         → TimeZone
+  @Mapping(target = "timeZone",      ignore = true)   // String         → TimeZone
   @Mapping(target = "auditInfo",     ignore = true)   // timestamps     → AuditInfoVO
   City toDomain(CityEntity entity);
 
@@ -109,7 +109,7 @@ public interface CityMapper {
     domain.setPopulation(longToPopulationVO(entity.getPopulation()));
 
     // ── String  →  TimeZone ────────────────────────────────────────
-    domain.setTimezone(stringToTimeZone(entity.getTimezone()));
+    domain.setTimeZone(stringToTimeZone(entity.getTimeZone()));
 
     // ── createdAt / updatedAt  →  AuditInfoVO ──────────────────────
     if (entity.getCreatedAt() != null || entity.getUpdatedAt() != null) {
