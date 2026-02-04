@@ -60,11 +60,11 @@ public class GeoShapeEntity implements Serializable {
   private BigDecimal radiusMeters;
 
   @JdbcTypeCode(SqlTypes.JSON)
-  @Column(name = "bounds", columnDefinition = "jsonb")
+  @Column(name = "bounds", columnDefinition = "json")
   private JsonNode bounds;
 
   @JdbcTypeCode(SqlTypes.JSON)
-  @Column(name = "metadata", nullable = false, columnDefinition = "jsonb")
+  @Column(name = "metadata", nullable = false, columnDefinition = "json")
   private JsonNode metadata;
 
   @Column(name = "created_at", nullable = false, updatable = false)

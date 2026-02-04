@@ -63,7 +63,7 @@ public class LocationEntity implements Serializable {
   private String postalCode;
 
   @JdbcTypeCode(SqlTypes.JSON)
-  @Column(name = "metadata", columnDefinition = "jsonb")
+  @Column(name = "metadata", columnDefinition = "json")
   private JsonNode metadata;
 
   @Column(name = "active", nullable = false)

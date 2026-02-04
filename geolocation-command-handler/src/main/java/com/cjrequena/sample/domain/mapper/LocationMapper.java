@@ -4,12 +4,11 @@ import com.cjrequena.sample.domain.model.aggregate.Location;
 import com.cjrequena.sample.domain.model.vo.*;
 import com.cjrequena.sample.persistence.entity.LocationEntity;
 import com.cjrequena.sample.persistence.entity.ZoneEntity;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.mapstruct.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -21,10 +20,7 @@ import java.util.UUID;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public abstract class LocationMapper {
 
-  @Autowired
-  private ObjectMapper objectMapper;
-
-  private final GeometryFactory geometryFactory = new GeometryFactory();
+  private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
   // ================================================================
   // Domain  →  Entity
@@ -76,7 +72,7 @@ public abstract class LocationMapper {
 
     // ── MetadataVO  →  JsonNode ────────────────────────────────────
     if (domain.getMetadata() != null) {
-      entity.setMetadata(domain.getMetadata().getValue());
+      entity.setMetadata(domain.getMetadata().getJsonNode());
     }
 
   }

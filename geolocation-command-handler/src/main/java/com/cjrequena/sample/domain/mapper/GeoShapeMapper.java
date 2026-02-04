@@ -5,6 +5,7 @@ import com.cjrequena.sample.domain.model.vo.*;
 import com.cjrequena.sample.persistence.entity.GeoShapeEntity;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.mapstruct.*;
 
 import java.math.BigDecimal;
@@ -20,7 +21,7 @@ import java.math.BigDecimal;
 )
 public abstract class GeoShapeMapper {
 
-  private final GeometryFactory geometryFactory = new GeometryFactory();
+  private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
   // ==========================================
   // Domain -> Entity
@@ -68,7 +69,7 @@ public abstract class GeoShapeMapper {
 
     // MetadataVO  ->  JsonNode
     if (domain.getMetadata() != null) {
-      entity.setMetadata(domain.getMetadata().getValue());
+      entity.setMetadata(domain.getMetadata().getJsonNode());
     }
   }
 

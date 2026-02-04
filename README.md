@@ -18,28 +18,28 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 ----------------------------------------------------
 CREATE TABLE geoshape (
     id                UUID         PRIMARY KEY,
-    geometry_type        VARCHAR(20) NOT NULL CHECK (geometry_type IN ('point','circle','rectangle','polygon','line')),
-    geometry          geometry NOT NULL,
+    geometry_type        VARCHAR(20) NOT NULL CHECK (geometry_type IN ('POINT','CIRCLE','RECTANGLE','POLYGON','LINE')),
+    geometry          geometry(Geometry, 4326) NOT NULL,
     
     -- Optional fields based on geometry_type
     center_latitude   DECIMAL(9,6),
     center_longitude  DECIMAL(9,6),
     radius_meters     DECIMAL(10,2),
-    bounds            JSONB,
+    bounds            JSON,
     
-    metadata          JSONB NOT NULL DEFAULT '{}',
+    metadata          JSON NOT NULL DEFAULT '{}',
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
     -- Validation constraints
     CONSTRAINT chk_point_no_radius CHECK (
-        geometry_type != 'point' OR radius_meters IS NULL
+        geometry_type != 'POINT' OR radius_meters IS NULL
     ),
     CONSTRAINT chk_circle_has_radius CHECK (
-        geometry_type != 'circle' OR (radius_meters IS NOT NULL AND center_latitude IS NOT NULL AND center_longitude IS NOT NULL)
+        geometry_type != 'CIRCLE' OR (radius_meters IS NOT NULL AND center_latitude IS NOT NULL AND center_longitude IS NOT NULL)
     ),
     CONSTRAINT chk_polygon_no_radius CHECK (
-        geometry_type != 'polygon' OR radius_meters IS NULL
+        geometry_type != 'POLYGON' OR radius_meters IS NULL
     )
 );
 
@@ -195,7 +195,7 @@ CREATE TABLE location (
     accuracy_meters   DECIMAL(8,2),
     address           TEXT,
     postal_code       VARCHAR(20),
-    metadata          JSONB DEFAULT '{}',
+    metadata          JSON DEFAULT '{}',
     active            BOOLEAN NOT NULL DEFAULT TRUE,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

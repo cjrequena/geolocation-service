@@ -1,5 +1,6 @@
 package com.cjrequena.sample.domain.model.vo;
 
+import com.cjrequena.sample.shared.common.util.JsonUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,12 +22,12 @@ import java.util.*;
 public class MetadataVO implements Serializable {
   @Serial
   private static final long serialVersionUID = 1L;
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = JsonUtil.getObjectMapper();
 
-  private final JsonNode value;
+  private final JsonNode jsonNode;
 
   private MetadataVO(JsonNode value) {
-    this.value = value != null ? value : OBJECT_MAPPER.createObjectNode();
+    this.jsonNode = value != null ? value : OBJECT_MAPPER.createObjectNode();
   }
 
   /**
@@ -73,22 +74,22 @@ public class MetadataVO implements Serializable {
    * Check if metadata is empty.
    */
   public boolean isEmpty() {
-    return value.isEmpty();
+    return jsonNode.isEmpty();
   }
 
   /**
    * Check if metadata has a specific key.
    */
   public boolean has(String key) {
-    return value.has(key);
+    return jsonNode.has(key);
   }
 
   /**
    * Get the number of fields in metadata.
    */
   public int size() {
-    if (value.isObject()) {
-      return value.size();
+    if (jsonNode.isObject()) {
+      return jsonNode.size();
     }
     return 0;
   }
@@ -97,11 +98,11 @@ public class MetadataVO implements Serializable {
    * Get all keys in metadata.
    */
   public Set<String> keys() {
-    if (!value.isObject()) {
+    if (!jsonNode.isObject()) {
       return Collections.emptySet();
     }
     Set<String> keys = new HashSet<>();
-    value.fieldNames().forEachRemaining(keys::add);
+    jsonNode.fieldNames().forEachRemaining(keys::add);
     return Collections.unmodifiableSet(keys);
   }
 
@@ -114,7 +115,7 @@ public class MetadataVO implements Serializable {
     if (key == null) {
       throw new IllegalArgumentException("Key cannot be null");
     }
-    ObjectNode newNode = ((ObjectNode) this.value).deepCopy();
+    ObjectNode newNode = ((ObjectNode) this.jsonNode).deepCopy();
     if (value != null) {
       newNode.put(key, value);
     } else {
@@ -127,10 +128,10 @@ public class MetadataVO implements Serializable {
    * Get string value.
    */
   public String getString(String key) {
-    if (!value.has(key)) {
+    if (!jsonNode.has(key)) {
       return null;
     }
-    JsonNode node = value.get(key);
+    JsonNode node = jsonNode.get(key);
     return node.isNull() ? null : node.asText();
   }
 
@@ -151,7 +152,7 @@ public class MetadataVO implements Serializable {
     if (key == null) {
       throw new IllegalArgumentException("Key cannot be null");
     }
-    ObjectNode newNode = ((ObjectNode) this.value).deepCopy();
+    ObjectNode newNode = ((ObjectNode) this.jsonNode).deepCopy();
     if (value != null) {
       newNode.put(key, value);
     } else {
@@ -164,10 +165,10 @@ public class MetadataVO implements Serializable {
    * Get integer value.
    */
   public Integer getInt(String key) {
-    if (!value.has(key)) {
+    if (!jsonNode.has(key)) {
       return null;
     }
-    JsonNode node = value.get(key);
+    JsonNode node = jsonNode.get(key);
     return node.isNull() ? null : node.asInt();
   }
 
@@ -186,7 +187,7 @@ public class MetadataVO implements Serializable {
     if (key == null) {
       throw new IllegalArgumentException("Key cannot be null");
     }
-    ObjectNode newNode = ((ObjectNode) this.value).deepCopy();
+    ObjectNode newNode = ((ObjectNode) this.jsonNode).deepCopy();
     if (value != null) {
       newNode.put(key, value);
     } else {
@@ -199,10 +200,10 @@ public class MetadataVO implements Serializable {
    * Get long value.
    */
   public Long getLong(String key) {
-    if (!value.has(key)) {
+    if (!jsonNode.has(key)) {
       return null;
     }
-    JsonNode node = value.get(key);
+    JsonNode node = jsonNode.get(key);
     return node.isNull() ? null : node.asLong();
   }
 
@@ -213,7 +214,7 @@ public class MetadataVO implements Serializable {
     if (key == null) {
       throw new IllegalArgumentException("Key cannot be null");
     }
-    ObjectNode newNode = ((ObjectNode) this.value).deepCopy();
+    ObjectNode newNode = ((ObjectNode) this.jsonNode).deepCopy();
     if (value != null) {
       newNode.put(key, value);
     } else {
@@ -226,10 +227,10 @@ public class MetadataVO implements Serializable {
    * Get double value.
    */
   public Double getDouble(String key) {
-    if (!value.has(key)) {
+    if (!jsonNode.has(key)) {
       return null;
     }
-    JsonNode node = value.get(key);
+    JsonNode node = jsonNode.get(key);
     return node.isNull() ? null : node.asDouble();
   }
 
@@ -242,7 +243,7 @@ public class MetadataVO implements Serializable {
     if (key == null) {
       throw new IllegalArgumentException("Key cannot be null");
     }
-    ObjectNode newNode = ((ObjectNode) this.value).deepCopy();
+    ObjectNode newNode = ((ObjectNode) this.jsonNode).deepCopy();
     if (value != null) {
       newNode.put(key, value);
     } else {
@@ -255,10 +256,10 @@ public class MetadataVO implements Serializable {
    * Get boolean value.
    */
   public Boolean getBoolean(String key) {
-    if (!value.has(key)) {
+    if (!jsonNode.has(key)) {
       return null;
     }
-    JsonNode node = value.get(key);
+    JsonNode node = jsonNode.get(key);
     return node.isNull() ? null : node.asBoolean();
   }
 
@@ -279,7 +280,7 @@ public class MetadataVO implements Serializable {
     if (key == null) {
       throw new IllegalArgumentException("Key cannot be null");
     }
-    ObjectNode newNode = ((ObjectNode) this.value).deepCopy();
+    ObjectNode newNode = ((ObjectNode) this.jsonNode).deepCopy();
     if (values != null && !values.isEmpty()) {
       ArrayNode arrayNode = OBJECT_MAPPER.createArrayNode();
       values.forEach(arrayNode::add);
@@ -294,10 +295,10 @@ public class MetadataVO implements Serializable {
    * Get list of strings.
    */
   public List<String> getStringList(String key) {
-    if (!value.has(key)) {
+    if (!jsonNode.has(key)) {
       return Collections.emptyList();
     }
-    JsonNode node = value.get(key);
+    JsonNode node = jsonNode.get(key);
     if (!node.isArray()) {
       return Collections.emptyList();
     }
@@ -315,9 +316,9 @@ public class MetadataVO implements Serializable {
     if (key == null) {
       throw new IllegalArgumentException("Key cannot be null");
     }
-    ObjectNode newNode = ((ObjectNode) this.value).deepCopy();
+    ObjectNode newNode = ((ObjectNode) this.jsonNode).deepCopy();
     if (nestedMetadata != null && !nestedMetadata.isEmpty()) {
-      newNode.set(key, nestedMetadata.value);
+      newNode.set(key, nestedMetadata.jsonNode);
     } else {
       newNode.remove(key);
     }
@@ -328,10 +329,10 @@ public class MetadataVO implements Serializable {
    * Get nested metadata object.
    */
   public MetadataVO getObject(String key) {
-    if (!value.has(key)) {
+    if (!jsonNode.has(key)) {
       return MetadataVO.empty();
     }
-    JsonNode node = value.get(key);
+    JsonNode node = jsonNode.get(key);
     if (!node.isObject()) {
       return MetadataVO.empty();
     }
@@ -347,7 +348,7 @@ public class MetadataVO implements Serializable {
     if (key == null || !has(key)) {
       return this;
     }
-    ObjectNode newNode = ((ObjectNode) this.value).deepCopy();
+    ObjectNode newNode = ((ObjectNode) this.jsonNode).deepCopy();
     newNode.remove(key);
     return new MetadataVO(newNode);
   }
@@ -359,7 +360,7 @@ public class MetadataVO implements Serializable {
     if (keys == null || keys.length == 0) {
       return this;
     }
-    ObjectNode newNode = ((ObjectNode) this.value).deepCopy();
+    ObjectNode newNode = ((ObjectNode) this.jsonNode).deepCopy();
     for (String key : keys) {
       newNode.remove(key);
     }
@@ -379,8 +380,8 @@ public class MetadataVO implements Serializable {
       return other;
     }
 
-    ObjectNode merged = ((ObjectNode) this.value).deepCopy();
-    ObjectNode otherNode = (ObjectNode) other.value;
+    ObjectNode merged = ((ObjectNode) this.jsonNode).deepCopy();
+    ObjectNode otherNode = (ObjectNode) other.jsonNode;
 
     otherNode.fields().forEachRemaining(entry -> {
       merged.set(entry.getKey(), entry.getValue());
@@ -396,7 +397,7 @@ public class MetadataVO implements Serializable {
    */
   public Map<String, Object> toMap() {
     try {
-      return OBJECT_MAPPER.convertValue(value, Map.class);
+      return OBJECT_MAPPER.convertValue(jsonNode, Map.class);
     } catch (IllegalArgumentException e) {
       return Collections.emptyMap();
     }
@@ -407,7 +408,7 @@ public class MetadataVO implements Serializable {
    */
   public String toJson() {
     try {
-      return OBJECT_MAPPER.writeValueAsString(value);
+      return OBJECT_MAPPER.writeValueAsString(jsonNode);
     } catch (JsonProcessingException e) {
       return "{}";
     }
@@ -418,7 +419,7 @@ public class MetadataVO implements Serializable {
    */
   public String toPrettyJson() {
     try {
-      return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(value);
+      return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
     } catch (JsonProcessingException e) {
       return "{}";
     }

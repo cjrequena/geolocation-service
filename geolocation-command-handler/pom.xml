@@ -17,7 +17,7 @@
         <!---->
         <postgresql.version>42.7.1</postgresql.version>
         <postgis-jdbc.version>2.5.1</postgis-jdbc.version>
-        <hibernate-spatial.version>5.6.15.Final</hibernate-spatial.version>
+        <!-- REMOVED: hibernate-spatial.version - Let Spring Boot manage this -->
         <jts.version>1.19.0</jts.version>
         <hypersistence-utils.version>3.7.0</hypersistence-utils.version>
     </properties>
@@ -49,10 +49,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-webflux</artifactId>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework.boot</groupId>-->
+        <!--            <artifactId>spring-boot-starter-webflux</artifactId>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -65,10 +65,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.boot</groupId>-->
-        <!--            <artifactId>spring-boot-starter-data-mongodb</artifactId>-->
-        <!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
@@ -124,6 +120,7 @@
             <artifactId>postgresql</artifactId>
         </dependency>
         <!-- PostGIS JDBC Driver for spatial data types -->
+        <!-- NOTE: This is optional if using Hibernate Spatial alone -->
         <dependency>
             <groupId>net.postgis</groupId>
             <artifactId>postgis-jdbc</artifactId>
@@ -136,10 +133,11 @@
             </exclusions>
         </dependency>
         <!-- Hibernate Spatial for PostGIS support -->
+        <!-- FIXED: Removed version - let Spring Boot parent manage it -->
         <dependency>
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-spatial</artifactId>
-            <version>${hibernate-spatial.version}</version>
+            <!-- No version specified - managed by Spring Boot BOM -->
         </dependency>
         <!-- JTS Topology Suite for Geometry types -->
         <dependency>
@@ -154,11 +152,11 @@
             <version>${jts.version}</version>
         </dependency>
         <!-- Hypersistence Utils for JSONB support -->
-        <!--        <dependency>-->
-        <!--            <groupId>io.hypersistence</groupId>-->
-        <!--            <artifactId>hypersistence-utils-hibernate-55</artifactId>-->
-        <!--            <version>${hypersistence-utils.version}</version>-->
-        <!--        </dependency>-->
+        <dependency>
+            <groupId>io.hypersistence</groupId>
+            <artifactId>hypersistence-utils-hibernate-55</artifactId>
+            <version>${hypersistence-utils.version}</version>
+        </dependency>
         <!-- Source: https://mvnrepository.com/artifact/com.github.f4b6a3/uuid-creator -->
         <dependency>
             <groupId>com.github.f4b6a3</groupId>
