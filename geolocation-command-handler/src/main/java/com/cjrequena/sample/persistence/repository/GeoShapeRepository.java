@@ -166,24 +166,21 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
   /**
    * Finds all GeoShapes within a given distance (in metres) from a point.
    *
-   * @param point          the center point
-   * @param distanceMeters radius in metres
-   * @return all GeoShapes within the specified distance
    */
   @Query(
     value = """
       SELECT *
-      FROM geoshape
+      FROM geo_schema.geoshape
       WHERE ST_DWithin(
-        geometry,
-        :point,
+        geometry::geography,
+        ST_GeomFromText(:wkt)::geography,
         :distance
       )
     """,
     nativeQuery = true
   )
   List<GeoShapeEntity> findWithinDistance(
-    @Param("point") Point point,
+    @Param("wkt") String wkt,
     @Param("distance") double distanceMeters
   );
 

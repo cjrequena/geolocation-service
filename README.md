@@ -1,17 +1,20 @@
 ## Postgres (Postgis) sql script
 ```sql
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 ----------------------------------------------------
 -- IMPROVED VERSION - Current Structure Enhanced
 ----------------------------------------------------
 DROP SCHEMA IF EXISTS geo_schema CASCADE;
 CREATE SCHEMA geo_schema;
 
-SET search_path = geo_schema;
+SET search_path = geo_schema, public;
 
+----------------------------------------------------
+-- EXTENSIONS
+----------------------------------------------------
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS postgis_topology;
 
 ----------------------------------------------------
 -- GeoShape (Improved)
