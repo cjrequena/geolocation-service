@@ -28,17 +28,33 @@ public interface AreaRepository extends JpaRepository<AreaEntity, UUID> {
   /**
    * Finds all active areas.
    */
-  List<AreaEntity> findAllByActiveTrue();
+  @Query(
+    value = "SELECT * FROM area WHERE active = true",
+    nativeQuery = true
+  )
+  List<AreaEntity> findAllActive();
 
   /**
    * Finds all inactive areas.
    */
-  List<AreaEntity> findAllByActiveFalse();
+  @Query(
+    value = "SELECT * FROM area WHERE active = false",
+    nativeQuery = true
+  )
+  List<AreaEntity> findAllInactive();
 
   /**
    * Finds areas by active status with pagination.
    */
-  Page<AreaEntity> findByActive(Boolean active, Pageable pageable);
+  @Query(
+    value = "SELECT * FROM area WHERE active = :active",
+    countQuery = "SELECT COUNT(*) FROM area WHERE active = :active",
+    nativeQuery = true
+  )
+  Page<AreaEntity> findByActive(
+    @Param("active") Boolean active,
+    Pageable pageable
+  );
 
   // ================================================================
   // Parent navigation — City
