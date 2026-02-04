@@ -26,7 +26,7 @@ import java.util.UUID;
   name = "geoshape",
   schema = "geo_schema",
   indexes = {
-    @Index(name = "idx_geoshape_type", columnList = "shape_type"),
+    @Index(name = "idx_geoshape_geometry_type", columnList = "geometry_type"),
     @Index(name = "idx_geoshape_geometry", columnList = "geometry")
   }
 )
@@ -43,7 +43,7 @@ public class GeoShapeEntity implements Serializable {
   @Column(columnDefinition = "uuid", nullable = false, updatable = false)
   private UUID id;
 
-  @Column(name = "shape_type", nullable = false, length = 20)
+  @Column(name = "geometry_type", nullable = false, length = 20)
   @Enumerated(EnumType.STRING)
   private GeometryType geometryType;
 

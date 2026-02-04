@@ -18,10 +18,10 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 ----------------------------------------------------
 CREATE TABLE geoshape (
     id                UUID         PRIMARY KEY,
-    shape_type        VARCHAR(20) NOT NULL CHECK (shape_type IN ('point','circle','rectangle','polygon','line')),
+    geometry_type        VARCHAR(20) NOT NULL CHECK (geometry_type IN ('point','circle','rectangle','polygon','line')),
     geometry          geometry NOT NULL,
     
-    -- Optional fields based on shape_type
+    -- Optional fields based on geometry_type
     center_latitude   DECIMAL(9,6),
     center_longitude  DECIMAL(9,6),
     radius_meters     DECIMAL(10,2),
@@ -33,17 +33,17 @@ CREATE TABLE geoshape (
     
     -- Validation constraints
     CONSTRAINT chk_point_no_radius CHECK (
-        shape_type != 'point' OR radius_meters IS NULL
+        geometry_type != 'point' OR radius_meters IS NULL
     ),
     CONSTRAINT chk_circle_has_radius CHECK (
-        shape_type != 'circle' OR (radius_meters IS NOT NULL AND center_latitude IS NOT NULL AND center_longitude IS NOT NULL)
+        geometry_type != 'circle' OR (radius_meters IS NOT NULL AND center_latitude IS NOT NULL AND center_longitude IS NOT NULL)
     ),
     CONSTRAINT chk_polygon_no_radius CHECK (
-        shape_type != 'polygon' OR radius_meters IS NULL
+        geometry_type != 'polygon' OR radius_meters IS NULL
     )
 );
 
-CREATE INDEX idx_geoshape_type ON geoshape(shape_type);
+CREATE INDEX idx_geoshape_geometry_type ON geoshape(geometry_type);
 CREATE INDEX idx_geoshape_geometry ON geoshape USING GIST(geometry);
 
 COMMENT ON TABLE geoshape IS 'Stores geometric shapes for geographic entities';
