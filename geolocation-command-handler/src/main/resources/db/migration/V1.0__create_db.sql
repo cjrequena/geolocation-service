@@ -1,6 +1,3 @@
-## Postgres (Postgis) sql script
-
-```sql
 ----------------------------------------------------
 -- IMPROVED VERSION - Current Structure Enhanced
 ----------------------------------------------------
@@ -22,19 +19,21 @@ CREATE EXTENSION IF NOT EXISTS postgis_topology;
 ----------------------------------------------------
 CREATE TABLE geoshape (
     id                      UUID         PRIMARY KEY,
+    name                    VARCHAR(255) NOT NULL,
     geometry_type           VARCHAR(20) NOT NULL CHECK (geometry_type IN ('POINT','CIRCLE','RECTANGLE','POLYGON','LINE')),
     geometry                geometry(Geometry, 4326) NOT NULL,
-    
+
     -- Optional fields based on geometry_type
     center_latitude         DECIMAL(9,6),
     center_longitude        DECIMAL(9,6),
     radius_meters           DECIMAL(10,2),
     bounds                  JSON,
-    
+
+    active                  BOOLEAN NOT NULL DEFAULT TRUE,
     metadata                JSON NOT NULL DEFAULT '{}',
     created_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
+
     -- Validation constraints
     CONSTRAINT chk_point_no_radius CHECK (
         geometry_type != 'POINT' OR radius_meters IS NULL
@@ -66,10 +65,10 @@ CREATE TABLE country (
     currency_code     CHAR(3),
     capital           VARCHAR(255),
     population        BIGINT,
-    active         BOOLEAN NOT NULL DEFAULT TRUE,
+    active            BOOLEAN NOT NULL DEFAULT TRUE,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
+
     CONSTRAINT chk_iso_alpha2_format CHECK (iso_code_alpha2 ~ '^[A-Z]{2}$'),
     CONSTRAINT chk_iso_alpha3_format CHECK (iso_code_alpha3 IS NULL OR iso_code_alpha3 ~ '^[A-Z]{3}$')
 );
@@ -94,7 +93,7 @@ CREATE TABLE region (
     active         BOOLEAN NOT NULL DEFAULT TRUE,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
+
     CONSTRAINT fk_region_country FOREIGN KEY (country_id) REFERENCES country(id) ON DELETE CASCADE,
     CONSTRAINT fk_region_geoshape FOREIGN KEY (geoshape_id) REFERENCES geoshape(id) ON DELETE SET NULL,
     CONSTRAINT uq_region_country_name UNIQUE(country_id, name)
@@ -122,7 +121,7 @@ CREATE TABLE city (
     active         BOOLEAN NOT NULL DEFAULT TRUE,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
+
     CONSTRAINT fk_city_region FOREIGN KEY (region_id) REFERENCES region(id) ON DELETE CASCADE,
     CONSTRAINT fk_city_geoshape FOREIGN KEY (geoshape_id) REFERENCES geoshape(id) ON DELETE SET NULL,
     CONSTRAINT uq_city_region_name UNIQUE(region_id, name)
@@ -149,7 +148,7 @@ CREATE TABLE area (
     active         BOOLEAN NOT NULL DEFAULT TRUE,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
+
     CONSTRAINT fk_area_city FOREIGN KEY (city_id) REFERENCES city(id) ON DELETE CASCADE,
     CONSTRAINT fk_area_geoshape FOREIGN KEY (geoshape_id) REFERENCES geoshape(id) ON DELETE SET NULL,
     CONSTRAINT uq_area_city_name UNIQUE(city_id, name)
@@ -175,7 +174,7 @@ CREATE TABLE zone (
     active         BOOLEAN NOT NULL DEFAULT TRUE,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
+
     CONSTRAINT fk_zone_area FOREIGN KEY (area_id) REFERENCES area(id) ON DELETE CASCADE,
     CONSTRAINT fk_zone_geoshape FOREIGN KEY (geoshape_id) REFERENCES geoshape(id) ON DELETE SET NULL,
     CONSTRAINT uq_zone_area_name UNIQUE(area_id, name)
@@ -203,7 +202,7 @@ CREATE TABLE location (
     active            BOOLEAN NOT NULL DEFAULT TRUE,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
+
     CONSTRAINT fk_location_zone FOREIGN KEY (zone_id) REFERENCES zone(id) ON DELETE SET NULL
 );
 
@@ -271,7 +270,7 @@ CREATE TRIGGER update_location_updated_at BEFORE UPDATE ON location
 
 -- Complete location hierarchy view
 CREATE OR REPLACE VIEW v_location_hierarchy AS
-SELECT 
+SELECT
     l.id AS location_id,
     l.point,
     get_latitude(l.point) AS latitude,
@@ -298,4 +297,3 @@ LEFT JOIN region r ON c.region_id = r.id
 LEFT JOIN country co ON r.country_id = co.id;
 
 COMMENT ON VIEW v_location_hierarchy IS 'Complete location hierarchy from location to country';
-```

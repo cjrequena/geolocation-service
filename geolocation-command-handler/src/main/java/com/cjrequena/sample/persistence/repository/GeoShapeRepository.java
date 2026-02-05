@@ -34,7 +34,7 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
    * Finds all active GeoShapes.
    */
   @Query(
-    value = "SELECT * FROM geoshape WHERE active = true",
+    value = "SELECT * FROM geo_schema.geoshape WHERE active = true",
     nativeQuery = true
   )
   List<GeoShapeEntity> findAllActive();
@@ -43,7 +43,7 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
    * Finds all inactive GeoShapes.
    */
   @Query(
-    value = "SELECT * FROM geoshape WHERE active = false",
+    value = "SELECT * FROM geo_schema.geoshape WHERE active = false",
     nativeQuery = true
   )
   List<GeoShapeEntity> findAllInactive();
@@ -52,8 +52,8 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
    * Finds all active GeoShapes with pagination.
    */
   @Query(
-    value = "SELECT * FROM geoshape WHERE active = :active",
-    countQuery = "SELECT COUNT(*) FROM geoshape WHERE active = :active",
+    value = "SELECT * FROM geo_schema.geoshape WHERE active = :active",
+    countQuery = "SELECT COUNT(*) FROM geo_schema.geoshape WHERE active = :active",
     nativeQuery = true
   )
   Page<GeoShapeEntity> findByActive(
@@ -69,7 +69,7 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
    * Finds a GeoShape by exact name (case-sensitive).
    */
   @Query(
-    value = "SELECT * FROM geoshape WHERE name = :name LIMIT 1",
+    value = "SELECT * FROM geo_schema.geoshape WHERE name = :name LIMIT 1",
     nativeQuery = true
   )
   Optional<GeoShapeEntity> findByName(@Param("name") String name);
@@ -80,7 +80,7 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
   @Query(
     value = """
       SELECT *
-      FROM geoshape
+      FROM geo_schema.geoshape
       WHERE LOWER(name) LIKE LOWER(CONCAT('%', :namePart, '%'))
     """,
     nativeQuery = true
@@ -102,7 +102,7 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
   @Query(
     value = """
       SELECT *
-      FROM geoshape
+      FROM geo_schema.geoshape
       WHERE ST_Within(:point, geometry)
     """,
     nativeQuery = true
@@ -115,7 +115,7 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
   @Query(
     value = """
       SELECT *
-      FROM geoshape
+      FROM geo_schema.geoshape
       WHERE active = true
         AND ST_Within(:point, geometry)
     """,
@@ -136,7 +136,7 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
   @Query(
     value = """
       SELECT *
-      FROM geoshape
+      FROM geo_schema.geoshape
       WHERE ST_Intersects(geometry, :geometry)
     """,
     nativeQuery = true
@@ -149,7 +149,7 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
   @Query(
     value = """
       SELECT *
-      FROM geoshape
+      FROM geo_schema.geoshape
       WHERE active = true
         AND ST_Intersects(geometry, :geometry)
     """,
@@ -190,19 +190,22 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
    */
   @Query(
     value = """
-      SELECT *
-      FROM geoshape
-      WHERE ST_DWithin(
-        geometry,
-        :point,
-        :distance
-      )
-      ORDER BY ST_Distance(geometry, :point)
-    """,
+    SELECT *
+    FROM geo_schema.geoshape
+    WHERE ST_DWithin(
+      geometry::geography,
+      ST_GeomFromText(:wkt, 4326)::geography,
+      :distance
+    )
+    ORDER BY ST_Distance(
+      geometry::geography,
+      ST_GeomFromText(:wkt)::geography
+    )
+  """,
     nativeQuery = true
   )
   List<GeoShapeEntity> findWithinDistanceOrderedByDistance(
-    @Param("point") Point point,
+    @Param("wkt") String wkt,
     @Param("distance") double distanceMeters
   );
 
@@ -219,7 +222,7 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
   @Query(
     value = """
       SELECT *
-      FROM geoshape
+      FROM geo_schema.geoshape
       WHERE ST_Intersects(geometry, :boundingBox)
     """,
     nativeQuery = true
@@ -238,7 +241,7 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
   @Query(
     value = """
       SELECT *
-      FROM geoshape
+      FROM geo_schema.geoshape
       WHERE created_at BETWEEN :start AND :end
     """,
     nativeQuery = true
@@ -254,7 +257,7 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
   @Query(
     value = """
       SELECT *
-      FROM geoshape
+      FROM geo_schema.geoshape
       ORDER BY updated_at DESC
       LIMIT 10
     """,
@@ -273,7 +276,7 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
     value = """
       SELECT EXISTS(
         SELECT 1
-        FROM geoshape
+        FROM geo_schema.geoshape
         WHERE name = :name
       )
     """,
@@ -288,7 +291,7 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
     value = """
       SELECT EXISTS(
         SELECT 1
-        FROM geoshape
+        FROM geo_schema.geoshape
         WHERE name = :name
           AND active = true
       )

@@ -39,6 +39,7 @@ public abstract class GeoShapeMapper {
   @Mapping(target = "centerLatitude",  source = "centerCoordinates.latitude")
   @Mapping(target = "centerLongitude", source = "centerCoordinates.longitude")
   @Mapping(target = "radiusMeters",    source = "radius.meters")
+  @Mapping(target = "active",          source = "active")
   @Mapping(target = "createdAt",       source = "auditInfo.createdAt")
   @Mapping(target = "updatedAt",       source = "auditInfo.updatedAt")
   // These three fields have no direct path mapping; the @AfterMapping hook handles them.
@@ -86,6 +87,7 @@ public abstract class GeoShapeMapper {
    */
   @Mapping(target = "id",              source = "id")
   @Mapping(target = "geometryType",    source = "geometryType")
+  @Mapping(target = "active",          source = "active")
   // These fields have no direct 1-to-1 target path; the @AfterMapping hook builds them.
   @Mapping(target = "geometry",           ignore = true)
   @Mapping(target = "centerCoordinates",  ignore = true)

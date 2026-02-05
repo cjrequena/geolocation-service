@@ -43,6 +43,9 @@ public class GeoShapeEntity implements Serializable {
   @Column(columnDefinition = "uuid", nullable = false, updatable = false)
   private UUID id;
 
+  @Column(name = "name", nullable = false, length = 255)
+  private String name;
+
   @Column(name = "geometry_type", nullable = false, length = 20)
   @Enumerated(EnumType.STRING)
   private GeometryType geometryType;
@@ -67,6 +70,9 @@ public class GeoShapeEntity implements Serializable {
   @Column(name = "metadata", nullable = false, columnDefinition = "json")
   private JsonNode metadata;
 
+  @Column(name = "active", nullable = false)
+  private Boolean active = true;
+
   @Column(name = "created_at", nullable = false, updatable = false)
   private OffsetDateTime createdAt;
 
@@ -78,8 +84,7 @@ public class GeoShapeEntity implements Serializable {
     if (id == null) {
       id = com.github.f4b6a3.uuid.UuidCreator.getTimeOrdered();
     }
-    createdAt = OffsetDateTime.now();
-    updatedAt = OffsetDateTime.now();
+    createdAt = updatedAt = OffsetDateTime.now();
   }
 
   @PreUpdate

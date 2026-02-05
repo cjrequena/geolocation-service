@@ -22,27 +22,31 @@ import java.util.UUID;
 public class GeoShape {
 
   private UUID id;
+  private String name;
   private GeometryType geometryType;
   private GeometryVO geometry;
   private CoordinateVO centerCoordinates;
   private RadiusVO radius;
   private BoundVO bounds;
+  private Boolean active;
   private MetadataVO metadata;
   private AuditInfoVO auditInfo;
 
   /**
    * Factory method to create a point shape.
    */
-  public static GeoShape createPoint(UUID id, CoordinateVO coordinates, MetadataVO metadata) {
+  public static GeoShape createPoint(UUID id, String name, CoordinateVO coordinates, MetadataVO metadata) {
     validatePointCreation(coordinates);
 
     return GeoShape.builder()
       .id(id)
+      .name(name)
       .geometryType(GeometryType.POINT)
       .geometry(GeometryVO.ofCoordinates(coordinates))
       .centerCoordinates(null)
       .radius(null)
       .bounds(null)
+      .active(Boolean.TRUE)
       .metadata(metadata != null ? metadata : MetadataVO.empty())
       .auditInfo(AuditInfoVO.create())
       .build();
@@ -51,11 +55,12 @@ public class GeoShape {
   /**
    * Factory method to create a circle shape.
    */
-  public static GeoShape createCircle(UUID id, CoordinateVO center, RadiusVO radius, MetadataVO metadata) {
+  public static GeoShape createCircle(UUID id, String name, CoordinateVO center, RadiusVO radius, MetadataVO metadata) {
     validateCircleCreation(center, radius);
 
     return GeoShape.builder()
       .id(id)
+      .name(name)
       .geometryType(GeometryType.CIRCLE)
       .geometry(GeometryVO.ofCircle(center, radius))
       .centerCoordinates(center)
@@ -69,11 +74,12 @@ public class GeoShape {
   /**
    * Factory method to create a polygon shape.
    */
-  public static GeoShape createPolygon(UUID id, GeometryVO geometry, BoundVO bounds, MetadataVO metadata) {
+  public static GeoShape createPolygon(UUID id, String name, GeometryVO geometry, BoundVO bounds, MetadataVO metadata) {
     validatePolygonCreation(geometry);
 
     return GeoShape.builder()
       .id(id)
+      .name(name)
       .geometryType(GeometryType.POLYGON)
       .geometry(geometry)
       .centerCoordinates(null)
@@ -163,5 +169,28 @@ public class GeoShape {
     if (newGeometry == null) {
       throw new IllegalArgumentException("Geometry cannot be null");
     }
+  }
+
+  /**
+   * Activate the area.
+   */
+  public void activate() {
+    this.active = Boolean.TRUE;
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Deactivate the area.
+   */
+  public void deactivate() {
+    this.active = Boolean.FALSE;
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Check if area is active.
+   */
+  public boolean isActive() {
+    return this.active != null && this.active.equals(Boolean.TRUE);
   }
 }

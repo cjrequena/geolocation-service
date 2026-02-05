@@ -14,6 +14,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -27,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @SpringBootTest
 @DisplayName("GeoShapeMapper Integration Tests")
+@ActiveProfiles("test")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 class GeoShapeMapperIT {
 
@@ -473,6 +475,9 @@ class GeoShapeMapperIT {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+
+    // Set active
+    entity.setActive(Boolean.TRUE);
 
     // Set metadata
     try {

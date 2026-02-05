@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: postgis/postgis:15-3.4
+    container_name: geolocation-service-postgis-db
+    hostname: geolocation-service-postgis-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      PGDATA: /data/postgres
+    volumes:
+      - postgres-data:/data/postgres
+      - $PWD/provision/V1.0__foo_db.sql:/docker-entrypoint-initdb.d/1-schema.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - local-network
+    restart: unless-stopped
+#---------------------------------------------------------------------------------------------------------------------
+networks:
+  local-network:
+    name: sample-network.local
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 171.28.0.0/16
+#---------------------------------------------------------------------------------------------------------------------
+volumes:
+  postgres-data:
