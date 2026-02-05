@@ -88,19 +88,28 @@ public interface AreaRepository extends JpaRepository<AreaEntity, UUID> {
   /**
    * Finds areas associated with a specific GeoShape.
    */
-  @Query("SELECT a FROM AreaEntity a WHERE a.geoShape.id = :geoShapeId")
+  @Query(
+    value = "SELECT * FROM geo_schema.area WHERE geoshape_id = :geoShapeId",
+    nativeQuery = true
+  )
   List<AreaEntity> findByGeoShapeId(@Param("geoShapeId") UUID geoShapeId);
 
   /**
    * Finds areas that have no associated GeoShape.
    */
-  @Query("SELECT a FROM AreaEntity a WHERE a.geoShape IS NULL")
+  @Query(
+    value = "SELECT * FROM geo_schema.area WHERE geoshape_id IS NULL",
+    nativeQuery = true
+  )
   List<AreaEntity> findByGeoShapeIdIsNull();
 
   /**
    * Finds areas that have an associated GeoShape.
    */
-  @Query("SELECT a FROM AreaEntity a WHERE a.geoShape IS NOT NULL")
+  @Query(
+    value = "SELECT * FROM geo_schema.area WHERE geoshape_id IS NOT NULL",
+    nativeQuery = true
+  )
   List<AreaEntity> findByGeoShapeIdIsNotNull();
 
   // ================================================================
@@ -109,15 +118,21 @@ public interface AreaRepository extends JpaRepository<AreaEntity, UUID> {
 
   /**
    * Finds areas by area type (e.g., "DISTRICT", "NEIGHBORHOOD").
-   *
-   * @param areaType the string value of the area type enum
    */
-  List<AreaEntity> findByAreaType(String areaType);
+  @Query(
+    value = "SELECT * FROM geo_schema.area WHERE area_type = :areaType",
+    nativeQuery = true
+  )
+  List<AreaEntity> findByAreaType(@Param("areaType") String areaType);
 
   /**
    * Finds active areas by area type.
    */
-  List<AreaEntity> findByAreaTypeAndActiveTrue(String areaType);
+  @Query(
+    value = "SELECT * FROM geo_schema.area WHERE area_type = :areaType AND active = true",
+    nativeQuery = true
+  )
+  List<AreaEntity> findByAreaTypeAndActiveTrue(@Param("areaType") String areaType);
 
   /**
    * Finds areas in a city filtered by area type.
@@ -135,12 +150,20 @@ public interface AreaRepository extends JpaRepository<AreaEntity, UUID> {
   /**
    * Finds areas by postal code.
    */
-  List<AreaEntity> findByPostalCode(String postalCode);
+  @Query(
+    value = "SELECT * FROM geo_schema.area WHERE postal_code = :postalCode",
+    nativeQuery = true
+  )
+  List<AreaEntity> findByPostalCode(@Param("postalCode") String postalCode);
 
   /**
    * Finds active areas by postal code.
    */
-  List<AreaEntity> findByPostalCodeAndActiveTrue(String postalCode);
+  @Query(
+    value = "SELECT * FROM geo_schema.area WHERE postal_code = :postalCode AND active = true",
+    nativeQuery = true
+  )
+  List<AreaEntity> findByPostalCodeAndActiveTrue(@Param("postalCode") String postalCode);
 
   /**
    * Finds areas in a city filtered by postal code.
@@ -164,12 +187,29 @@ public interface AreaRepository extends JpaRepository<AreaEntity, UUID> {
   /**
    * Finds areas where the name contains the given substring (case-insensitive).
    */
-  List<AreaEntity> findByNameContainingIgnoreCase(String namePart);
+  @Query(
+    value = """
+    SELECT *
+    FROM geo_schema.area
+    WHERE LOWER(name) LIKE LOWER(CONCAT('%', :namePart, '%'))
+  """,
+    nativeQuery = true
+  )
+  List<AreaEntity> findByNameContainingIgnoreCase(@Param("namePart") String namePart);
 
   /**
    * Finds active areas where the name contains the given substring.
    */
-  List<AreaEntity> findByNameContainingIgnoreCaseAndActiveTrue(String namePart);
+  @Query(
+    value = """
+    SELECT *
+    FROM geo_schema.area
+    WHERE LOWER(name) LIKE LOWER(CONCAT('%', :namePart, '%'))
+      AND active = true
+  """,
+    nativeQuery = true
+  )
+  List<AreaEntity> findByNameContainingIgnoreCaseAndActiveTrue(@Param("namePart") String namePart);
 
   // ================================================================
   // Population queries
@@ -200,11 +240,31 @@ public interface AreaRepository extends JpaRepository<AreaEntity, UUID> {
   /**
    * Finds areas created within a given time range.
    */
-  List<AreaEntity> findByCreatedAtBetween(OffsetDateTime start, OffsetDateTime end);
+  @Query(
+    value = """
+    SELECT *
+    FROM geo_schema.area
+    WHERE created_at BETWEEN :start AND :end
+  """,
+    nativeQuery = true
+  )
+  List<AreaEntity> findByCreatedAtBetween(
+    @Param("start") OffsetDateTime start,
+    @Param("end") OffsetDateTime end
+  );
 
   /**
    * Finds the 10 most recently updated areas.
    */
+  @Query(
+    value = """
+    SELECT *
+    FROM geo_schema.area
+    ORDER BY updated_at DESC
+    LIMIT 10
+  """,
+    nativeQuery = true
+  )
   List<AreaEntity> findTop10ByOrderByUpdatedAtDesc();
 
   // ================================================================
@@ -229,5 +289,15 @@ public interface AreaRepository extends JpaRepository<AreaEntity, UUID> {
   /**
    * Checks if an area with the given postal code exists.
    */
-  boolean existsByPostalCode(String postalCode);
+  @Query(
+    value = """
+    SELECT EXISTS(
+      SELECT 1
+      FROM geo_schema.area
+      WHERE postal_code = :postalCode
+    )
+  """,
+    nativeQuery = true
+  )
+  boolean existsByPostalCode(@Param("postalCode") String postalCode);
 }
