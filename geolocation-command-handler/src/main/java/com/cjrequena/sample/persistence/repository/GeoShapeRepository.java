@@ -27,78 +27,34 @@ import java.util.UUID;
 public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> {
 
   // ================================================================
-  // Active / Inactive filtering
+  // Active / Inactive filtering (JPQL)
   // ================================================================
 
-  /**
-   * Finds all active GeoShapes.
-   */
-  @Query(
-    value = "SELECT * FROM geo_schema.geoshape WHERE active = true",
-    nativeQuery = true
-  )
-  List<GeoShapeEntity> findAllActive();
+  List<GeoShapeEntity> findByActiveTrue();
 
-  /**
-   * Finds all inactive GeoShapes.
-   */
-  @Query(
-    value = "SELECT * FROM geo_schema.geoshape WHERE active = false",
-    nativeQuery = true
-  )
-  List<GeoShapeEntity> findAllInactive();
+  List<GeoShapeEntity> findByActiveFalse();
 
-  /**
-   * Finds all active GeoShapes with pagination.
-   */
-  @Query(
-    value = "SELECT * FROM geo_schema.geoshape WHERE active = :active",
-    countQuery = "SELECT COUNT(*) FROM geo_schema.geoshape WHERE active = :active",
-    nativeQuery = true
-  )
-  Page<GeoShapeEntity> findByActive(
-    @Param("active") Boolean active,
-    Pageable pageable
-  );
+  Page<GeoShapeEntity> findByActive(Boolean active, Pageable pageable);
 
   // ================================================================
-  // Name-based queries
+  // Name-based queries (JPQL)
   // ================================================================
 
-  /**
-   * Finds a GeoShape by exact name (case-sensitive).
-   */
-  @Query(
-    value = "SELECT * FROM geo_schema.geoshape WHERE name = :name LIMIT 1",
-    nativeQuery = true
-  )
-  Optional<GeoShapeEntity> findByName(@Param("name") String name);
+  Optional<GeoShapeEntity> findByName(String name);
 
-  /**
-   * Finds GeoShapes where the name contains the given substring (case-insensitive).
-   */
-  @Query(
-    value = """
-      SELECT *
-      FROM geo_schema.geoshape
-      WHERE LOWER(name) LIKE LOWER(CONCAT('%', :namePart, '%'))
-    """,
-    nativeQuery = true
-  )
+  @Query("""
+    SELECT g
+    FROM GeoShapeEntity g
+    WHERE LOWER(g.name) LIKE LOWER(CONCAT('%', :namePart, '%'))
+  """)
   List<GeoShapeEntity> findByNameContainingIgnoreCase(
     @Param("namePart") String namePart
   );
 
   // ================================================================
-  // Spatial queries — Point containment
+  // Spatial queries — Point containment (NATIVE)
   // ================================================================
 
-  /**
-   * Finds all GeoShapes whose geometry contains the given point.
-   *
-   * @param point the point to test (SRID must match the entity geometry, typically 4326)
-   * @return all GeoShapes that contain the point
-   */
   @Query(
     value = """
       SELECT *
@@ -109,9 +65,6 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
   )
   List<GeoShapeEntity> findContainingPoint(@Param("point") Point point);
 
-  /**
-   * Finds active GeoShapes containing the given point.
-   */
   @Query(
     value = """
       SELECT *
@@ -124,15 +77,9 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
   List<GeoShapeEntity> findActiveContainingPoint(@Param("point") Point point);
 
   // ================================================================
-  // Spatial queries — Geometry intersection
+  // Spatial queries — Geometry intersection (NATIVE)
   // ================================================================
 
-  /**
-   * Finds all GeoShapes that intersect with the given geometry.
-   *
-   * @param geometry the geometry to test against (Polygon, MultiPolygon, etc.)
-   * @return all GeoShapes whose geometry intersects the input
-   */
   @Query(
     value = """
       SELECT *
@@ -143,9 +90,6 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
   )
   List<GeoShapeEntity> findIntersecting(@Param("geometry") Geometry geometry);
 
-  /**
-   * Finds active GeoShapes that intersect with the given geometry.
-   */
   @Query(
     value = """
       SELECT *
@@ -160,20 +104,16 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
   );
 
   // ================================================================
-  // Spatial queries — Distance-based
+  // Spatial queries — Distance-based (NATIVE, geography)
   // ================================================================
 
-  /**
-   * Finds all GeoShapes within a given distance (in metres) from a point.
-   *
-   */
   @Query(
     value = """
       SELECT *
       FROM geo_schema.geoshape
       WHERE ST_DWithin(
         geometry::geography,
-        ST_GeomFromText(:wkt)::geography,
+        ST_GeomFromText(:wkt, 4326)::geography,
         :distance
       )
     """,
@@ -184,24 +124,20 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
     @Param("distance") double distanceMeters
   );
 
-  /**
-   * Finds all GeoShapes within a given distance, ordered by actual distance ascending.
-   *
-   */
   @Query(
     value = """
-    SELECT *
-    FROM geo_schema.geoshape
-    WHERE ST_DWithin(
-      geometry::geography,
-      ST_GeomFromText(:wkt, 4326)::geography,
-      :distance
-    )
-    ORDER BY ST_Distance(
-      geometry::geography,
-      ST_GeomFromText(:wkt)::geography
-    )
-  """,
+      SELECT *
+      FROM geo_schema.geoshape
+      WHERE ST_DWithin(
+        geometry::geography,
+        ST_GeomFromText(:wkt, 4326)::geography,
+        :distance
+      )
+      ORDER BY ST_Distance(
+        geometry::geography,
+        ST_GeomFromText(:wkt, 4326)::geography
+      )
+    """,
     nativeQuery = true
   )
   List<GeoShapeEntity> findWithinDistanceOrderedByDistance(
@@ -210,15 +146,9 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
   );
 
   // ================================================================
-  // Bounding box queries
+  // Bounding box queries (NATIVE)
   // ================================================================
 
-  /**
-   * Finds all GeoShapes that intersect with the given bounding box (envelope).
-   *
-   * <p>The bounding box is represented as a {@link Polygon} — typically a
-   * rectangle constructed from min/max lat/lng.</p>
-   */
   @Query(
     value = """
       SELECT *
@@ -232,71 +162,31 @@ public interface GeoShapeRepository extends JpaRepository<GeoShapeEntity, UUID> 
   );
 
   // ================================================================
-  // Audit / Temporal queries
+  // Audit / Temporal queries (JPQL)
   // ================================================================
 
-  /**
-   * Finds GeoShapes created within a given time range.
-   */
-  @Query(
-    value = """
-      SELECT *
-      FROM geo_schema.geoshape
-      WHERE created_at BETWEEN :start AND :end
-    """,
-    nativeQuery = true
-  )
+  @Query("""
+    SELECT g
+    FROM GeoShapeEntity g
+    WHERE g.createdAt BETWEEN :start AND :end
+  """)
   List<GeoShapeEntity> findByCreatedAtBetween(
     @Param("start") OffsetDateTime start,
     @Param("end") OffsetDateTime end
   );
 
-  /**
-   * Finds the 10 most recently updated GeoShapes.
-   */
-  @Query(
-    value = """
-      SELECT *
-      FROM geo_schema.geoshape
-      ORDER BY updated_at DESC
-      LIMIT 10
-    """,
-    nativeQuery = true
-  )
-  List<GeoShapeEntity> findTop10ByOrderByUpdatedAtDesc();
+  @Query("""
+    SELECT g
+    FROM GeoShapeEntity g
+    ORDER BY g.updatedAt DESC
+  """)
+  List<GeoShapeEntity> findTop10ByOrderByUpdatedAtDesc(Pageable pageable);
 
   // ================================================================
-  // Existence checks
+  // Existence checks (JPQL)
   // ================================================================
 
-  /**
-   * Checks if a GeoShape with the given name exists.
-   */
-  @Query(
-    value = """
-      SELECT EXISTS(
-        SELECT 1
-        FROM geo_schema.geoshape
-        WHERE name = :name
-      )
-    """,
-    nativeQuery = true
-  )
-  boolean existsByName(@Param("name") String name);
+  boolean existsByName(String name);
 
-  /**
-   * Checks if an active GeoShape with the given name exists.
-   */
-  @Query(
-    value = """
-      SELECT EXISTS(
-        SELECT 1
-        FROM geo_schema.geoshape
-        WHERE name = :name
-          AND active = true
-      )
-    """,
-    nativeQuery = true
-  )
-  boolean existsByNameAndActiveTrue(@Param("name") String name);
+  boolean existsByNameAndActiveTrue(String name);
 }

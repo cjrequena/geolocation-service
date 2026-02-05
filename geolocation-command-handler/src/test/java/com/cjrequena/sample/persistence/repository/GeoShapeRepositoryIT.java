@@ -210,7 +210,7 @@ class GeoShapeRepositoryIT {
   @DisplayName("Should find all active GeoShapes")
   void shouldFindAllActive() {
     // When
-    List<GeoShapeEntity> active = repository.findAllActive();
+    List<GeoShapeEntity> active = repository.findByActiveTrue();
 
     // Then
     assertThat(active).hasSize(4);
@@ -220,7 +220,7 @@ class GeoShapeRepositoryIT {
     @DisplayName("Should find all inactive GeoShapes")
     void shouldFindAllInactive() {
       // When
-      List<GeoShapeEntity> inactive = repository.findAllInactive();
+      List<GeoShapeEntity> inactive = repository.findByActiveFalse();
 
       // Then
       assertThat(inactive).hasSize(1);
@@ -448,7 +448,7 @@ class GeoShapeRepositoryIT {
     @DisplayName("Should find top 10 most recently updated GeoShapes")
     void shouldFindTop10ByOrderByUpdatedAtDesc() {
       // When
-      List<GeoShapeEntity> found = repository.findTop10ByOrderByUpdatedAtDesc();
+      List<GeoShapeEntity> found = repository.findTop10ByOrderByUpdatedAtDesc(PageRequest.of(0, 10));
 
       // Then
       assertThat(found).hasSizeLessThanOrEqualTo(10);

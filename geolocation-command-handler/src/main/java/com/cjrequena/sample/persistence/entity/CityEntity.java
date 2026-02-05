@@ -53,7 +53,7 @@ public class CityEntity implements Serializable {
   @Column(name = "population")
   private Long population;
 
-  @Column(name = "timeZone", length = 50)
+  @Column(name = "timezone", length = 50)
   private String timeZone;
 
   @Column(name = "postal_code", length = 20)
@@ -76,8 +76,7 @@ public class CityEntity implements Serializable {
     if (id == null) {
       id = com.github.f4b6a3.uuid.UuidCreator.getTimeOrdered();
     }
-    createdAt = OffsetDateTime.now();
-    updatedAt = OffsetDateTime.now();
+    createdAt = updatedAt = OffsetDateTime.now();
     if (active == null) {
       active = true;
     }
