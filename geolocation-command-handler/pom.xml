@@ -14,6 +14,8 @@
     <properties>
         <!-- -->
         <main-class>com.cjrequena.command.handler.CommandHandlerMainApplication</main-class>
+
+
     </properties>
     <!-- -->
     <dependencies>
