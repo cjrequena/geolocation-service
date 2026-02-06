@@ -2,7 +2,6 @@ package com.cjrequena.sample.persistence.repository;
 
 import com.cjrequena.sample.persistence.entity.CityEntity;
 import com.cjrequena.sample.persistence.entity.CountryEntity;
-import com.cjrequena.sample.persistence.entity.GeoShapeEntity;
 import com.cjrequena.sample.persistence.entity.RegionEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
