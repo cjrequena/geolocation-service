@@ -19,7 +19,7 @@
         <postgis-jdbc.version>2.5.1</postgis-jdbc.version>
         <!-- REMOVED: hibernate-spatial.version - Let Spring Boot manage this -->
         <jts.version>1.19.0</jts.version>
-        <hypersistence-utils.version>3.7.0</hypersistence-utils.version>
+        <hypersistence-utils-hibernate-63.version>3.7.3</hypersistence-utils-hibernate-63.version>
     </properties>
     <!-- -->
     <dependencies>
@@ -154,9 +154,10 @@
         <!-- Hypersistence Utils for JSONB support -->
         <dependency>
             <groupId>io.hypersistence</groupId>
-            <artifactId>hypersistence-utils-hibernate-55</artifactId>
-            <version>${hypersistence-utils.version}</version>
+            <artifactId>hypersistence-utils-hibernate-63</artifactId>
+            <version>${hypersistence-utils-hibernate-63.version}</version>
         </dependency>
+
         <!-- Source: https://mvnrepository.com/artifact/com.github.f4b6a3/uuid-creator -->
         <dependency>
             <groupId>com.github.f4b6a3</groupId>
