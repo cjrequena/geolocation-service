@@ -14,12 +14,6 @@
     <properties>
         <!-- -->
         <main-class>com.cjrequena.command.handler.CommandHandlerMainApplication</main-class>
-        <!---->
-        <postgresql.version>42.7.1</postgresql.version>
-        <postgis-jdbc.version>2.5.1</postgis-jdbc.version>
-        <!-- REMOVED: hibernate-spatial.version - Let Spring Boot manage this -->
-        <jts.version>1.19.0</jts.version>
-        <hypersistence-utils-hibernate-63.version>3.7.3</hypersistence-utils-hibernate-63.version>
     </properties>
     <!-- -->
     <dependencies>
@@ -201,12 +195,12 @@
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
-            <version>${org.mapstruct.version}</version>
+            <version>${mapstruct.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct-processor</artifactId>
-            <version>${org.mapstruct.version}</version>
+            <version>${mapstruct.version}</version>
             <scope>provided</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/jakarta.json/jakarta.json-api -->

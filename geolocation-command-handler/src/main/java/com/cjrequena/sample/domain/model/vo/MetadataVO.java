@@ -1,6 +1,7 @@
 package com.cjrequena.sample.domain.model.vo;
 
 import com.cjrequena.sample.shared.common.util.JsonUtil;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +27,7 @@ public class MetadataVO implements Serializable {
 
   private final JsonNode jsonNode;
 
+  @JsonCreator
   private MetadataVO(JsonNode value) {
     this.jsonNode = value != null ? value : objectMapper.createObjectNode();
   }
