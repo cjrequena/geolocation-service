@@ -70,8 +70,7 @@ public class ZoneEntity implements Serializable {
     if (id == null) {
       id = com.github.f4b6a3.uuid.UuidCreator.getTimeOrdered();
     }
-    createdAt = OffsetDateTime.now();
-    updatedAt = OffsetDateTime.now();
+    createdAt = updatedAt = OffsetDateTime.now();
     if (active == null) {
       active = true;
     }

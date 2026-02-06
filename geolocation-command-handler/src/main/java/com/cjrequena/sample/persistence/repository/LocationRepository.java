@@ -1,8 +1,6 @@
 package com.cjrequena.sample.persistence.repository;
 
 import com.cjrequena.sample.persistence.entity.LocationEntity;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,6 +21,9 @@ import java.util.UUID;
  *
  * <p>Includes spatial queries using PostGIS/Hibernate Spatial for proximity
  * and containment operations.</p>
+ *
+ * <p><b>Note:</b> Spatial queries use WKT (Well-Known Text) format for geometry parameters
+ * to ensure proper parameter binding with PostGIS. Example: "POINT(-3.7038 40.4168)"</p>
  */
 @Repository
 public interface LocationRepository extends JpaRepository<LocationEntity, UUID> {
@@ -90,24 +91,24 @@ public interface LocationRepository extends JpaRepository<LocationEntity, UUID> 
   /**
    * Finds all locations within a given radius (in metres) from a center point.
    *
-   * @param center         the center point (SRID 4326)
+   * @param wkt            the center point as WKT string (e.g., "POINT(-3.7038 40.4168)")
    * @param radiusMeters   radius in metres
    * @return all locations within the specified distance
    */
   @Query(
     value = """
     SELECT l.*
-    FROM location l
+    FROM geo_schema.location l
     WHERE ST_DWithin(
       l.point::geography,
-      :center::geography,
+      ST_GeomFromText(:wkt, 4326)::geography,
       :radius
     )
   """,
     nativeQuery = true
   )
   List<LocationEntity> findWithinRadius(
-    @Param("center") Point center,
+    @Param("wkt") String wkt,
     @Param("radius") double radiusMeters
   );
 
@@ -117,18 +118,18 @@ public interface LocationRepository extends JpaRepository<LocationEntity, UUID> 
   @Query(
     value = """
     SELECT l.*
-    FROM location l
+    FROM geo_schema.location l
     WHERE l.active = true
       AND ST_DWithin(
         l.point::geography,
-        :center::geography,
+        ST_GeomFromText(:wkt, 4326)::geography,
         :radius
       )
   """,
     nativeQuery = true
   )
   List<LocationEntity> findActiveWithinRadius(
-    @Param("center") Point center,
+    @Param("wkt") String wkt,
     @Param("radius") double radiusMeters
   );
 
@@ -138,59 +139,58 @@ public interface LocationRepository extends JpaRepository<LocationEntity, UUID> 
   @Query(
     value = """
     SELECT l.*
-    FROM location l
+    FROM geo_schema.location l
     WHERE ST_DWithin(
       l.point::geography,
-      :center::geography,
+      ST_GeomFromText(:wkt, 4326)::geography,
       :radius
     )
     ORDER BY ST_Distance(
       l.point::geography,
-      :center::geography
+      ST_GeomFromText(:wkt, 4326)::geography
     )
   """,
     nativeQuery = true
   )
   List<LocationEntity> findWithinRadiusOrderedByDistance(
-    @Param("center") Point center,
+    @Param("wkt") String wkt,
     @Param("radius") double radiusMeters
   );
 
   /**
    * Finds the N nearest locations to a center point (with a max search radius).
    *
-   * @param center       the center point
+   * @param wkt          the center point as WKT string
    * @param maxRadius    the maximum search radius in metres
    * @param pageable     use {@code PageRequest.of(0, n)} to limit results
    */
   @Query(
     value = """
     SELECT l.*
-    FROM location l
+    FROM geo_schema.location l
     WHERE ST_DWithin(
       l.point::geography,
-      :center::geography,
+      ST_GeomFromText(:wkt, 4326)::geography,
       :maxRadius
     )
     ORDER BY ST_Distance(
       l.point::geography,
-      :center::geography
+      ST_GeomFromText(:wkt, 4326)::geography
     )
-    /* Pagination is handled by Spring Data via Pageable */
   """,
     countQuery = """
     SELECT COUNT(*)
-    FROM location l
+    FROM geo_schema.location l
     WHERE ST_DWithin(
       l.point::geography,
-      :center::geography,
+      ST_GeomFromText(:wkt, 4326)::geography,
       :maxRadius
     )
   """,
     nativeQuery = true
   )
   Page<LocationEntity> findNearestLocations(
-    @Param("center") Point center,
+    @Param("wkt") String wkt,
     @Param("maxRadius") double maxRadius,
     Pageable pageable
   );
@@ -202,34 +202,32 @@ public interface LocationRepository extends JpaRepository<LocationEntity, UUID> 
   /**
    * Finds all locations within a given polygon.
    *
-   * @param polygon the bounding polygon (SRID must match entity, typically 4326)
+   * @param wkt the bounding polygon as WKT string (e.g., "POLYGON((-3.72 40.41, -3.68 40.41, -3.68 40.42, -3.72 40.42, -3.72 40.41))")
    * @return all locations whose point falls within the polygon
    */
   @Query(
     value = """
     SELECT l.*
-    FROM location l
-    WHERE ST_Within(l.point, :polygon)
+    FROM geo_schema.location l
+    WHERE ST_Within(l.point, ST_GeomFromText(:wkt, 4326))
   """,
     nativeQuery = true
   )
-  List<LocationEntity> findWithinPolygon(@Param("polygon") Polygon polygon);
+  List<LocationEntity> findWithinPolygon(@Param("wkt") String wkt);
 
   /**
    * Finds active locations within a given polygon.
    */
   @Query(
     value = """
-    SELECT *
-    FROM location l
+    SELECT l.*
+    FROM geo_schema.location l
     WHERE l.active = true
-      AND ST_Within(l.point, :polygon)
+      AND ST_Within(l.point, ST_GeomFromText(:wkt, 4326))
   """,
     nativeQuery = true
   )
-  List<LocationEntity> findActiveWithinPolygon(
-    @Param("polygon") Polygon polygon
-  );
+  List<LocationEntity> findActiveWithinPolygon(@Param("wkt") String wkt);
 
   // ================================================================
   // Postal code queries
@@ -306,11 +304,11 @@ public interface LocationRepository extends JpaRepository<LocationEntity, UUID> 
   @Query(
     value = """
     SELECT l.*
-    FROM location l
+    FROM geo_schema.location l
     WHERE l.zone_id = :zoneId
       AND ST_DWithin(
-        l.point,
-        :center,
+        l.point::geography,
+        ST_GeomFromText(:wkt, 4326)::geography,
         :radius
       )
   """,
@@ -318,7 +316,7 @@ public interface LocationRepository extends JpaRepository<LocationEntity, UUID> 
   )
   List<LocationEntity> findByZoneIdAndWithinRadius(
     @Param("zoneId") UUID zoneId,
-    @Param("center") Point center,
+    @Param("wkt") String wkt,
     @Param("radius") double radiusMeters
   );
 
@@ -346,14 +344,6 @@ public interface LocationRepository extends JpaRepository<LocationEntity, UUID> 
   // ================================================================
 
   /**
-   * Checks if a location exists at the exact coordinates (equality check on Point).
-   *
-   * <p><b>Note:</b> Direct equality on JTS Point can be brittle due to floating-point
-   * precision. Consider using a small distance threshold instead for production use.</p>
-   */
-  boolean existsByPoint(Point point);
-
-  /**
    * Checks if an active location exists within a very small radius of the given point
    * (useful for duplicate detection).
    */
@@ -361,11 +351,11 @@ public interface LocationRepository extends JpaRepository<LocationEntity, UUID> 
     value = """
     SELECT EXISTS (
       SELECT 1
-      FROM location l
+      FROM geo_schema.location l
       WHERE l.active = true
         AND ST_DWithin(
           l.point::geography,
-          :point::geography,
+          ST_GeomFromText(:wkt, 4326)::geography,
           :threshold
         )
     )
@@ -373,7 +363,7 @@ public interface LocationRepository extends JpaRepository<LocationEntity, UUID> 
     nativeQuery = true
   )
   boolean existsActiveNearPoint(
-    @Param("point") Point point,
+    @Param("wkt") String wkt,
     @Param("threshold") double thresholdMeters
   );
 }
