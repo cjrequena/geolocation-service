@@ -12,6 +12,9 @@ public enum ZoneType {
   LOT("LOT"),
   SUBZONE("SUBZONE"),
   MICRODISTRICT("MICRODISTRICT"),
+  RESIDENTIAL("RESIDENTIAL"),
+  COMMERCIAL("COMMERCIAL"),
+  INDUSTRIAL("INDUSTRIAL"),
   OTHER("OTHER");
 
   private final String value;

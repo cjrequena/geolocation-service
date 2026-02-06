@@ -1,0 +1,127 @@
+package com.cjrequena.sample.service;
+
+import com.cjrequena.sample.domain.mapper.CityMapper;
+import com.cjrequena.sample.domain.model.aggregate.City;
+import com.cjrequena.sample.persistence.entity.CityEntity;
+import com.cjrequena.sample.persistence.repository.CityRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+@DisplayName("CityService Unit Tests")
+class CityServiceTest {
+
+  @Mock
+  private CityRepository cityRepository;
+
+  @Mock
+  private CityMapper cityMapper;
+
+  @InjectMocks
+  private CityService cityService;
+
+  private City cityDomain;
+  private CityEntity cityEntity;
+  private UUID cityId;
+  private UUID regionId;
+
+  @BeforeEach
+  void setUp() {
+    cityId = UUID.randomUUID();
+    regionId = UUID.randomUUID();
+
+    cityDomain = new City();
+    cityDomain.setId(cityId);
+    cityDomain.setName("Barcelona");
+    cityDomain.setRegionId(regionId);
+
+    cityEntity = new CityEntity();
+    cityEntity.setId(cityId);
+    cityEntity.setName("Barcelona");
+  }
+
+  @Test
+  @DisplayName("Should create city successfully")
+  void shouldCreateCity() {
+    when(cityMapper.toEntity(cityDomain)).thenReturn(cityEntity);
+    when(cityRepository.save(cityEntity)).thenReturn(cityEntity);
+    when(cityMapper.toDomain(cityEntity)).thenReturn(cityDomain);
+
+    City result = cityService.create(cityDomain);
+
+    assertThat(result).isNotNull();
+    verify(cityRepository).save(cityEntity);
+  }
+
+  @Test
+  @DisplayName("Should find city by ID")
+  void shouldFindById() {
+    when(cityRepository.findById(cityId)).thenReturn(Optional.of(cityEntity));
+    when(cityMapper.toDomain(cityEntity)).thenReturn(cityDomain);
+
+    Optional<City> result = cityService.findById(cityId);
+
+    assertThat(result).isPresent();
+  }
+
+  @Test
+  @DisplayName("Should find cities by region ID")
+  void shouldFindByRegionId() {
+    List<CityEntity> entities = Arrays.asList(cityEntity);
+    when(cityRepository.findByRegionId(regionId)).thenReturn(entities);
+    when(cityMapper.toDomain(any(CityEntity.class))).thenReturn(cityDomain);
+
+    List<City> result = cityService.findByRegionId(regionId);
+
+    assertThat(result).hasSize(1);
+  }
+
+  @Test
+  @DisplayName("Should update city successfully")
+  void shouldUpdateCity() {
+    when(cityRepository.findById(cityId)).thenReturn(Optional.of(cityEntity));
+    when(cityMapper.toEntity(cityDomain)).thenReturn(cityEntity);
+    when(cityRepository.save(cityEntity)).thenReturn(cityEntity);
+    when(cityMapper.toDomain(cityEntity)).thenReturn(cityDomain);
+
+    City result = cityService.update(cityId, cityDomain);
+
+    assertThat(result).isNotNull();
+    verify(cityRepository).save(cityEntity);
+  }
+
+  @Test
+  @DisplayName("Should delete city by ID")
+  void shouldDeleteById() {
+    when(cityRepository.existsById(cityId)).thenReturn(true);
+
+    cityService.deleteById(cityId);
+
+    verify(cityRepository).deleteById(cityId);
+  }
+
+  @Test
+  @DisplayName("Should count all cities")
+  void shouldCount() {
+    when(cityRepository.count()).thenReturn(5L);
+
+    long result = cityService.count();
+
+    assertThat(result).isEqualTo(5L);
+  }
+}
