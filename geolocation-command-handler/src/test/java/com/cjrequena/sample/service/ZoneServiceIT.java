@@ -1,10 +1,19 @@
 package com.cjrequena.sample.service;
 
 import com.cjrequena.sample.domain.model.aggregate.Area;
+import com.cjrequena.sample.domain.model.aggregate.City;
+import com.cjrequena.sample.domain.model.aggregate.Country;
+import com.cjrequena.sample.domain.model.aggregate.Region;
 import com.cjrequena.sample.domain.model.aggregate.Zone;
+import com.cjrequena.sample.domain.model.enums.AreaType;
+import com.cjrequena.sample.domain.model.enums.RegionType;
 import com.cjrequena.sample.domain.model.enums.ZoneType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
+import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
 import com.cjrequena.sample.persistence.repository.AreaRepository;
+import com.cjrequena.sample.persistence.repository.CityRepository;
+import com.cjrequena.sample.persistence.repository.CountryRepository;
+import com.cjrequena.sample.persistence.repository.RegionRepository;
 import com.cjrequena.sample.persistence.repository.ZoneRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,21 +47,67 @@ class ZoneServiceIT {
   private AreaService areaService;
 
   @Autowired
+  private CityService cityService;
+
+  @Autowired
+  private RegionService regionService;
+
+  @Autowired
+  private CountryService countryService;
+
+  @Autowired
   private ZoneRepository zoneRepository;
 
   @Autowired
   private AreaRepository areaRepository;
 
+  @Autowired
+  private CityRepository cityRepository;
+
+  @Autowired
+  private RegionRepository regionRepository;
+
+  @Autowired
+  private CountryRepository countryRepository;
+
   private UUID areaId;
 
   @BeforeEach
   void setUp() {
+    // Clear database in correct order (children first)
     zoneRepository.deleteAll();
     areaRepository.deleteAll();
+    cityRepository.deleteAll();
+    regionRepository.deleteAll();
+    countryRepository.deleteAll();
 
-    // Create parent area
+    // Create full hierarchy: Country → Region → City → Area
+    Country country = new Country();
+    country.setName("Spain");
+    country.setIsoCode(IsoCodeVO.of("ES", "ESP", "724"));
+    country.setActive(true);
+    country.setAuditInfo(AuditInfoVO.of(OffsetDateTime.now(), OffsetDateTime.now()));
+    Country createdCountry = countryService.create(country);
+
+    Region region = new Region();
+    region.setName("Madrid");
+    region.setCountryId(createdCountry.getId());
+    region.setType(RegionType.AUTONOMOUS_COMMUNITY);
+    region.setActive(true);
+    region.setAuditInfo(AuditInfoVO.of(OffsetDateTime.now(), OffsetDateTime.now()));
+    Region createdRegion = regionService.create(region);
+
+    City city = new City();
+    city.setName("Madrid City");
+    city.setRegionId(createdRegion.getId());
+    city.setActive(true);
+    city.setAuditInfo(AuditInfoVO.of(OffsetDateTime.now(), OffsetDateTime.now()));
+    City createdCity = cityService.create(city);
+
     Area area = new Area();
-    area.setName("Test Area");
+    area.setName("Chamberí");
+    area.setCityId(createdCity.getId());
+    area.setType(AreaType.DISTRICT);
     area.setActive(true);
     area.setAuditInfo(AuditInfoVO.of(OffsetDateTime.now(), OffsetDateTime.now()));
     Area createdArea = areaService.create(area);
