@@ -9,6 +9,7 @@ import org.locationtech.jts.geom.PrecisionModel;
 import org.mapstruct.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  *
@@ -96,6 +97,12 @@ public abstract class GeoShapeMapper {
   @Mapping(target = "metadata",           ignore = true)
   @Mapping(target = "auditInfo",          ignore = true)
   public abstract GeoShape toDomain(GeoShapeEntity entity);
+
+  /**
+   * Converts a list of {@link GeoShapeEntity} into a list of {@link GeoShape} domain aggregates.
+   * Each entity is converted using {@link #toDomain(GeoShapeEntity)}.
+   */
+  public abstract List<GeoShape> toDomainList(List<GeoShapeEntity> entityList);
 
   /**
    * Fills the value-object fields on {@link GeoShape} that require

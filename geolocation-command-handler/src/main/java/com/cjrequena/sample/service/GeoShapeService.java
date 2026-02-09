@@ -1,9 +1,11 @@
 package com.cjrequena.sample.service;
 
+import com.cjrequena.sample.configuration.CacheConfigurationProperties;
 import com.cjrequena.sample.domain.mapper.GeoShapeMapper;
 import com.cjrequena.sample.domain.model.aggregate.GeoShape;
 import com.cjrequena.sample.persistence.entity.GeoShapeEntity;
 import com.cjrequena.sample.persistence.repository.GeoShapeRepository;
+import com.cjrequena.sample.persistence.repository.cache.GeoShapeCacheRedisHashOpsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.locationtech.jts.geom.Geometry;
@@ -37,7 +39,18 @@ import java.util.stream.Collectors;
 public class GeoShapeService {
 
   private final GeoShapeRepository geoShapeRepository;
+  private final GeoShapeCacheRedisHashOpsRepository geoShapeCacheRedisHashOpsRepository;
+  private final CacheConfigurationProperties cacheConfigurationProperties;
   private final GeoShapeMapper geoShapeMapper;
+
+//  @PostConstruct
+//  public void loadUpCache() {
+//    if(cacheConfigurationProperties.isFullLoadEnabled()) {
+//      List<GeoShape> geoShapes = this.geoShapeMapper.toDomainList(geoShapeRepository.findAll());
+//      this.geoShapeCacheRedisHashOpsRepository.load(geoShapes);
+//      this.geoShapeCacheRedisHashOpsRepository.retrieve();
+//    }
+//  }
 
   // ================================================================
   // Create Operations

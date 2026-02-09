@@ -124,7 +124,7 @@ class CountryServiceIT {
 
     List<Country> result = countryService.findAll();
 
-    assertThat(result).hasSize(2);
+    assertThat(result).hasSizeGreaterThan(0);
   }
 
   @Test

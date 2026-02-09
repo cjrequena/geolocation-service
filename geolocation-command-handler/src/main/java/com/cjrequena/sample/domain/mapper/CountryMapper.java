@@ -7,6 +7,8 @@ import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import com.cjrequena.sample.persistence.entity.CountryEntity;
 import org.mapstruct.*;
 
+import java.util.List;
+
 /**
  *
  * @author cjrequena
@@ -84,6 +86,12 @@ public interface CountryMapper {
   @Mapping(target = "population",   ignore = true)   // Long           →  PopulationVO
   @Mapping(target = "auditInfo",    ignore = true)   // timestamps     →  AuditInfoVO
   Country toDomain(CountryEntity entity);
+
+  /**
+   * Converts a list of {@link CountryEntity} into a list of {@link Country} domain aggregates.
+   * Each entity is converted using {@link #toDomain(CountryEntity)}.
+   */
+  List<Country> toDomainList(List<CountryEntity> entityList);
 
   /**
    * Fills the value-object fields on {@link Country} that require assembly

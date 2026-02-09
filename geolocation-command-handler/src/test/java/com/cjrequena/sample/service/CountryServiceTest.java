@@ -1,9 +1,11 @@
 package com.cjrequena.sample.service;
 
+import com.cjrequena.sample.configuration.CacheConfigurationProperties;
 import com.cjrequena.sample.domain.mapper.CountryMapper;
 import com.cjrequena.sample.domain.model.aggregate.Country;
 import com.cjrequena.sample.persistence.entity.CountryEntity;
 import com.cjrequena.sample.persistence.repository.CountryRepository;
+import com.cjrequena.sample.persistence.repository.cache.CountryCacheRedisHashOpsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +42,12 @@ class CountryServiceTest {
 
   @Mock
   private CountryRepository countryRepository;
+
+  @Mock
+  private CountryCacheRedisHashOpsRepository countryCacheRedisHashOpsRepository;
+
+  @Mock
+  private CacheConfigurationProperties cacheConfigurationProperties;
 
   @Mock
   private CountryMapper countryMapper;
