@@ -1,9 +1,11 @@
 package com.cjrequena.sample;
 
 import com.cjrequena.sample.domain.mapper.GeoShapeMapper;
+import com.cjrequena.sample.domain.model.aggregate.Area;
 import com.cjrequena.sample.domain.model.vo.PointVO;
 import com.cjrequena.sample.persistence.entity.GeoShapeEntity;
 import com.cjrequena.sample.persistence.repository.GeoShapeRepository;
+import com.cjrequena.sample.service.AreaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.locationtech.jts.geom.Coordinate;
@@ -26,6 +28,8 @@ public class MainApplication implements CommandLineRunner {
 
   private final GeoShapeMapper geoShapeMapper;
   private final GeoShapeRepository geoShapeRepository;
+  private final AreaService areaService;
+
   public static void main(String... args) {
     SpringApplication.run(MainApplication.class, args);
   }
@@ -77,6 +81,9 @@ public class MainApplication implements CommandLineRunner {
     final List<GeoShapeEntity> withinDistance = this.geoShapeRepository.findWithinDistance(point.toText(), 1001);
 
     log.debug("{}", withinDistance);
+
+    final List<Area> all = areaService.findAll();
+    log.debug("{}", all);
 
   }
 }

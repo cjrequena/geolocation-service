@@ -9,6 +9,7 @@ import com.cjrequena.sample.persistence.entity.CityEntity;
 import com.cjrequena.sample.persistence.entity.GeoShapeEntity;
 import org.mapstruct.*;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -29,18 +30,23 @@ public interface AreaMapper {
    * declaratively alongside the other direct scalars.  Everything that needs
    * a helper lives in {@link #populateEntityFields}.</p>
    */
-  @Mapping(target = "id",         source = "id")
-  @Mapping(target = "name",       source = "name")
+  @Mapping(target = "id", source = "id")
+  @Mapping(target = "name", source = "name")
   @Mapping(target = "postalCode", source = "postalCode")
-  @Mapping(target = "active",     source = "active")
+  @Mapping(target = "active", source = "active")
   // Handled in @AfterMapping:
-  @Mapping(target = "city",       ignore = true)   // UUID       → shell CityEntity
-  @Mapping(target = "geoShape",   ignore = true)   // UUID       → shell GeoShapeEntity
-  @Mapping(target = "areaType",   ignore = true)   // AreaType   → String
+  @Mapping(target = "city", ignore = true)   // UUID       → shell CityEntity
+  @Mapping(target = "geoShape", ignore = true)   // UUID       → shell GeoShapeEntity
+  @Mapping(target = "areaType", ignore = true)   // AreaType   → String
   @Mapping(target = "population", ignore = true)   // PopulationVO → Long
-  @Mapping(target = "createdAt",  ignore = true)   // AuditInfoVO  → OffsetDateTime
-  @Mapping(target = "updatedAt",  ignore = true)
+  @Mapping(target = "createdAt", ignore = true)   // AuditInfoVO  → OffsetDateTime
+  @Mapping(target = "updatedAt", ignore = true)
   AreaEntity toEntity(Area domain);
+
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "createdAt", ignore = true)
+  @Mapping(target = "updatedAt", ignore = true)
+  void updateEntity(Area source, @MappingTarget AreaEntity target);
 
   /** Fills every field on {@link AreaEntity} that requires a helper conversion. */
   @AfterMapping
@@ -73,17 +79,24 @@ public interface AreaMapper {
   /**
    * Converts an {@link AreaEntity} into an {@link Area} domain aggregate.
    */
-  @Mapping(target = "id",         source = "id")
-  @Mapping(target = "name",       source = "name")
+  @Mapping(target = "id", source = "id")
+  @Mapping(target = "name", source = "name")
   @Mapping(target = "postalCode", source = "postalCode")
-  @Mapping(target = "active",     source = "active")
+  @Mapping(target = "active", source = "active")
   // Handled in @AfterMapping:
-  @Mapping(target = "cityId",     ignore = true)   // CityEntity      → UUID
+  @Mapping(target = "cityId", ignore = true)   // CityEntity      → UUID
   @Mapping(target = "geoShapeId", ignore = true)   // GeoShapeEntity  → UUID
-  @Mapping(target = "type",       ignore = true)   // String          → AreaType
+  @Mapping(target = "type", ignore = true)   // String          → AreaType
   @Mapping(target = "population", ignore = true)   // Long            → PopulationVO
-  @Mapping(target = "auditInfo",  ignore = true)   // timestamps      → AuditInfoVO
+  @Mapping(target = "auditInfo", ignore = true)
+  // timestamps      → AuditInfoVO
   Area toDomain(AreaEntity entity);
+
+  /**
+   * Converts a list of {@link AreaEntity} into a list of {@link Area} domain aggregates.
+   * Each entity is converted using {@link #toDomain(AreaEntity)}.
+   */
+  List<Area> toDomainList(List<AreaEntity> entityList);
 
   /** Fills every value-object / derived field on {@link Area} that requires a helper. */
   @AfterMapping

@@ -61,4 +61,33 @@ public class JacksonConfiguration {
     return buildObjectMapper();
   }
 
+  /**
+   * Dedicated ObjectMapper for Redis serialization (uses default camelCase).
+   * Does not use snake_case to match Java domain object field names.
+   */
+  @Bean(name = "redisObjectMapper")
+  public ObjectMapper redisObjectMapper() {
+    ObjectMapper objectMapper = jackson2ObjectMapperBuilder()
+      .serializationInclusion(NON_NULL)
+      .failOnEmptyBeans(false)
+      .failOnUnknownProperties(false)
+      .featuresToEnable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+      .featuresToDisable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+      .modules(new JavaTimeModule())
+      .build();
+
+    // Don't set snake_case for Redis - keep default camelCase
+    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    objectMapper.setFilterProvider(new SimpleFilterProvider().setFailOnUnknownId(false));
+
+    // Enable polymorphic type handling for Redis
+    objectMapper.activateDefaultTyping(
+      objectMapper.getPolymorphicTypeValidator(),
+      ObjectMapper.DefaultTyping.NON_FINAL,
+      com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
+    );
+
+    return objectMapper;
+  }
+
 }

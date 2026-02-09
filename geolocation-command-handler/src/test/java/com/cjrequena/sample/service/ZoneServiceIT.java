@@ -1,20 +1,12 @@
 package com.cjrequena.sample.service;
 
-import com.cjrequena.sample.domain.model.aggregate.Area;
-import com.cjrequena.sample.domain.model.aggregate.City;
-import com.cjrequena.sample.domain.model.aggregate.Country;
-import com.cjrequena.sample.domain.model.aggregate.Region;
-import com.cjrequena.sample.domain.model.aggregate.Zone;
+import com.cjrequena.sample.domain.model.aggregate.*;
 import com.cjrequena.sample.domain.model.enums.AreaType;
 import com.cjrequena.sample.domain.model.enums.RegionType;
 import com.cjrequena.sample.domain.model.enums.ZoneType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
-import com.cjrequena.sample.persistence.repository.AreaRepository;
-import com.cjrequena.sample.persistence.repository.CityRepository;
-import com.cjrequena.sample.persistence.repository.CountryRepository;
-import com.cjrequena.sample.persistence.repository.RegionRepository;
-import com.cjrequena.sample.persistence.repository.ZoneRepository;
+import com.cjrequena.sample.persistence.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

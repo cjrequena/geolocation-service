@@ -30,6 +30,7 @@ management.info.env.enabled: true # Whether to enable environment info.
 management.info.git.enabled: true # Whether to enable git info.
 management.info.git.mode: full # Mode to use to expose git information.
 
+management.tracing.sampling.probability: 1.0   # 100% sampling (use lower in prod)
 ---
 # ----------------------------------------
 # LOCAL
@@ -75,6 +76,67 @@ spring.jpa.properties.hibernate.default_schema: geo_schema
 spring.flyway.enabled: false
 spring.flyway.locations: classpath:/db/migration
 #spring.flyway.schemas: geo_schema
+
+# ----------------------------------------
+# Redis - Enhanced Configuration
+# ----------------------------------------
+spring.redis:
+  host: localhost
+  port: 6379
+  password: # Leave empty for no password
+  ssl: false
+  timeout: 10000  # 10 seconds
+  database: 0
+  # Connection Pooling Configuration
+  lettuce:
+    pool:
+      max-active: 8      # Maximum number of connections
+      max-idle: 8        # Maximum idle connections
+      min-idle: 2        # Minimum idle connections
+      max-wait: 5000     # Maximum wait time in ms
+    shutdown-timeout: 100  # Shutdown timeout in ms
+  # Uncomment for Cluster mode
+  #cluster:
+  #  nodes:
+  #    - 127.0.0.1:7000
+  #    - 127.0.0.1:7001
+  #    - 127.0.0.1:7002
+  #  max-redirects: 3
+  # Uncomment for Sentinel mode
+  #sentinel:
+  #  master: mymaster
+  #  nodes:
+  #    - 127.0.0.1:26379
+  #    - 127.0.0.1:26380
+  #    - 127.0.0.1:26381
+
+# ----------------------------------------
+# Cache - Configuration
+# ----------------------------------------
+cache:
+  full-load-enabled: true
+  type: redis
+
+# ----------------------------------------
+# logging
+# ----------------------------------------
+# https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#appendix.application-properties.core
+logging.level:
+  org.springframework: ERROR
+  org.flywaydb: INFO
+  com.zaxxer.hikari: INFO
+  com.cjrequena: INFO
+  com.cjrequena.core.eventstore: INFO
+logging.pattern:
+  console: "%highlight{%-5p | %d{ISO8601}{GMT} | application=${spring.application.name} | traceID=%X{traceId}, spanID=%X{spanId} | %c{1} | %m%ex%n}{
+      FATAL=bg_red, 
+      ERROR=red, 
+      WARN=yellow, 
+      INFO=green, 
+      DEBUG=blue, 
+      TRACE=cyan
+    }"
+  file: "%-5p| %d{ISO8601}{GMT} | application=${spring.application.name} | traceID=%X{traceId}, spanID=%X{spanId} | %c{1} | %m%ex%n"
 
 ---
 # ----------------------------------------
@@ -126,3 +188,65 @@ spring.flyway.locations: classpath:/db/migration
 
 # Test-specific settings
 spring.test.database.replace: none
+
+# ----------------------------------------
+# Redis - Enhanced Configuration
+# ----------------------------------------
+spring.redis:
+  host: localhost
+  port: 6379
+  password: # Leave empty for no password
+  ssl: false
+  timeout: 10000  # 10 seconds
+  database: 0
+  # Connection Pooling Configuration
+  lettuce:
+    pool:
+      max-active: 8      # Maximum number of connections
+      max-idle: 8        # Maximum idle connections
+      min-idle: 2        # Minimum idle connections
+      max-wait: 5000     # Maximum wait time in ms
+    shutdown-timeout: 100  # Shutdown timeout in ms
+  # Uncomment for Cluster mode
+  #cluster:
+  #  nodes:
+  #    - 127.0.0.1:7000
+  #    - 127.0.0.1:7001
+  #    - 127.0.0.1:7002
+  #  max-redirects: 3
+  # Uncomment for Sentinel mode
+  #sentinel:
+  #  master: mymaster
+  #  nodes:
+  #    - 127.0.0.1:26379
+  #    - 127.0.0.1:26380
+  #    - 127.0.0.1:26381
+
+# ----------------------------------------
+# Cache - Configuration
+# ----------------------------------------
+cache:
+  full-load-enabled: true
+  type: redis
+
+# ----------------------------------------
+# logging
+# ----------------------------------------
+# https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#appendix.application-properties.core
+logging.level:
+  org.springframework: ERROR
+  org.flywaydb: INFO
+  com.zaxxer.hikari: INFO
+  com.cjrequena: INFO
+  com.cjrequena.core.eventstore: INFO
+logging.pattern:
+  console: "%highlight{%-5p | %d{ISO8601}{GMT} | application=${spring.application.name} | traceID=%X{traceId}, spanID=%X{spanId} | %c{1} | %m%ex%n}{
+      FATAL=bg_red, 
+      ERROR=red, 
+      WARN=yellow, 
+      INFO=green, 
+      DEBUG=blue, 
+      TRACE=cyan
+    }"
+  file: "%-5p| %d{ISO8601}{GMT} | application=${spring.application.name} | traceID=%X{traceId}, spanID=%X{spanId} | %c{1} | %m%ex%n"
+
