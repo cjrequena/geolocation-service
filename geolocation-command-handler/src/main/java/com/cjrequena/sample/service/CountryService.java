@@ -132,10 +132,10 @@ public class CountryService {
     // Try cache first for full list retrieval
     if (cacheConfigurationProperties.isCacheEnabled() && !countryCacheRedisHashOpsRepository.isEmpty()) {
       try {
-        List<Country> cachedCountrys = countryCacheRedisHashOpsRepository.retrieve();
-        if (!cachedCountrys.isEmpty()) {
-          log.debug("Retrieved {} countries from cache", cachedCountrys.size());
-          return cachedCountrys;
+        List<Country> cachedCountries = countryCacheRedisHashOpsRepository.retrieve();
+        if (!cachedCountries.isEmpty()) {
+          log.debug("Retrieved {} countries from cache", cachedCountries.size());
+          return cachedCountries;
         }
       } catch (Exception e) {
         log.warn("Cache retrieval failed for all countries, falling back to database", e);
@@ -504,7 +504,7 @@ public class CountryService {
    * Warm up cache with active countries only.
    * More efficient than loading all countries when most queries are for active countries.
    */
-  public void warmCacheWithActiveCountrys() {
+  public void warmCacheWithActiveCountries() {
     if (!cacheConfigurationProperties.isCacheEnabled()) {
       log.warn("Cache is disabled, skipping warm-up");
       return;
@@ -512,12 +512,12 @@ public class CountryService {
 
     log.info("Warming cache with active countries");
     try {
-      List<Country> activeCountrys = countryRepository.findAllByActiveTrue().stream()
+      List<Country> activeCountries = countryRepository.findAllByActiveTrue().stream()
         .map(countryMapper::toDomain)
         .collect(Collectors.toList());
 
-      countryCacheRedisHashOpsRepository.saveAll(activeCountrys);
-      log.info("Successfully warmed cache with {} active countries", activeCountrys.size());
+      countryCacheRedisHashOpsRepository.saveAll(activeCountries);
+      log.info("Successfully warmed cache with {} active countries", activeCountries.size());
     } catch (Exception e) {
       log.error("Failed to warm cache with active countries", e);
       throw new RuntimeException("Failed to warm cache with active countries", e);
