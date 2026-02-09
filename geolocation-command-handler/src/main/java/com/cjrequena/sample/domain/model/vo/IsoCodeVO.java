@@ -1,5 +1,6 @@
 package com.cjrequena.sample.domain.model.vo;
 
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -10,6 +11,7 @@ import java.util.regex.Pattern;
 /**
  * ISO Code value object for countries.
  */
+@Builder
 @Getter
 @EqualsAndHashCode
 public class IsoCodeVO implements Serializable {

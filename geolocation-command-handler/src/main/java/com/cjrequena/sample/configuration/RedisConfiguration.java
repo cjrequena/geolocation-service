@@ -383,7 +383,7 @@ public class RedisConfiguration {
    */
   @Bean
   @Primary
-  public RedisTemplate<String, Object> redisTemplate(
+  public RedisTemplate redisTemplate(
     LettuceConnectionFactory connectionFactory,
     ObjectMapper redisObjectMapper) {
 

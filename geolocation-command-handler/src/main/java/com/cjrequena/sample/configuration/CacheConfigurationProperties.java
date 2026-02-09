@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "cache")
 public class CacheConfigurationProperties {
+  boolean cacheEnabled;
   boolean fullLoadEnabled;
   String type;
 

@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * @author cjrequena
  */
 @Repository
-@Qualifier("areaCacheRedisRepository")
+@Qualifier("areaCacheRedisHashOpsRepository")
 @Slf4j
 public class AreaCacheRedisHashOpsRepository implements CacheRepository<UUID, Area> {
 
@@ -31,11 +31,11 @@ public class AreaCacheRedisHashOpsRepository implements CacheRepository<UUID, Ar
   /* =========================================================
    * Redis Operations
    * ========================================================= */
-  private final RedisTemplate<String, Object> redisTemplate;
+  private final RedisTemplate<String, Area> redisTemplate;
   private final HashOperations<String, String, Area> hashOps;
 
   @Autowired
-  public AreaCacheRedisHashOpsRepository(RedisTemplate<String, Object> redisTemplate) {
+  public AreaCacheRedisHashOpsRepository(RedisTemplate<String, Area> redisTemplate) {
     this.redisTemplate = redisTemplate;
     this.hashOps = redisTemplate.opsForHash();
   }

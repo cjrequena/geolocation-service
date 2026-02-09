@@ -31,11 +31,11 @@ public class CityCacheRedisHashOpsRepository implements CacheRepository<UUID, Ci
   /* =========================================================
    * Redis Operations
    * ========================================================= */
-  private final RedisTemplate<String, Object> redisTemplate;
+  private final RedisTemplate<String, City> redisTemplate;
   private final HashOperations<String, String, City> hashOps;
 
   @Autowired
-  public CityCacheRedisHashOpsRepository(RedisTemplate<String, Object> redisTemplate) {
+  public CityCacheRedisHashOpsRepository(RedisTemplate<String, City> redisTemplate) {
     this.redisTemplate = redisTemplate;
     this.hashOps = redisTemplate.opsForHash();
   }

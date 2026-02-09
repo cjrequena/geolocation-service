@@ -1,5 +1,6 @@
 package com.cjrequena.sample.domain.model.vo;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -28,6 +29,7 @@ public class AuditInfoVO implements Serializable {
   private final String createdBy;
   private final String updatedBy;
 
+  @JsonCreator
   @Builder
   private AuditInfoVO(
     OffsetDateTime createdAt,

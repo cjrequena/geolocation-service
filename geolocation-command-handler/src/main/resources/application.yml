@@ -114,6 +114,7 @@ spring.redis:
 # Cache - Configuration
 # ----------------------------------------
 cache:
+  cache-enabled: true
   full-load-enabled: true
   type: redis
 
@@ -226,6 +227,7 @@ spring.redis:
 # Cache - Configuration
 # ----------------------------------------
 cache:
+  cache-enabled: true
   full-load-enabled: true
   type: redis
 

@@ -31,11 +31,11 @@ public class GeoShapeCacheRedisHashOpsRepository implements CacheRepository<UUID
   /* =========================================================
    * Redis Operations
    * ========================================================= */
-  private final RedisTemplate<String, Object> redisTemplate;
+  private final RedisTemplate<String, GeoShape> redisTemplate;
   private final HashOperations<String, String, GeoShape> hashOps;
 
   @Autowired
-  public GeoShapeCacheRedisHashOpsRepository(RedisTemplate<String, Object> redisTemplate) {
+  public GeoShapeCacheRedisHashOpsRepository(RedisTemplate<String, GeoShape> redisTemplate) {
     this.redisTemplate = redisTemplate;
     this.hashOps = redisTemplate.opsForHash();
   }

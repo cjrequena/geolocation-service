@@ -1,9 +1,11 @@
 package com.cjrequena.sample.service;
 
+import com.cjrequena.sample.configuration.CacheConfigurationProperties;
 import com.cjrequena.sample.domain.mapper.AreaMapper;
 import com.cjrequena.sample.domain.model.aggregate.Area;
 import com.cjrequena.sample.persistence.entity.AreaEntity;
 import com.cjrequena.sample.persistence.repository.AreaRepository;
+import com.cjrequena.sample.persistence.repository.cache.AreaCacheRedisHashOpsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,12 @@ class AreaServiceTest {
 
   @Mock
   private AreaRepository areaRepository;
+
+  @Mock
+  private AreaCacheRedisHashOpsRepository areaCacheRedisHashOpsRepository;
+
+  @Mock
+  private CacheConfigurationProperties cacheConfigurationProperties;
 
   @Mock
   private AreaMapper areaMapper;

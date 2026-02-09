@@ -31,11 +31,11 @@ public class ZoneCacheRedisHashOpsRepository implements CacheRepository<UUID, Zo
   /* =========================================================
    * Redis Operations
    * ========================================================= */
-  private final RedisTemplate<String, Object> redisTemplate;
+  private final RedisTemplate<String, Zone> redisTemplate;
   private final HashOperations<String, String, Zone> hashOps;
 
   @Autowired
-  public ZoneCacheRedisHashOpsRepository(RedisTemplate<String, Object> redisTemplate) {
+  public ZoneCacheRedisHashOpsRepository(RedisTemplate<String, Zone> redisTemplate) {
     this.redisTemplate = redisTemplate;
     this.hashOps = redisTemplate.opsForHash();
   }
