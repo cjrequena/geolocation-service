@@ -43,13 +43,19 @@
         <!-- https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
         <!-- Sonar Configuration -->
+        <sonar.host.url>http://localhost:9000</sonar.host.url>
+        <sonar.token>sonar-token</sonar.token>
+        <sonar.projectKey>${project.artifactId}</sonar.projectKey>
+        <sonar.projectName>${project.artifactId}</sonar.projectName>
+        <sonar.language>java</sonar.language>
+        <sonar.sources>src/main</sonar.sources>
+        <sonar.tests>src/test</sonar.tests>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.coverage.jacoco.xmlReportPaths>
             ${project.build.directory}/site/jacoco/jacoco.xml,
             ${project.build.directory}/site/jacoco-it/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
-        <sonar.language>java</sonar.language>
         <sonar.exclusions>
             **/config/**,
             **/dto/**,
@@ -307,6 +313,12 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <!-- -->
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.11.0.3922</version>
             </plugin>
         </plugins>
     </build>

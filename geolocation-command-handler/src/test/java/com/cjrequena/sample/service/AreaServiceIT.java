@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author cjrequena
  */
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("integrationTest")
 @DisplayName("AreaService Integration Tests")
 class AreaServiceIT {
 

@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * - Ensure application-local.properties has correct database configuration
  */
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("integrationTest")
 @DisplayName("LocationRepository Integration Tests")
 class LocationRepositoryIT {
 

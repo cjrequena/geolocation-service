@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @SpringBootTest
 @DisplayName("GeoShapeMapper Integration Tests")
-@ActiveProfiles("test")
+@ActiveProfiles("integrationTest")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 class GeoShapeMapperIT {
 

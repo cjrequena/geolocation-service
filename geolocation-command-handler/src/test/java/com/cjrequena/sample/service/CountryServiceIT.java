@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author cjrequena
  */
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("integrationTest")
 @DisplayName("CountryService Integration Tests")
 class CountryServiceIT {
 

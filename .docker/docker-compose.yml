@@ -1,21 +1,146 @@
+
 services:
-  postgres:
+  # -------------------------------------------------------
+  # PostgreSQL + PostGIS - Local Development
+  # -------------------------------------------------------
+  postgis-db-local:
     image: postgis/postgis:15-3.4
-    container_name: geolocation-service-postgis-db
-    hostname: geolocation-service-postgis-db
+    container_name: postgis-db-local
+    hostname: postgis-db-local
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
       PGDATA: /data/postgres
     volumes:
-      - postgres-data:/data/postgres
-      - $PWD/provision/V1.0__foo_db.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - postgres-data-local:/data/postgres
     ports:
       - "5432:5432"
     networks:
       - local-network
     restart: unless-stopped
-#---------------------------------------------------------------------------------------------------------------------
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+  # -------------------------------------------------------
+  # PostgreSQL + PostGIS - Integration Tests
+  # -------------------------------------------------------
+  postgis-db-it:
+    image: postgis/postgis:15-3.4
+    container_name: postgis-db-it
+    hostname: postgis-db-it
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      PGDATA: /data/postgres
+    volumes:
+      - postgres-data-it:/data/postgres
+      - $PWD/provision/V1__int_ddl.sql:/docker-entrypoint-initdb.d/1-schema.sql
+    ports:
+      - "6432:5432"
+    networks:
+      - local-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+  # -------------------------------------------------------
+  # PostgreSQL - SonarQube Database
+  # -------------------------------------------------------
+  sonarqube-db:
+    image: postgres:15
+    container_name: sonarqube-db
+    hostname: sonarqube-db
+    environment:
+      POSTGRES_USER: ${SONAR_DB_USER:-sonar}
+      POSTGRES_PASSWORD: ${SONAR_DB_PASSWORD:-sonar}
+      POSTGRES_DB: ${SONAR_DB_NAME:-sonarqube}
+      PGDATA: /data/postgres
+    volumes:
+      - sonarqube-db-data:/data/postgres
+    networks:
+      - local-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SONAR_DB_USER:-sonar} -d ${SONAR_DB_NAME:-sonarqube}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+  # -------------------------------------------------------
+  # SonarQube
+  # -------------------------------------------------------
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube-local
+    hostname: sonarqube-local
+    depends_on:
+      sonarqube-db:
+        condition: service_healthy
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/${SONAR_DB_NAME:-sonarqube}
+      SONAR_JDBC_USERNAME: ${SONAR_DB_USER:-sonar}
+      SONAR_JDBC_PASSWORD: ${SONAR_DB_PASSWORD:-sonar}
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: true   # Disable for local dev only
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-extensions:/opt/sonarqube/extensions
+      - sonarqube-logs:/opt/sonarqube/logs
+    ports:
+      - "9000:9000"
+    networks:
+      - local-network
+    restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/api/system/status | grep -q '\"status\":\"UP\"'"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s   # SonarQube takes a while to start
+  # -------------------------------------------------------
+  # Redis
+  # -------------------------------------------------------
+  redis:
+    image: redis:alpine
+    container_name: redis-local
+    hostname: redis-local
+    command: [
+      "redis-server",
+      "--appendonly", "yes",
+      "--appendfsync", "everysec",
+      "--maxmemory", "256mb",
+      "--maxmemory-policy", "allkeys-lru",
+      "--loglevel", "notice"
+    ]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    environment:
+      REDIS_REPLICATION_MODE: master
+    networks:
+      - local-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+  # -------------------------------------------------------
+  # Networks
+  # -------------------------------------------------------
 networks:
   local-network:
     name: sample-network.local
@@ -24,6 +149,14 @@ networks:
       driver: default
       config:
         - subnet: 171.28.0.0/16
-#---------------------------------------------------------------------------------------------------------------------
+  # -------------------------------------------------------
+  # Volumes
+  # -------------------------------------------------------
 volumes:
-  postgres-data:
+  postgres-data-local:
+  postgres-data-it:
+  sonarqube-db-data:
+  sonarqube-data:
+  sonarqube-extensions:
+  sonarqube-logs:
+  redis-data:

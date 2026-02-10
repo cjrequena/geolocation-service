@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Uses an actual database (H2 or PostgreSQL with PostGIS) to test spatial queries.
  */
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("integrationTest")
 @DisplayName("GeoShapeRepository Integration Tests")
 class GeoShapeRepositoryIT {
 
