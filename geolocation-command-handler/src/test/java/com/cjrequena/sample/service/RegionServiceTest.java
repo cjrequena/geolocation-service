@@ -1,9 +1,11 @@
 package com.cjrequena.sample.service;
 
+import com.cjrequena.sample.configuration.CacheConfigurationProperties;
 import com.cjrequena.sample.domain.mapper.RegionMapper;
 import com.cjrequena.sample.domain.model.aggregate.Region;
 import com.cjrequena.sample.persistence.entity.RegionEntity;
 import com.cjrequena.sample.persistence.repository.RegionRepository;
+import com.cjrequena.sample.persistence.repository.cache.RegionCacheRedisHashOpsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,6 +36,12 @@ class RegionServiceTest {
 
   @Mock
   private RegionRepository regionRepository;
+
+  @Mock
+  private RegionCacheRedisHashOpsRepository regionCacheRedisHashOpsRepository;
+
+  @Mock
+  private CacheConfigurationProperties cacheConfigurationProperties;
 
   @Mock
   private RegionMapper regionMapper;

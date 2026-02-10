@@ -1,9 +1,12 @@
 package com.cjrequena.sample.service;
 
+import com.cjrequena.sample.configuration.CacheConfigurationProperties;
 import com.cjrequena.sample.domain.mapper.RegionMapper;
 import com.cjrequena.sample.domain.model.aggregate.Region;
 import com.cjrequena.sample.persistence.entity.RegionEntity;
 import com.cjrequena.sample.persistence.repository.RegionRepository;
+import com.cjrequena.sample.persistence.repository.cache.RegionCacheRedisHashOpsRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -32,58 +35,179 @@ import java.util.stream.Collectors;
 public class RegionService {
 
   private final RegionRepository regionRepository;
+  private final RegionCacheRedisHashOpsRepository regionCacheRedisHashOpsRepository;
+  private final CacheConfigurationProperties cacheConfigurationProperties;
   private final RegionMapper regionMapper;
 
+  @PostConstruct
+  public void loadUpCache() {
+    if(cacheConfigurationProperties.isFullLoadEnabled()) {
+      List<Region> regions = this.regionMapper.toDomainList(regionRepository.findAll());
+      this.regionCacheRedisHashOpsRepository.load(regions);
+      this.regionCacheRedisHashOpsRepository.retrieve();
+    }
+  }
+
   // ================================================================
-  // Create Operations
+  // CRUD Standard Operations
   // ================================================================
 
-  /**
-   * Creates a new region.
-   *
-   * @param region the region domain aggregate to create
-   * @return the created region with generated ID
-   */
   @Transactional
   public Region create(Region region) {
     log.debug("Creating region: {}", region.getName());
-    
     RegionEntity entity = regionMapper.toEntity(region);
     RegionEntity savedEntity = regionRepository.save(entity);
-    
+    Region createdRegion = regionMapper.toDomain(savedEntity);
+
+    // Update cache
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        regionCacheRedisHashOpsRepository.save(createdRegion);
+        log.debug("Region cached with ID: {}", createdRegion.getId());
+      } catch (Exception e) {
+        log.warn("Failed to cache region on create: {}", createdRegion.getId(), e);
+      }
+    }
+
     log.info("Region created with ID: {}", savedEntity.getId());
-    return regionMapper.toDomain(savedEntity);
+    return createdRegion;
+  }
+
+  public Optional<Region> findById(UUID id) {
+    log.debug("Finding region by ID: {}", id);
+
+    // Try cache first (cache-aside pattern)
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        Optional<Region> cachedRegion = regionCacheRedisHashOpsRepository.retrieveById(id);
+        if (cachedRegion.isPresent()) {
+          log.debug("Region found in cache: {}", id);
+          return cachedRegion;
+        }
+        log.debug("Region not found in cache, querying database: {}", id);
+      } catch (Exception e) {
+        log.warn("Cache retrieval failed for region: {}, falling back to database", id, e);
+      }
+    }
+
+    // Cache miss or disabled - query database
+    Optional<Region> region = regionRepository.findById(id).map(regionMapper::toDomain);
+
+    // Update cache on successful database hit
+    if (cacheConfigurationProperties.isCacheEnabled() && region.isPresent()) {
+      try {
+        regionCacheRedisHashOpsRepository.save(region.get());
+        log.debug("Region cached after database query: {}", id);
+      } catch (Exception e) {
+        log.warn("Failed to cache region after database query: {}", id, e);
+      }
+    }
+
+    return region;
+  }
+
+  public List<Region> findAll() {
+    log.debug("Finding all regions");
+
+    // Try cache first for full list retrieval
+    if (cacheConfigurationProperties.isCacheEnabled() && !regionCacheRedisHashOpsRepository.isEmpty()) {
+      try {
+        List<Region> cachedRegions = regionCacheRedisHashOpsRepository.retrieve();
+        if (!cachedRegions.isEmpty()) {
+          log.debug("Retrieved {} regions from cache", cachedRegions.size());
+          return cachedRegions;
+        }
+      } catch (Exception e) {
+        log.warn("Cache retrieval failed for all regions, falling back to database", e);
+      }
+    }
+
+    // Cache miss or disabled - query database
+    List<Region> regions = regionRepository.findAll().stream()
+      .map(regionMapper::toDomain)
+      .collect(Collectors.toList());
+
+    // Update cache with full list
+    if (cacheConfigurationProperties.isCacheEnabled() && !regions.isEmpty()) {
+      try {
+        regionCacheRedisHashOpsRepository.saveAll(regions);
+        log.debug("Cached {} regions after database query", regions.size());
+      } catch (Exception e) {
+        log.warn("Failed to cache regions after database query", e);
+      }
+    }
+
+    return regions;
+  }
+
+  @Transactional
+  public Region update(UUID id, Region region) {
+    log.debug("Updating region with ID: {}", id);
+    RegionEntity existingEntity = regionRepository.findById(id)
+      .orElseThrow(() -> new IllegalArgumentException("Region not found with ID: " + id));
+
+    RegionEntity updatedEntity = regionMapper.toEntity(region);
+    updatedEntity.setId(existingEntity.getId());
+    updatedEntity.setCreatedAt(existingEntity.getCreatedAt());
+
+    RegionEntity savedEntity = regionRepository.save(updatedEntity);
+    Region updatedRegion = regionMapper.toDomain(savedEntity);
+
+    // Update cache
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        regionCacheRedisHashOpsRepository.save(updatedRegion);
+        log.debug("Region cache updated with ID: {}", updatedRegion.getId());
+      } catch (Exception e) {
+        log.warn("Failed to update cache for region: {}", updatedRegion.getId(), e);
+      }
+    }
+
+    log.info("Region updated with ID: {}", savedEntity.getId());
+    return updatedRegion;
+  }
+
+  @Transactional
+  public void deleteById(UUID id) {
+    log.debug("Deleting region with ID: {}", id);
+    if (!regionRepository.existsById(id)) {
+      throw new IllegalArgumentException("Region not found with ID: " + id);
+    }
+
+    regionRepository.deleteById(id);
+
+    // Remove from cache
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        regionCacheRedisHashOpsRepository.deleteById(id);
+        log.debug("Region removed from cache: {}", id);
+      } catch (Exception e) {
+        log.warn("Failed to remove region from cache: {}", id, e);
+      }
+    }
+
+    log.info("Region deleted with ID: {}", id);
+  }
+
+  public boolean existsById(UUID id) {
+    // Check cache first for existence
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        if (regionCacheRedisHashOpsRepository.existsById(id)) {
+          log.debug("Region exists in cache: {}", id);
+          return true;
+        }
+      } catch (Exception e) {
+        log.warn("Cache existence check failed for region: {}, falling back to database", id, e);
+      }
+    }
+
+    return regionRepository.existsById(id);
   }
 
   // ================================================================
   // Read Operations
   // ================================================================
-
-  /**
-   * Finds a region by ID.
-   *
-   * @param id the region ID
-   * @return Optional containing the region if found
-   */
-  public Optional<Region> findById(UUID id) {
-    log.debug("Finding region by ID: {}", id);
-    
-    return regionRepository.findById(id)
-      .map(regionMapper::toDomain);
-  }
-
-  /**
-   * Finds all regions.
-   *
-   * @return list of all regions
-   */
-  public List<Region> findAll() {
-    log.debug("Finding all regions");
-    
-    return regionRepository.findAll().stream()
-      .map(regionMapper::toDomain)
-      .collect(Collectors.toList());
-  }
 
   /**
    * Finds all active regions.
@@ -252,70 +376,6 @@ public class RegionService {
     return regionRepository.findByCreatedAtBetween(start, end).stream()
       .map(regionMapper::toDomain)
       .collect(Collectors.toList());
-  }
-
-  // ================================================================
-  // Update Operations
-  // ================================================================
-
-  /**
-   * Updates an existing region.
-   *
-   * @param id the region ID
-   * @param region the updated region data
-   * @return the updated region
-   * @throws IllegalArgumentException if region not found
-   */
-  @Transactional
-  public Region update(UUID id, Region region) {
-    log.debug("Updating region with ID: {}", id);
-    
-    RegionEntity existingEntity = regionRepository.findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Region not found with ID: " + id));
-    
-    RegionEntity updatedEntity = regionMapper.toEntity(region);
-    updatedEntity.setId(existingEntity.getId());
-    updatedEntity.setCreatedAt(existingEntity.getCreatedAt());
-    
-    RegionEntity savedEntity = regionRepository.save(updatedEntity);
-    
-    log.info("Region updated with ID: {}", savedEntity.getId());
-    return regionMapper.toDomain(savedEntity);
-  }
-
-  // ================================================================
-  // Delete Operations
-  // ================================================================
-
-  /**
-   * Deletes a region by ID.
-   *
-   * @param id the region ID
-   */
-  @Transactional
-  public void deleteById(UUID id) {
-    log.debug("Deleting region with ID: {}", id);
-    
-    if (!regionRepository.existsById(id)) {
-      throw new IllegalArgumentException("Region not found with ID: " + id);
-    }
-    
-    regionRepository.deleteById(id);
-    log.info("Region deleted with ID: {}", id);
-  }
-
-  // ================================================================
-  // Existence Checks
-  // ================================================================
-
-  /**
-   * Checks if a region exists by ID.
-   *
-   * @param id the region ID
-   * @return true if exists, false otherwise
-   */
-  public boolean existsById(UUID id) {
-    return regionRepository.existsById(id);
   }
 
   /**

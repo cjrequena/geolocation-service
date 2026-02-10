@@ -9,6 +9,7 @@ import com.cjrequena.sample.persistence.entity.GeoShapeEntity;
 import com.cjrequena.sample.persistence.entity.RegionEntity;
 import org.mapstruct.*;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -96,6 +97,12 @@ public interface RegionMapper {
   // timestamps     → VO
   Region toDomain(RegionEntity entity);
 
+  /**
+   * Converts a list of {@link RegionEntity} into a list of {@link Region} domain aggregates.
+   * Each entity is converted using {@link #toDomain(RegionEntity)}.
+   */
+  List<Region> toDomainList(List<RegionEntity> entityList);
+  
   /**
    * Populates every value-object / derived field on {@link Region} that could
    * not be expressed as a simple {@code source} path.

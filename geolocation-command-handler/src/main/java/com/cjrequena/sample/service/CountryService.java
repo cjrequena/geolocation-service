@@ -48,7 +48,7 @@ public class CountryService {
   }
 
   // ================================================================
-  // Create Operations
+  // CRUD Standard Operations
   // ================================================================
 
   /**
@@ -77,10 +77,6 @@ public class CountryService {
     log.info("Country created with ID: {}", savedEntity.getId());
     return createdCountry;
   }
-
-  // ================================================================
-  // Read Operations
-  // ================================================================
 
   /**
    * Finds a country by ID.
@@ -159,6 +155,96 @@ public class CountryService {
 
     return countries;
   }
+
+  /**
+   * Updates an existing country.
+   *
+   * @param id the country ID
+   * @param country the updated country data
+   * @return the updated country
+   * @throws IllegalArgumentException if country not found
+   */
+  @Transactional
+  public Country update(UUID id, Country country) {
+    log.debug("Updating country with ID: {}", id);
+    CountryEntity existingEntity = countryRepository
+      .findById(id)
+      .orElseThrow(() -> new IllegalArgumentException("Country not found with ID: " + id));
+
+    CountryEntity updatedEntity = countryMapper.toEntity(country);
+    updatedEntity.setId(existingEntity.getId());
+    updatedEntity.setCreatedAt(existingEntity.getCreatedAt());
+
+    CountryEntity savedEntity = countryRepository.save(updatedEntity);
+    Country updatedCountry = countryMapper.toDomain(savedEntity);
+
+    // Update cache
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        countryCacheRedisHashOpsRepository.save(updatedCountry);
+        log.debug("Country cache updated with ID: {}", updatedCountry.getId());
+      } catch (Exception e) {
+        log.warn("Failed to update cache for country: {}", updatedCountry.getId(), e);
+      }
+    }
+
+    log.info("Country updated with ID: {}", savedEntity.getId());
+    return updatedCountry;
+  }
+
+  /**
+   * Deletes a country by ID.
+   *
+   * @param id the country ID
+   */
+  @Transactional
+  public void deleteById(UUID id) {
+    log.debug("Deleting country with ID: {}", id);
+    if (!countryRepository.existsById(id)) {
+      throw new IllegalArgumentException("Country not found with ID: " + id);
+    }
+
+    countryRepository.deleteById(id);
+
+    // Remove from cache
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        countryCacheRedisHashOpsRepository.deleteById(id);
+        log.debug("Country removed from cache: {}", id);
+      } catch (Exception e) {
+        log.warn("Failed to remove country from cache: {}", id, e);
+      }
+    }
+
+    log.info("Country deleted with ID: {}", id);
+  }
+
+  /**
+   * Checks if a country exists by ID.
+   *
+   * @param id the country ID
+   * @return true if exists, false otherwise
+   */
+  public boolean existsById(UUID id) {
+    // Check cache first for existence
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        if (countryCacheRedisHashOpsRepository.existsById(id)) {
+          log.debug("Country exists in cache: {}", id);
+          return true;
+        }
+      } catch (Exception e) {
+        log.warn("Cache existence check failed for country: {}, falling back to database", id, e);
+      }
+    }
+
+    return countryRepository.existsById(id);
+  }
+
+  // ================================================================
+  // Read Operations
+  // ================================================================
+
 
   /**
    * Finds a country by ISO Alpha-2 code.
@@ -282,103 +368,6 @@ public class CountryService {
     return countryRepository.findByCreatedAtBetween(start, end).stream()
       .map(countryMapper::toDomain)
       .collect(Collectors.toList());
-  }
-
-  // ================================================================
-  // Update Operations
-  // ================================================================
-
-  /**
-   * Updates an existing country.
-   *
-   * @param id the country ID
-   * @param country the updated country data
-   * @return the updated country
-   * @throws IllegalArgumentException if country not found
-   */
-  @Transactional
-  public Country update(UUID id, Country country) {
-    log.debug("Updating country with ID: {}", id);
-    CountryEntity existingEntity = countryRepository
-      .findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Country not found with ID: " + id));
-
-    CountryEntity updatedEntity = countryMapper.toEntity(country);
-    updatedEntity.setId(existingEntity.getId());
-    updatedEntity.setCreatedAt(existingEntity.getCreatedAt());
-
-    CountryEntity savedEntity = countryRepository.save(updatedEntity);
-    Country updatedCountry = countryMapper.toDomain(savedEntity);
-
-    // Update cache
-    if (cacheConfigurationProperties.isCacheEnabled()) {
-      try {
-        countryCacheRedisHashOpsRepository.save(updatedCountry);
-        log.debug("Country cache updated with ID: {}", updatedCountry.getId());
-      } catch (Exception e) {
-        log.warn("Failed to update cache for country: {}", updatedCountry.getId(), e);
-      }
-    }
-
-    log.info("Country updated with ID: {}", savedEntity.getId());
-    return updatedCountry;
-  }
-
-  // ================================================================
-  // Delete Operations
-  // ================================================================
-
-  /**
-   * Deletes a country by ID.
-   *
-   * @param id the country ID
-   */
-  @Transactional
-  public void deleteById(UUID id) {
-    log.debug("Deleting country with ID: {}", id);
-    if (!countryRepository.existsById(id)) {
-      throw new IllegalArgumentException("Country not found with ID: " + id);
-    }
-
-    countryRepository.deleteById(id);
-
-    // Remove from cache
-    if (cacheConfigurationProperties.isCacheEnabled()) {
-      try {
-        countryCacheRedisHashOpsRepository.deleteById(id);
-        log.debug("Country removed from cache: {}", id);
-      } catch (Exception e) {
-        log.warn("Failed to remove country from cache: {}", id, e);
-      }
-    }
-
-    log.info("Country deleted with ID: {}", id);
-  }
-
-  // ================================================================
-  // Existence Checks
-  // ================================================================
-
-  /**
-   * Checks if a country exists by ID.
-   *
-   * @param id the country ID
-   * @return true if exists, false otherwise
-   */
-  public boolean existsById(UUID id) {
-    // Check cache first for existence
-    if (cacheConfigurationProperties.isCacheEnabled()) {
-      try {
-        if (countryCacheRedisHashOpsRepository.existsById(id)) {
-          log.debug("Country exists in cache: {}", id);
-          return true;
-        }
-      } catch (Exception e) {
-        log.warn("Cache existence check failed for country: {}, falling back to database", id, e);
-      }
-    }
-
-    return countryRepository.existsById(id);
   }
 
   /**
