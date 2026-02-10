@@ -1,9 +1,11 @@
 package com.cjrequena.sample.service;
 
+import com.cjrequena.sample.configuration.CacheConfigurationProperties;
 import com.cjrequena.sample.domain.mapper.ZoneMapper;
 import com.cjrequena.sample.domain.model.aggregate.Zone;
 import com.cjrequena.sample.persistence.entity.ZoneEntity;
 import com.cjrequena.sample.persistence.repository.ZoneRepository;
+import com.cjrequena.sample.persistence.repository.cache.ZoneCacheRedisHashOpsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,6 +36,12 @@ class ZoneServiceTest {
 
   @Mock
   private ZoneRepository zoneRepository;
+
+  @Mock
+  private ZoneCacheRedisHashOpsRepository zoneCacheRedisHashOpsRepository;
+
+  @Mock
+  private CacheConfigurationProperties cacheConfigurationProperties;
 
   @Mock
   private ZoneMapper zoneMapper;

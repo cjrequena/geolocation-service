@@ -1,9 +1,12 @@
 package com.cjrequena.sample.service;
 
+import com.cjrequena.sample.configuration.CacheConfigurationProperties;
 import com.cjrequena.sample.domain.mapper.ZoneMapper;
 import com.cjrequena.sample.domain.model.aggregate.Zone;
 import com.cjrequena.sample.persistence.entity.ZoneEntity;
 import com.cjrequena.sample.persistence.repository.ZoneRepository;
+import com.cjrequena.sample.persistence.repository.cache.ZoneCacheRedisHashOpsRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -32,58 +35,179 @@ import java.util.stream.Collectors;
 public class ZoneService {
 
   private final ZoneRepository zoneRepository;
+  private final ZoneCacheRedisHashOpsRepository zoneCacheRedisHashOpsRepository;
+  private final CacheConfigurationProperties cacheConfigurationProperties;
   private final ZoneMapper zoneMapper;
 
+  @PostConstruct
+  public void loadUpCache() {
+    if(cacheConfigurationProperties.isFullLoadEnabled()) {
+      List<Zone> zones = this.zoneMapper.toDomainList(zoneRepository.findAll());
+      this.zoneCacheRedisHashOpsRepository.load(zones);
+      this.zoneCacheRedisHashOpsRepository.retrieve();
+    }
+  }
+
   // ================================================================
-  // Create Operations
+  // CRUD Standard Operations
   // ================================================================
 
-  /**
-   * Creates a new zone.
-   *
-   * @param zone the zone domain aggregate to create
-   * @return the created zone with generated ID
-   */
   @Transactional
   public Zone create(Zone zone) {
     log.debug("Creating zone: {}", zone.getName());
-    
     ZoneEntity entity = zoneMapper.toEntity(zone);
     ZoneEntity savedEntity = zoneRepository.save(entity);
-    
+    Zone createdZone = zoneMapper.toDomain(savedEntity);
+
+    // Update cache
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        zoneCacheRedisHashOpsRepository.save(createdZone);
+        log.debug("Zone cached with ID: {}", createdZone.getId());
+      } catch (Exception e) {
+        log.warn("Failed to cache zone on create: {}", createdZone.getId(), e);
+      }
+    }
+
     log.info("Zone created with ID: {}", savedEntity.getId());
-    return zoneMapper.toDomain(savedEntity);
+    return createdZone;
+  }
+
+  public Optional<Zone> findById(UUID id) {
+    log.debug("Finding zone by ID: {}", id);
+
+    // Try cache first (cache-aside pattern)
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        Optional<Zone> cachedZone = zoneCacheRedisHashOpsRepository.retrieveById(id);
+        if (cachedZone.isPresent()) {
+          log.debug("Zone found in cache: {}", id);
+          return cachedZone;
+        }
+        log.debug("Zone not found in cache, querying database: {}", id);
+      } catch (Exception e) {
+        log.warn("Cache retrieval failed for zone: {}, falling back to database", id, e);
+      }
+    }
+
+    // Cache miss or disabled - query database
+    Optional<Zone> zone = zoneRepository.findById(id).map(zoneMapper::toDomain);
+
+    // Update cache on successful database hit
+    if (cacheConfigurationProperties.isCacheEnabled() && zone.isPresent()) {
+      try {
+        zoneCacheRedisHashOpsRepository.save(zone.get());
+        log.debug("Zone cached after database query: {}", id);
+      } catch (Exception e) {
+        log.warn("Failed to cache zone after database query: {}", id, e);
+      }
+    }
+
+    return zone;
+  }
+
+  public List<Zone> findAll() {
+    log.debug("Finding all zones");
+
+    // Try cache first for full list retrieval
+    if (cacheConfigurationProperties.isCacheEnabled() && !zoneCacheRedisHashOpsRepository.isEmpty()) {
+      try {
+        List<Zone> cachedZones = zoneCacheRedisHashOpsRepository.retrieve();
+        if (!cachedZones.isEmpty()) {
+          log.debug("Retrieved {} zones from cache", cachedZones.size());
+          return cachedZones;
+        }
+      } catch (Exception e) {
+        log.warn("Cache retrieval failed for all zones, falling back to database", e);
+      }
+    }
+
+    // Cache miss or disabled - query database
+    List<Zone> zones = zoneRepository.findAll().stream()
+      .map(zoneMapper::toDomain)
+      .collect(Collectors.toList());
+
+    // Update cache with full list
+    if (cacheConfigurationProperties.isCacheEnabled() && !zones.isEmpty()) {
+      try {
+        zoneCacheRedisHashOpsRepository.saveAll(zones);
+        log.debug("Cached {} zones after database query", zones.size());
+      } catch (Exception e) {
+        log.warn("Failed to cache zones after database query", e);
+      }
+    }
+
+    return zones;
+  }
+
+  @Transactional
+  public Zone update(UUID id, Zone zone) {
+    log.debug("Updating zone with ID: {}", id);
+    ZoneEntity existingEntity = zoneRepository.findById(id)
+      .orElseThrow(() -> new IllegalArgumentException("Zone not found with ID: " + id));
+
+    ZoneEntity updatedEntity = zoneMapper.toEntity(zone);
+    updatedEntity.setId(existingEntity.getId());
+    updatedEntity.setCreatedAt(existingEntity.getCreatedAt());
+
+    ZoneEntity savedEntity = zoneRepository.save(updatedEntity);
+    Zone updatedZone = zoneMapper.toDomain(savedEntity);
+
+    // Update cache
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        zoneCacheRedisHashOpsRepository.save(updatedZone);
+        log.debug("Zone cache updated with ID: {}", updatedZone.getId());
+      } catch (Exception e) {
+        log.warn("Failed to update cache for zone: {}", updatedZone.getId(), e);
+      }
+    }
+
+    log.info("Zone updated with ID: {}", savedEntity.getId());
+    return updatedZone;
+  }
+
+  @Transactional
+  public void deleteById(UUID id) {
+    log.debug("Deleting zone with ID: {}", id);
+    if (!zoneRepository.existsById(id)) {
+      throw new IllegalArgumentException("Zone not found with ID: " + id);
+    }
+
+    zoneRepository.deleteById(id);
+
+    // Remove from cache
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        zoneCacheRedisHashOpsRepository.deleteById(id);
+        log.debug("Zone removed from cache: {}", id);
+      } catch (Exception e) {
+        log.warn("Failed to remove zone from cache: {}", id, e);
+      }
+    }
+
+    log.info("Zone deleted with ID: {}", id);
+  }
+
+  public boolean existsById(UUID id) {
+    // Check cache first for existence
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        if (zoneCacheRedisHashOpsRepository.existsById(id)) {
+          log.debug("Zone exists in cache: {}", id);
+          return true;
+        }
+      } catch (Exception e) {
+        log.warn("Cache existence check failed for zone: {}, falling back to database", id, e);
+      }
+    }
+
+    return zoneRepository.existsById(id);
   }
 
   // ================================================================
   // Read Operations
   // ================================================================
-
-  /**
-   * Finds a zone by ID.
-   *
-   * @param id the zone ID
-   * @return Optional containing the zone if found
-   */
-  public Optional<Zone> findById(UUID id) {
-    log.debug("Finding zone by ID: {}", id);
-    
-    return zoneRepository.findById(id)
-      .map(zoneMapper::toDomain);
-  }
-
-  /**
-   * Finds all zones.
-   *
-   * @return list of all zones
-   */
-  public List<Zone> findAll() {
-    log.debug("Finding all zones");
-    
-    return zoneRepository.findAll().stream()
-      .map(zoneMapper::toDomain)
-      .collect(Collectors.toList());
-  }
 
   /**
    * Finds all active zones.
@@ -334,70 +458,6 @@ public class ZoneService {
     return zoneRepository.findTop10ByOrderByUpdatedAtDesc().stream()
       .map(zoneMapper::toDomain)
       .collect(Collectors.toList());
-  }
-
-  // ================================================================
-  // Update Operations
-  // ================================================================
-
-  /**
-   * Updates an existing zone.
-   *
-   * @param id the zone ID
-   * @param zone the updated zone data
-   * @return the updated zone
-   * @throws IllegalArgumentException if zone not found
-   */
-  @Transactional
-  public Zone update(UUID id, Zone zone) {
-    log.debug("Updating zone with ID: {}", id);
-    
-    ZoneEntity existingEntity = zoneRepository.findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Zone not found with ID: " + id));
-    
-    ZoneEntity updatedEntity = zoneMapper.toEntity(zone);
-    updatedEntity.setId(existingEntity.getId());
-    updatedEntity.setCreatedAt(existingEntity.getCreatedAt());
-    
-    ZoneEntity savedEntity = zoneRepository.save(updatedEntity);
-    
-    log.info("Zone updated with ID: {}", savedEntity.getId());
-    return zoneMapper.toDomain(savedEntity);
-  }
-
-  // ================================================================
-  // Delete Operations
-  // ================================================================
-
-  /**
-   * Deletes a zone by ID.
-   *
-   * @param id the zone ID
-   */
-  @Transactional
-  public void deleteById(UUID id) {
-    log.debug("Deleting zone with ID: {}", id);
-    
-    if (!zoneRepository.existsById(id)) {
-      throw new IllegalArgumentException("Zone not found with ID: " + id);
-    }
-    
-    zoneRepository.deleteById(id);
-    log.info("Zone deleted with ID: {}", id);
-  }
-
-  // ================================================================
-  // Existence Checks
-  // ================================================================
-
-  /**
-   * Checks if a zone exists by ID.
-   *
-   * @param id the zone ID
-   * @return true if exists, false otherwise
-   */
-  public boolean existsById(UUID id) {
-    return zoneRepository.existsById(id);
   }
 
   /**

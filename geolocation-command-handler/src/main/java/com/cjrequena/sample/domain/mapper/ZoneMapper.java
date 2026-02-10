@@ -8,6 +8,7 @@ import com.cjrequena.sample.persistence.entity.GeoShapeEntity;
 import com.cjrequena.sample.persistence.entity.ZoneEntity;
 import org.mapstruct.*;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -79,6 +80,12 @@ public interface ZoneMapper {
   @Mapping(target = "auditInfo",  ignore = true)   // timestamps      → AuditInfoVO
   Zone toDomain(ZoneEntity entity);
 
+  /**
+   * Converts a list of {@link ZoneEntity} into a list of {@link Zone} domain aggregates.
+   * Each entity is converted using {@link #toDomain(ZoneEntity)}.
+   */
+  List<Zone> toDomainList(List<ZoneEntity> entityList);
+  
   /** Fills every value-object / derived field on {@link Zone} that requires a helper. */
   @AfterMapping
   default void populateDomainFields(ZoneEntity entity, @MappingTarget Zone domain) {
