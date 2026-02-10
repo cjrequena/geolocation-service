@@ -2,7 +2,7 @@ package com.cjrequena.sample.service;
 
 import com.cjrequena.sample.configuration.CacheConfigurationProperties;
 import com.cjrequena.sample.domain.mapper.CountryMapper;
-import com.cjrequena.sample.domain.model.aggregate.Country;
+import com.cjrequena.sample.domain.model.Country;
 import com.cjrequena.sample.persistence.entity.CountryEntity;
 import com.cjrequena.sample.persistence.repository.CountryRepository;
 import com.cjrequena.sample.persistence.repository.cache.CountryCacheRedisHashOpsRepository;

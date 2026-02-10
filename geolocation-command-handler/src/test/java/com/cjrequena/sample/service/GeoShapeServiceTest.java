@@ -2,7 +2,7 @@ package com.cjrequena.sample.service;
 
 import com.cjrequena.sample.configuration.CacheConfigurationProperties;
 import com.cjrequena.sample.domain.mapper.GeoShapeMapper;
-import com.cjrequena.sample.domain.model.aggregate.GeoShape;
+import com.cjrequena.sample.domain.model.GeoShape;
 import com.cjrequena.sample.domain.model.enums.GeometryType;
 import com.cjrequena.sample.persistence.entity.GeoShapeEntity;
 import com.cjrequena.sample.persistence.repository.GeoShapeRepository;

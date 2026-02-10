@@ -1,6 +1,6 @@
 package com.cjrequena.sample.service;
 
-import com.cjrequena.sample.domain.model.aggregate.*;
+import com.cjrequena.sample.domain.model.*;
 import com.cjrequena.sample.domain.model.enums.AreaType;
 import com.cjrequena.sample.domain.model.enums.RegionType;
 import com.cjrequena.sample.domain.model.enums.ZoneType;

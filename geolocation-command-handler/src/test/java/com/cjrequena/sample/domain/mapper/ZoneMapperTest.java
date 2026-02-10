@@ -1,6 +1,6 @@
 package com.cjrequena.sample.domain.mapper;
 
-import com.cjrequena.sample.domain.model.aggregate.Zone;
+import com.cjrequena.sample.domain.model.Zone;
 import com.cjrequena.sample.domain.model.enums.ZoneType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.persistence.entity.AreaEntity;

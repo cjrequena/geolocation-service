@@ -1,7 +1,7 @@
 package com.cjrequena.sample.persistence.repository.cache;
 
 import com.cjrequena.sample.domain.exception.CacheException;
-import com.cjrequena.sample.domain.model.aggregate.Area;
+import com.cjrequena.sample.domain.model.Area;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

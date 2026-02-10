@@ -1,7 +1,7 @@
 package com.cjrequena.sample.service;
 
-import com.cjrequena.sample.domain.model.aggregate.Location;
-import com.cjrequena.sample.domain.model.aggregate.Zone;
+import com.cjrequena.sample.domain.model.Location;
+import com.cjrequena.sample.domain.model.Zone;
 import com.cjrequena.sample.domain.model.vo.AltitudeVO;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.PointVO;

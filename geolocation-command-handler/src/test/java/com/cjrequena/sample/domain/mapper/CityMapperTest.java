@@ -1,6 +1,6 @@
 package com.cjrequena.sample.domain.mapper;
 
-import com.cjrequena.sample.domain.model.aggregate.City;
+import com.cjrequena.sample.domain.model.City;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import com.cjrequena.sample.persistence.entity.CityEntity;

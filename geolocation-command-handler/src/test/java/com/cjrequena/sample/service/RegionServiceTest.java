@@ -2,7 +2,7 @@ package com.cjrequena.sample.service;
 
 import com.cjrequena.sample.configuration.CacheConfigurationProperties;
 import com.cjrequena.sample.domain.mapper.RegionMapper;
-import com.cjrequena.sample.domain.model.aggregate.Region;
+import com.cjrequena.sample.domain.model.Region;
 import com.cjrequena.sample.persistence.entity.RegionEntity;
 import com.cjrequena.sample.persistence.repository.RegionRepository;
 import com.cjrequena.sample.persistence.repository.cache.RegionCacheRedisHashOpsRepository;

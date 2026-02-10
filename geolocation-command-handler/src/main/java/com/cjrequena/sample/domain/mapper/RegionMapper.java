@@ -1,6 +1,6 @@
 package com.cjrequena.sample.domain.mapper;
 
-import com.cjrequena.sample.domain.model.aggregate.Region;
+import com.cjrequena.sample.domain.model.Region;
 import com.cjrequena.sample.domain.model.enums.RegionType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;

@@ -1,6 +1,6 @@
 package com.cjrequena.sample.domain.mapper;
 
-import com.cjrequena.sample.domain.model.aggregate.Location;
+import com.cjrequena.sample.domain.model.Location;
 import com.cjrequena.sample.domain.model.vo.*;
 import com.cjrequena.sample.persistence.entity.LocationEntity;
 import com.cjrequena.sample.persistence.entity.ZoneEntity;

@@ -1,4 +1,4 @@
-package com.cjrequena.sample.domain.model.aggregate;
+package com.cjrequena.sample.domain.model;
 
 import com.cjrequena.sample.domain.model.enums.ZoneType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;

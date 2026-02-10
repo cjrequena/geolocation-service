@@ -1,6 +1,6 @@
-package com.cjrequena.sample.domain.model.aggregate;
+package com.cjrequena.sample.domain.model;
 
-import com.cjrequena.sample.domain.model.enums.RegionType;
+import com.cjrequena.sample.domain.model.enums.AreaType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import lombok.AllArgsConstructor;
@@ -8,68 +8,64 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.TimeZone;
 import java.util.UUID;
 
 /**
- * Region Domain Aggregate.
+ * Area Domain Aggregate.
  *
- * Represents a first-level administrative division (state, province, territory, etc.).
- * A region belongs to a country and can contain multiple cities.
+ * Represents a sub-city area such as a district, borough, or neighborhood.
+ * An area belongs to a city and contains multiple zones.
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Region {
+public class Area {
 
   private UUID id;
-  private UUID countryId;
+  private UUID cityId;
   private UUID geoShapeId;
   private String name;
-  private String code;
-  private RegionType type;
+  private AreaType type;
 
   private PopulationVO population;
-  private TimeZone timeZone;
+  private String postalCode;
   private Boolean active;
   private AuditInfoVO auditInfo;
 
   /**
-   * Factory method to create a new region.
+   * Factory method to create a new area.
    */
-  public static Region create(
+  public static Area create(
     UUID id,
-    UUID countryId,
+    UUID cityId,
     String name,
-    String code,
-    RegionType type) {
+    AreaType type) {
 
-    validateCreation(id, countryId, name);
+    validateCreation(id, cityId, name);
 
-    return Region.builder()
+    return Area.builder()
       .id(id)
-      .countryId(countryId)
+      .cityId(cityId)
       .name(name)
-      .code(code)
-      .type(type != null ? type : RegionType.defaultType())
+      .type(type != null ? type : AreaType.defaultType())
       .active(Boolean.TRUE)
       .auditInfo(AuditInfoVO.create())
       .build();
   }
 
   /**
-   * Update region information.
+   * Update area information.
    */
-  public void updateInfo(String name, String code, RegionType type) {
+  public void updateInfo(String name, AreaType type, String postalCode) {
     if (name != null) {
       this.name = name;
     }
-    if (code != null) {
-      this.code = code;
-    }
     if (type != null) {
       this.type = type;
+    }
+    if (postalCode != null) {
+      this.postalCode = postalCode;
     }
     this.auditInfo = this.auditInfo.update();
   }
@@ -94,15 +90,7 @@ public class Region {
   }
 
   /**
-   * Set timeZone.
-   */
-  public void setTimeZone(TimeZone timeZone) {
-    this.timeZone = timeZone;
-    this.auditInfo = this.auditInfo.update();
-  }
-
-  /**
-   * Activate the region.
+   * Activate the area.
    */
   public void activate() {
     this.active = Boolean.TRUE;
@@ -110,7 +98,7 @@ public class Region {
   }
 
   /**
-   * Deactivate the region.
+   * Deactivate the area.
    */
   public void deactivate() {
     this.active = Boolean.FALSE;
@@ -118,28 +106,28 @@ public class Region {
   }
 
   /**
-   * Check if region is active.
+   * Check if area is active.
    */
   public boolean isActive() {
     return this.active != null && this.active.equals(Boolean.TRUE);
   }
 
   /**
-   * Check if region has geographic shape assigned.
+   * Check if area has geographic shape assigned.
    */
   public boolean hasGeoShape() {
     return this.geoShapeId != null;
   }
 
   /**
-   * Check if region has population data.
+   * Check if area has population data.
    */
   public boolean hasPopulationData() {
     return this.population != null && this.population.getValue() > 0;
   }
 
   /**
-   * Get region type as string.
+   * Get area type as string.
    */
   public String getTypeAsString() {
     return this.type != null ? this.type.getValue() : null;
@@ -147,21 +135,21 @@ public class Region {
 
   // Validation methods
 
-  private static void validateCreation(UUID id, UUID countryId, String name) {
+  private static void validateCreation(UUID id, UUID cityId, String name) {
     if (id == null) {
-      throw new IllegalArgumentException("Region ID cannot be null");
+      throw new IllegalArgumentException("Area ID cannot be null");
     }
-    if (countryId == null) {
-      throw new IllegalArgumentException("Country ID cannot be null");
+    if (cityId == null) {
+      throw new IllegalArgumentException("City ID cannot be null");
     }
     if (name == null) {
-      throw new IllegalArgumentException("Region name cannot be null");
+      throw new IllegalArgumentException("Area name cannot be null");
     }
   }
 
   @Override
   public String toString() {
-    return String.format("Region{id=%s, name=%s, country=%s, type=%s}",
-      id, name, countryId, type);
+    return String.format("Area{id=%s, name=%s, city=%s, type=%s}",
+      id, name, cityId, type);
   }
 }

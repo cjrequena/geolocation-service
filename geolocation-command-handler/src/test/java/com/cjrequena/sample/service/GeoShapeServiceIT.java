@@ -1,6 +1,6 @@
 package com.cjrequena.sample.service;
 
-import com.cjrequena.sample.domain.model.aggregate.GeoShape;
+import com.cjrequena.sample.domain.model.GeoShape;
 import com.cjrequena.sample.domain.model.enums.GeometryType;
 import com.cjrequena.sample.domain.model.vo.*;
 import com.cjrequena.sample.persistence.repository.GeoShapeRepository;

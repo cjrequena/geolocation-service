@@ -2,7 +2,7 @@ package com.cjrequena.sample.service;
 
 import com.cjrequena.sample.configuration.CacheConfigurationProperties;
 import com.cjrequena.sample.domain.mapper.LocationMapper;
-import com.cjrequena.sample.domain.model.aggregate.Location;
+import com.cjrequena.sample.domain.model.Location;
 import com.cjrequena.sample.persistence.entity.LocationEntity;
 import com.cjrequena.sample.persistence.repository.LocationRepository;
 import com.cjrequena.sample.persistence.repository.cache.LocationCacheRedisHashOpsRepository;

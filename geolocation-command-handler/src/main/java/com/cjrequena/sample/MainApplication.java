@@ -1,7 +1,7 @@
 package com.cjrequena.sample;
 
 import com.cjrequena.sample.domain.mapper.GeoShapeMapper;
-import com.cjrequena.sample.domain.model.aggregate.Area;
+import com.cjrequena.sample.domain.model.Area;
 import com.cjrequena.sample.domain.model.vo.PointVO;
 import com.cjrequena.sample.persistence.entity.GeoShapeEntity;
 import com.cjrequena.sample.persistence.repository.GeoShapeRepository;

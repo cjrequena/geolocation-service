@@ -1,6 +1,5 @@
-package com.cjrequena.sample.domain.model.aggregate;
+package com.cjrequena.sample.domain.model;
 
-import com.cjrequena.sample.domain.model.enums.AreaType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import lombok.AllArgsConstructor;
@@ -8,64 +7,65 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.TimeZone;
 import java.util.UUID;
 
 /**
- * Area Domain Aggregate.
+ * City Domain Aggregate.
  *
- * Represents a sub-city area such as a district, borough, or neighborhood.
- * An area belongs to a city and contains multiple zones.
+ * Represents a city or municipality within a region.
+ * A city can be designated as a capital and contains multiple areas.
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Area {
+public class City {
 
   private UUID id;
-  private UUID cityId;
+  private UUID regionId;
   private UUID geoShapeId;
   private String name;
-  private AreaType type;
 
   private PopulationVO population;
+  private TimeZone timeZone;
   private String postalCode;
+  private Boolean capital;
   private Boolean active;
   private AuditInfoVO auditInfo;
 
   /**
-   * Factory method to create a new area.
+   * Factory method to create a new city.
    */
-  public static Area create(
+  public static City create(
     UUID id,
-    UUID cityId,
-    String name,
-    AreaType type) {
+    UUID regionId,
+    String name) {
 
-    validateCreation(id, cityId, name);
+    validateCreation(id, regionId, name);
 
-    return Area.builder()
+    return City.builder()
       .id(id)
-      .cityId(cityId)
+      .regionId(regionId)
       .name(name)
-      .type(type != null ? type : AreaType.defaultType())
+      .capital(Boolean.FALSE)
       .active(Boolean.TRUE)
       .auditInfo(AuditInfoVO.create())
       .build();
   }
 
   /**
-   * Update area information.
+   * Update city information.
    */
-  public void updateInfo(String name, AreaType type, String postalCode) {
+  public void updateInfo(String name, String postalCode, TimeZone timeZone) {
     if (name != null) {
       this.name = name;
     }
-    if (type != null) {
-      this.type = type;
-    }
     if (postalCode != null) {
       this.postalCode = postalCode;
+    }
+    if (timeZone != null) {
+      this.timeZone = timeZone;
     }
     this.auditInfo = this.auditInfo.update();
   }
@@ -90,7 +90,23 @@ public class Area {
   }
 
   /**
-   * Activate the area.
+   * Designate city as capital.
+   */
+  public void designateAsCapital() {
+    this.capital = Boolean.TRUE;
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Remove capital designation.
+   */
+  public void removeCapitalDesignation() {
+    this.capital = Boolean.FALSE;
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Activate the city.
    */
   public void activate() {
     this.active = Boolean.TRUE;
@@ -98,7 +114,7 @@ public class Area {
   }
 
   /**
-   * Deactivate the area.
+   * Deactivate the city.
    */
   public void deactivate() {
     this.active = Boolean.FALSE;
@@ -106,50 +122,57 @@ public class Area {
   }
 
   /**
-   * Check if area is active.
+   * Check if city is active.
    */
   public boolean isActive() {
     return this.active != null && this.active.equals(Boolean.TRUE);
   }
 
   /**
-   * Check if area has geographic shape assigned.
+   * Check if city is a capital.
+   */
+  public boolean isCapital() {
+    return this.capital != null && this.capital.equals(Boolean.TRUE);
+  }
+
+  /**
+   * Check if city has geographic shape assigned.
    */
   public boolean hasGeoShape() {
     return this.geoShapeId != null;
   }
 
   /**
-   * Check if area has population data.
+   * Check if city has population data.
    */
   public boolean hasPopulationData() {
     return this.population != null && this.population.getValue() > 0;
   }
 
   /**
-   * Get area type as string.
+   * Check if city has timeZone defined.
    */
-  public String getTypeAsString() {
-    return this.type != null ? this.type.getValue() : null;
+  public boolean hasTimezone() {
+    return this.timeZone != null;
   }
 
   // Validation methods
 
-  private static void validateCreation(UUID id, UUID cityId, String name) {
+  private static void validateCreation(UUID id, UUID regionId, String name) {
     if (id == null) {
-      throw new IllegalArgumentException("Area ID cannot be null");
-    }
-    if (cityId == null) {
       throw new IllegalArgumentException("City ID cannot be null");
     }
+    if (regionId == null) {
+      throw new IllegalArgumentException("Region ID cannot be null");
+    }
     if (name == null) {
-      throw new IllegalArgumentException("Area name cannot be null");
+      throw new IllegalArgumentException("City name cannot be null");
     }
   }
 
   @Override
   public String toString() {
-    return String.format("Area{id=%s, name=%s, city=%s, type=%s}",
-      id, name, cityId, type);
+    return String.format("City{id=%s, name=%s, region=%s, capital=%s}",
+      id, name, regionId, isCapital());
   }
 }

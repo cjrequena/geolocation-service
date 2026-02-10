@@ -1,9 +1,9 @@
 package com.cjrequena.sample.service;
 
-import com.cjrequena.sample.domain.model.aggregate.Area;
-import com.cjrequena.sample.domain.model.aggregate.City;
-import com.cjrequena.sample.domain.model.aggregate.Country;
-import com.cjrequena.sample.domain.model.aggregate.Region;
+import com.cjrequena.sample.domain.model.Area;
+import com.cjrequena.sample.domain.model.City;
+import com.cjrequena.sample.domain.model.Country;
+import com.cjrequena.sample.domain.model.Region;
 import com.cjrequena.sample.domain.model.enums.AreaType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
