@@ -23,20 +23,30 @@ import java.util.*;
 public class MetadataVO implements Serializable {
   @Serial
   private static final long serialVersionUID = 1L;
-  private static final ObjectMapper objectMapper = JsonUtil.getObjectMapper();
+  private static ObjectMapper objectMapper;
 
   private final JsonNode jsonNode;
 
+  /**
+   * Lazy-load ObjectMapper to avoid static initialization issues.
+   */
+  private static ObjectMapper getObjectMapper() {
+    if (objectMapper == null) {
+      objectMapper = JsonUtil.getObjectMapper();
+    }
+    return objectMapper;
+  }
+
   @JsonCreator
   private MetadataVO(JsonNode value) {
-    this.jsonNode = value != null ? value : objectMapper.createObjectNode();
+    this.jsonNode = value != null ? value : getObjectMapper().createObjectNode();
   }
 
   /**
    * Create empty metadata.
    */
   public static MetadataVO empty() {
-    return new MetadataVO(objectMapper.createObjectNode());
+    return new MetadataVO(getObjectMapper().createObjectNode());
   }
 
   /**
@@ -53,7 +63,7 @@ public class MetadataVO implements Serializable {
     if (map == null || map.isEmpty()) {
       return empty();
     }
-    ObjectNode node = objectMapper.valueToTree(map);
+    ObjectNode node = getObjectMapper().valueToTree(map);
     return new MetadataVO(node);
   }
 
@@ -65,7 +75,7 @@ public class MetadataVO implements Serializable {
       return empty();
     }
     try {
-      JsonNode node = objectMapper.readTree(json);
+      JsonNode node = getObjectMapper().readTree(json);
       return new MetadataVO(node);
     } catch (JsonProcessingException e) {
       throw new IllegalArgumentException("Invalid JSON: " + json, e);
@@ -284,7 +294,7 @@ public class MetadataVO implements Serializable {
     }
     ObjectNode newNode = ((ObjectNode) this.jsonNode).deepCopy();
     if (values != null && !values.isEmpty()) {
-      ArrayNode arrayNode = objectMapper.createArrayNode();
+      ArrayNode arrayNode = getObjectMapper().createArrayNode();
       values.forEach(arrayNode::add);
       newNode.set(key, arrayNode);
     } else {
@@ -399,7 +409,7 @@ public class MetadataVO implements Serializable {
    */
   public Map<String, Object> toMap() {
     try {
-      return objectMapper.convertValue(jsonNode, Map.class);
+      return getObjectMapper().convertValue(jsonNode, Map.class);
     } catch (IllegalArgumentException e) {
       return Collections.emptyMap();
     }
@@ -410,7 +420,7 @@ public class MetadataVO implements Serializable {
    */
   public String toJson() {
     try {
-      return objectMapper.writeValueAsString(jsonNode);
+      return getObjectMapper().writeValueAsString(jsonNode);
     } catch (JsonProcessingException e) {
       return "{}";
     }
@@ -421,7 +431,7 @@ public class MetadataVO implements Serializable {
    */
   public String toPrettyJson() {
     try {
-      return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
+      return getObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
     } catch (JsonProcessingException e) {
       return "{}";
     }

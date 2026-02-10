@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.Getter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,11 +17,20 @@ import java.util.Base64;
 public final class  JsonUtil {
 
   // region === ObjectMapper Initialization ===
-  @Getter
-  private static final ObjectMapper objectMapper = ApplicationContextProvider.getContext().getBean("objectMapper", ObjectMapper.class);
+  private static ObjectMapper objectMapper;
 
   private JsonUtil() {
     // Prevent instantiation
+  }
+
+  /**
+   * Lazy-load ObjectMapper from Spring context to avoid initialization issues.
+   */
+  public static ObjectMapper getObjectMapper() {
+    if (objectMapper == null) {
+      objectMapper = ApplicationContextProvider.getContext().getBean("objectMapper", ObjectMapper.class);
+    }
+    return objectMapper;
   }
   // endregion
 
@@ -32,7 +40,7 @@ public final class  JsonUtil {
    * Converts an object to a JSON string.
    */
   public static <T> String objectToJsonString(T object) throws JsonProcessingException {
-    return objectMapper.writeValueAsString(object);
+    return getObjectMapper().writeValueAsString(object);
   }
 
   /**
@@ -40,14 +48,14 @@ public final class  JsonUtil {
    */
   public static <T> T jsonStringToObject(String jsonString, Class<T> clazz)
       throws JsonProcessingException {
-    return objectMapper.readValue(jsonString, clazz);
+    return getObjectMapper().readValue(jsonString, clazz);
   }
 
   /**
    * Converts an object to a Base64-encoded JSON string.
    */
   public static <T> String objectToJsonBase64(T object) throws JsonProcessingException {
-    String jsonString = objectMapper.writeValueAsString(object);
+    String jsonString = getObjectMapper().writeValueAsString(object);
     return Base64.getEncoder().encodeToString(jsonString.getBytes(StandardCharsets.UTF_8));
   }
 
@@ -58,7 +66,7 @@ public final class  JsonUtil {
       throws JsonProcessingException {
     byte[] decodedBytes = Base64.getDecoder().decode(base64);
     String jsonString = new String(decodedBytes, StandardCharsets.UTF_8);
-    return objectMapper.readValue(jsonString, clazz);
+    return getObjectMapper().readValue(jsonString, clazz);
   }
 
   /**
@@ -69,8 +77,8 @@ public final class  JsonUtil {
       if (inputStream == null) {
         throw new IllegalArgumentException("File not found in resources: " + resourcePath);
       }
-      ObjectNode node = (ObjectNode) objectMapper.readTree(inputStream);
-      return objectMapper.writeValueAsString(node);
+      ObjectNode node = (ObjectNode) getObjectMapper().readTree(inputStream);
+      return getObjectMapper().writeValueAsString(node);
     }
   }
   // endregion
@@ -81,14 +89,14 @@ public final class  JsonUtil {
    * Converts an object into a JsonNode.
    */
   public static <T> JsonNode objectToJsonNode(T object) {
-    return objectMapper.valueToTree(object);
+    return getObjectMapper().valueToTree(object);
   }
 
   /**
    * Converts a JsonNode back into an object of the specified type.
    */
   public static <T> T jsonNodeToObject(JsonNode node, Class<T> clazz) throws JsonProcessingException {
-    return objectMapper.treeToValue(node, clazz);
+    return getObjectMapper().treeToValue(node, clazz);
   }
 
   // endregion

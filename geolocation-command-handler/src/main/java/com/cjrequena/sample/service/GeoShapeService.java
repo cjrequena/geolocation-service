@@ -6,6 +6,7 @@ import com.cjrequena.sample.domain.model.aggregate.GeoShape;
 import com.cjrequena.sample.persistence.entity.GeoShapeEntity;
 import com.cjrequena.sample.persistence.repository.GeoShapeRepository;
 import com.cjrequena.sample.persistence.repository.cache.GeoShapeCacheRedisHashOpsRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.locationtech.jts.geom.Geometry;
@@ -43,52 +44,175 @@ public class GeoShapeService {
   private final CacheConfigurationProperties cacheConfigurationProperties;
   private final GeoShapeMapper geoShapeMapper;
 
-//  @PostConstruct
-//  public void loadUpCache() {
-//    if(cacheConfigurationProperties.isFullLoadEnabled()) {
-//      List<GeoShape> geoShapes = this.geoShapeMapper.toDomainList(geoShapeRepository.findAll());
-//      this.geoShapeCacheRedisHashOpsRepository.load(geoShapes);
-//      this.geoShapeCacheRedisHashOpsRepository.retrieve();
-//    }
-//  }
+  @PostConstruct
+  public void loadUpCache() {
+    if(cacheConfigurationProperties.isFullLoadEnabled()) {
+      List<GeoShape> geoShapes = this.geoShapeMapper.toDomainList(geoShapeRepository.findAll());
+      this.geoShapeCacheRedisHashOpsRepository.load(geoShapes);
+      this.geoShapeCacheRedisHashOpsRepository.retrieve();
+    }
+  }
 
   // ================================================================
-  // Create Operations
+  // CRUD Standard Operations
   // ================================================================
 
-  /**
-   * Creates a new GeoShape.
-   *
-   * @param geoShape the GeoShape domain aggregate to create
-   * @return the created GeoShape with generated ID
-   */
   @Transactional
   public GeoShape create(GeoShape geoShape) {
-    log.debug("Creating GeoShape with geometry type: {}", geoShape.getGeometryType());
-    
+    log.debug("Creating geoShape: {}", geoShape.getName());
     GeoShapeEntity entity = geoShapeMapper.toEntity(geoShape);
     GeoShapeEntity savedEntity = geoShapeRepository.save(entity);
-    
+    GeoShape createdGeoShape = geoShapeMapper.toDomain(savedEntity);
+
+    // Update cache
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        geoShapeCacheRedisHashOpsRepository.save(createdGeoShape);
+        log.debug("GeoShape cached with ID: {}", createdGeoShape.getId());
+      } catch (Exception e) {
+        log.warn("Failed to cache geoShape on create: {}", createdGeoShape.getId(), e);
+      }
+    }
+
     log.info("GeoShape created with ID: {}", savedEntity.getId());
-    return geoShapeMapper.toDomain(savedEntity);
+    return createdGeoShape;
+  }
+
+  public Optional<GeoShape> findById(UUID id) {
+    log.debug("Finding geoShape by ID: {}", id);
+
+    // Try cache first (cache-aside pattern)
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        Optional<GeoShape> cachedGeoShape = geoShapeCacheRedisHashOpsRepository.retrieveById(id);
+        if (cachedGeoShape.isPresent()) {
+          log.debug("GeoShape found in cache: {}", id);
+          return cachedGeoShape;
+        }
+        log.debug("GeoShape not found in cache, querying database: {}", id);
+      } catch (Exception e) {
+        log.warn("Cache retrieval failed for geoShape: {}, falling back to database", id, e);
+      }
+    }
+
+    // Cache miss or disabled - query database
+    Optional<GeoShape> geoShape = geoShapeRepository.findById(id).map(geoShapeMapper::toDomain);
+
+    // Update cache on successful database hit
+    if (cacheConfigurationProperties.isCacheEnabled() && geoShape.isPresent()) {
+      try {
+        geoShapeCacheRedisHashOpsRepository.save(geoShape.get());
+        log.debug("GeoShape cached after database query: {}", id);
+      } catch (Exception e) {
+        log.warn("Failed to cache geoShape after database query: {}", id, e);
+      }
+    }
+
+    return geoShape;
+  }
+
+  public List<GeoShape> findAll() {
+    log.debug("Finding all geoShapes");
+
+    // Try cache first for full list retrieval
+    if (cacheConfigurationProperties.isCacheEnabled() && !geoShapeCacheRedisHashOpsRepository.isEmpty()) {
+      try {
+        List<GeoShape> cachedGeoShapes = geoShapeCacheRedisHashOpsRepository.retrieve();
+        if (!cachedGeoShapes.isEmpty()) {
+          log.debug("Retrieved {} geoShapes from cache", cachedGeoShapes.size());
+          return cachedGeoShapes;
+        }
+      } catch (Exception e) {
+        log.warn("Cache retrieval failed for all geoShapes, falling back to database", e);
+      }
+    }
+
+    // Cache miss or disabled - query database
+    List<GeoShape> geoShapes = geoShapeRepository.findAll().stream()
+      .map(geoShapeMapper::toDomain)
+      .collect(Collectors.toList());
+
+    // Update cache with full list
+    if (cacheConfigurationProperties.isCacheEnabled() && !geoShapes.isEmpty()) {
+      try {
+        geoShapeCacheRedisHashOpsRepository.saveAll(geoShapes);
+        log.debug("Cached {} geoShapes after database query", geoShapes.size());
+      } catch (Exception e) {
+        log.warn("Failed to cache geoShapes after database query", e);
+      }
+    }
+
+    return geoShapes;
+  }
+
+  @Transactional
+  public GeoShape update(UUID id, GeoShape geoShape) {
+    log.debug("Updating geoShape with ID: {}", id);
+    GeoShapeEntity existingEntity = geoShapeRepository.findById(id)
+      .orElseThrow(() -> new IllegalArgumentException("GeoShape not found with ID: " + id));
+
+    GeoShapeEntity updatedEntity = geoShapeMapper.toEntity(geoShape);
+    updatedEntity.setId(existingEntity.getId());
+    updatedEntity.setCreatedAt(existingEntity.getCreatedAt());
+
+    GeoShapeEntity savedEntity = geoShapeRepository.save(updatedEntity);
+    GeoShape updatedGeoShape = geoShapeMapper.toDomain(savedEntity);
+
+    // Update cache
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        geoShapeCacheRedisHashOpsRepository.save(updatedGeoShape);
+        log.debug("GeoShape cache updated with ID: {}", updatedGeoShape.getId());
+      } catch (Exception e) {
+        log.warn("Failed to update cache for geoShape: {}", updatedGeoShape.getId(), e);
+      }
+    }
+
+    log.info("GeoShape updated with ID: {}", savedEntity.getId());
+    return updatedGeoShape;
+  }
+
+  @Transactional
+  public void deleteById(UUID id) {
+    log.debug("Deleting geoShape with ID: {}", id);
+    if (!geoShapeRepository.existsById(id)) {
+      throw new IllegalArgumentException("GeoShape not found with ID: " + id);
+    }
+
+    geoShapeRepository.deleteById(id);
+
+    // Remove from cache
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        geoShapeCacheRedisHashOpsRepository.deleteById(id);
+        log.debug("GeoShape removed from cache: {}", id);
+      } catch (Exception e) {
+        log.warn("Failed to remove geoShape from cache: {}", id, e);
+      }
+    }
+
+    log.info("GeoShape deleted with ID: {}", id);
+  }
+
+  public boolean existsById(UUID id) {
+    // Check cache first for existence
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        if (geoShapeCacheRedisHashOpsRepository.existsById(id)) {
+          log.debug("GeoShape exists in cache: {}", id);
+          return true;
+        }
+      } catch (Exception e) {
+        log.warn("Cache existence check failed for geoShape: {}, falling back to database", id, e);
+      }
+    }
+
+    return geoShapeRepository.existsById(id);
   }
 
   // ================================================================
   // Read Operations
   // ================================================================
-
-  /**
-   * Finds a GeoShape by ID.
-   *
-   * @param id the GeoShape ID
-   * @return Optional containing the GeoShape if found
-   */
-  public Optional<GeoShape> findById(UUID id) {
-    log.debug("Finding GeoShape by ID: {}", id);
-    
-    return geoShapeRepository.findById(id)
-      .map(geoShapeMapper::toDomain);
-  }
 
   /**
    * Finds a GeoShape by name.
@@ -101,19 +225,6 @@ public class GeoShapeService {
     
     return geoShapeRepository.findByName(name)
       .map(geoShapeMapper::toDomain);
-  }
-
-  /**
-   * Finds all GeoShapes.
-   *
-   * @return list of all GeoShapes
-   */
-  public List<GeoShape> findAll() {
-    log.debug("Finding all GeoShapes");
-    
-    return geoShapeRepository.findAll().stream()
-      .map(geoShapeMapper::toDomain)
-      .collect(Collectors.toList());
   }
 
   /**
@@ -319,68 +430,8 @@ public class GeoShapeService {
   }
 
   // ================================================================
-  // Update Operations
-  // ================================================================
-
-  /**
-   * Updates an existing GeoShape.
-   *
-   * @param id the GeoShape ID
-   * @param geoShape the updated GeoShape data
-   * @return the updated GeoShape
-   * @throws IllegalArgumentException if GeoShape not found
-   */
-  @Transactional
-  public GeoShape update(UUID id, GeoShape geoShape) {
-    log.debug("Updating GeoShape with ID: {}", id);
-    
-    GeoShapeEntity existingEntity = geoShapeRepository.findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("GeoShape not found with ID: " + id));
-    
-    GeoShapeEntity updatedEntity = geoShapeMapper.toEntity(geoShape);
-    updatedEntity.setId(existingEntity.getId());
-    updatedEntity.setCreatedAt(existingEntity.getCreatedAt());
-    
-    GeoShapeEntity savedEntity = geoShapeRepository.save(updatedEntity);
-    
-    log.info("GeoShape updated with ID: {}", savedEntity.getId());
-    return geoShapeMapper.toDomain(savedEntity);
-  }
-
-  // ================================================================
-  // Delete Operations
-  // ================================================================
-
-  /**
-   * Deletes a GeoShape by ID.
-   *
-   * @param id the GeoShape ID
-   */
-  @Transactional
-  public void deleteById(UUID id) {
-    log.debug("Deleting GeoShape with ID: {}", id);
-    
-    if (!geoShapeRepository.existsById(id)) {
-      throw new IllegalArgumentException("GeoShape not found with ID: " + id);
-    }
-    
-    geoShapeRepository.deleteById(id);
-    log.info("GeoShape deleted with ID: {}", id);
-  }
-
-  // ================================================================
   // Existence Checks
   // ================================================================
-
-  /**
-   * Checks if a GeoShape exists by ID.
-   *
-   * @param id the GeoShape ID
-   * @return true if exists, false otherwise
-   */
-  public boolean existsById(UUID id) {
-    return geoShapeRepository.existsById(id);
-  }
 
   /**
    * Checks if a GeoShape exists by name.

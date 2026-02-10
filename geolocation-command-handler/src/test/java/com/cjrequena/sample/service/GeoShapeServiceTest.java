@@ -1,10 +1,12 @@
 package com.cjrequena.sample.service;
 
+import com.cjrequena.sample.configuration.CacheConfigurationProperties;
 import com.cjrequena.sample.domain.mapper.GeoShapeMapper;
 import com.cjrequena.sample.domain.model.aggregate.GeoShape;
 import com.cjrequena.sample.domain.model.enums.GeometryType;
 import com.cjrequena.sample.persistence.entity.GeoShapeEntity;
 import com.cjrequena.sample.persistence.repository.GeoShapeRepository;
+import com.cjrequena.sample.persistence.repository.cache.GeoShapeCacheRedisHashOpsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,6 +41,12 @@ class GeoShapeServiceTest {
 
   @Mock
   private GeoShapeRepository geoShapeRepository;
+
+  @Mock
+  private GeoShapeCacheRedisHashOpsRepository geoShapeCacheRedisHashOpsRepository;
+
+  @Mock
+  private CacheConfigurationProperties cacheConfigurationProperties;
 
   @Mock
   private GeoShapeMapper geoShapeMapper;
