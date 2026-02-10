@@ -45,6 +45,10 @@ public class AreaService {
     }
   }
 
+  // ================================================================
+  // CRUD Standard Operations
+  // ================================================================
+
   @Transactional
   public Area create(Area area) {
     log.debug("Creating area: {}", area.getName());
@@ -132,6 +136,75 @@ public class AreaService {
 
     return areas;
   }
+
+  @Transactional
+  public Area update(UUID id, Area area) {
+    log.debug("Updating area with ID: {}", id);
+    AreaEntity existingEntity = areaRepository.findById(id)
+      .orElseThrow(() -> new IllegalArgumentException("Area not found with ID: " + id));
+
+    AreaEntity updatedEntity = areaMapper.toEntity(area);
+    updatedEntity.setId(existingEntity.getId());
+    updatedEntity.setCreatedAt(existingEntity.getCreatedAt());
+
+    AreaEntity savedEntity = areaRepository.save(updatedEntity);
+    Area updatedArea = areaMapper.toDomain(savedEntity);
+
+    // Update cache
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        areaCacheRedisHashOpsRepository.save(updatedArea);
+        log.debug("Area cache updated with ID: {}", updatedArea.getId());
+      } catch (Exception e) {
+        log.warn("Failed to update cache for area: {}", updatedArea.getId(), e);
+      }
+    }
+
+    log.info("Area updated with ID: {}", savedEntity.getId());
+    return updatedArea;
+  }
+
+  @Transactional
+  public void deleteById(UUID id) {
+    log.debug("Deleting area with ID: {}", id);
+    if (!areaRepository.existsById(id)) {
+      throw new IllegalArgumentException("Area not found with ID: " + id);
+    }
+
+    areaRepository.deleteById(id);
+
+    // Remove from cache
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        areaCacheRedisHashOpsRepository.deleteById(id);
+        log.debug("Area removed from cache: {}", id);
+      } catch (Exception e) {
+        log.warn("Failed to remove area from cache: {}", id, e);
+      }
+    }
+
+    log.info("Area deleted with ID: {}", id);
+  }
+
+  public boolean existsById(UUID id) {
+    // Check cache first for existence
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        if (areaCacheRedisHashOpsRepository.existsById(id)) {
+          log.debug("Area exists in cache: {}", id);
+          return true;
+        }
+      } catch (Exception e) {
+        log.warn("Cache existence check failed for area: {}, falling back to database", id, e);
+      }
+    }
+
+    return areaRepository.existsById(id);
+  }
+
+  // ================================================================
+  // Read Operations
+  // ================================================================
 
   public List<Area> findAllActive() {
     log.debug("Finding all active areas");
@@ -229,71 +302,6 @@ public class AreaService {
     return areaRepository.findByCreatedAtBetween(start, end).stream()
       .map(areaMapper::toDomain)
       .collect(Collectors.toList());
-  }
-
-  @Transactional
-  public Area update(UUID id, Area area) {
-    log.debug("Updating area with ID: {}", id);
-    AreaEntity existingEntity = areaRepository.findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Area not found with ID: " + id));
-
-    AreaEntity updatedEntity = areaMapper.toEntity(area);
-    updatedEntity.setId(existingEntity.getId());
-    updatedEntity.setCreatedAt(existingEntity.getCreatedAt());
-
-    AreaEntity savedEntity = areaRepository.save(updatedEntity);
-    Area updatedArea = areaMapper.toDomain(savedEntity);
-
-    // Update cache
-    if (cacheConfigurationProperties.isCacheEnabled()) {
-      try {
-        areaCacheRedisHashOpsRepository.save(updatedArea);
-        log.debug("Area cache updated with ID: {}", updatedArea.getId());
-      } catch (Exception e) {
-        log.warn("Failed to update cache for area: {}", updatedArea.getId(), e);
-      }
-    }
-
-    log.info("Area updated with ID: {}", savedEntity.getId());
-    return updatedArea;
-  }
-
-  @Transactional
-  public void deleteById(UUID id) {
-    log.debug("Deleting area with ID: {}", id);
-    if (!areaRepository.existsById(id)) {
-      throw new IllegalArgumentException("Area not found with ID: " + id);
-    }
-
-    areaRepository.deleteById(id);
-
-    // Remove from cache
-    if (cacheConfigurationProperties.isCacheEnabled()) {
-      try {
-        areaCacheRedisHashOpsRepository.deleteById(id);
-        log.debug("Area removed from cache: {}", id);
-      } catch (Exception e) {
-        log.warn("Failed to remove area from cache: {}", id, e);
-      }
-    }
-
-    log.info("Area deleted with ID: {}", id);
-  }
-
-  public boolean existsById(UUID id) {
-    // Check cache first for existence
-    if (cacheConfigurationProperties.isCacheEnabled()) {
-      try {
-        if (areaCacheRedisHashOpsRepository.existsById(id)) {
-          log.debug("Area exists in cache: {}", id);
-          return true;
-        }
-      } catch (Exception e) {
-        log.warn("Cache existence check failed for area: {}, falling back to database", id, e);
-      }
-    }
-
-    return areaRepository.existsById(id);
   }
 
   public boolean existsByCityIdAndName(UUID cityId, String name) {

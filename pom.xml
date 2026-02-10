@@ -56,9 +56,24 @@
             **/entity/**,
             **/exception/**,
             **/*Application.java
+            **/*Mock*.java
         </sonar.exclusions>
+        <sonar.coverage.exclusions>
+            **/model/**,
+            **/trace/**,
+            **/entity/**,
+            **/dto/**,
+            **/db/**,
+            **/*Mock*.java,
+            **/mapper/**,
+            **/configuration/**,
+            **/exception/**,
+            **/aspect/**,
+            **/enums/**,
+            **/MainApplication.java
+        </sonar.coverage.exclusions>
         <!-- Test Configuration -->
-        <min.coveredratio>0.10</min.coveredratio>
+        <min.coveredratio>0.30</min.coveredratio>
         <skipUnitTests>false</skipUnitTests>
         <skipIntegrationTests>false</skipIntegrationTests>
     </properties>

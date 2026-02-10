@@ -8,6 +8,7 @@ import com.cjrequena.sample.persistence.entity.GeoShapeEntity;
 import com.cjrequena.sample.persistence.entity.RegionEntity;
 import org.mapstruct.*;
 
+import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -89,6 +90,12 @@ public interface CityMapper {
   @Mapping(target = "auditInfo",     ignore = true)   // timestamps     → AuditInfoVO
   City toDomain(CityEntity entity);
 
+  /**
+   * Converts a list of {@link CityEntity} into a list of {@link City} domain aggregates.
+   * Each entity is converted using {@link #toDomain(CityEntity)}.
+   */
+  List<City> toDomainList(List<CityEntity> entityList);
+  
   /**
    * Fills every value-object / derived field on {@link City} that requires
    * a helper conversion.
