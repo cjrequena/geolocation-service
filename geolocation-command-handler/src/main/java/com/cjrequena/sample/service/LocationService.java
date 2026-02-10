@@ -1,9 +1,12 @@
 package com.cjrequena.sample.service;
 
+import com.cjrequena.sample.configuration.CacheConfigurationProperties;
 import com.cjrequena.sample.domain.mapper.LocationMapper;
 import com.cjrequena.sample.domain.model.aggregate.Location;
 import com.cjrequena.sample.persistence.entity.LocationEntity;
 import com.cjrequena.sample.persistence.repository.LocationRepository;
+import com.cjrequena.sample.persistence.repository.cache.LocationCacheRedisHashOpsRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -34,58 +37,180 @@ import java.util.stream.Collectors;
 public class LocationService {
 
   private final LocationRepository locationRepository;
+  private final LocationCacheRedisHashOpsRepository locationCacheRedisHashOpsRepository;
+  private final CacheConfigurationProperties cacheConfigurationProperties;
   private final LocationMapper locationMapper;
 
+  @PostConstruct
+  public void loadUpCache() {
+    if(cacheConfigurationProperties.isFullLoadEnabled()) {
+      List<Location> locations = this.locationMapper.toDomainList(locationRepository.findAll());
+      this.locationCacheRedisHashOpsRepository.load(locations);
+      this.locationCacheRedisHashOpsRepository.retrieve();
+    }
+  }
+
   // ================================================================
-  // Create Operations
+  // CRUD Standard Operations
   // ================================================================
 
-  /**
-   * Creates a new location.
-   *
-   * @param location the location domain aggregate to create
-   * @return the created location with generated ID
-   */
   @Transactional
   public Location create(Location location) {
-    log.debug("Creating location at address: {}", location.getAddress());
-    
+    //log.debug("Creating location: {}", location.getName());
     LocationEntity entity = locationMapper.toEntity(location);
     LocationEntity savedEntity = locationRepository.save(entity);
-    
+    Location createdLocation = locationMapper.toDomain(savedEntity);
+
+    // Update cache
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        locationCacheRedisHashOpsRepository.save(createdLocation);
+        log.debug("Location cached with ID: {}", createdLocation.getId());
+      } catch (Exception e) {
+        log.warn("Failed to cache location on create: {}", createdLocation.getId(), e);
+      }
+    }
+
     log.info("Location created with ID: {}", savedEntity.getId());
-    return locationMapper.toDomain(savedEntity);
+    return createdLocation;
   }
+
+  public Optional<Location> findById(UUID id) {
+    log.debug("Finding location by ID: {}", id);
+
+    // Try cache first (cache-aside pattern)
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        Optional<Location> cachedLocation = locationCacheRedisHashOpsRepository.retrieveById(id);
+        if (cachedLocation.isPresent()) {
+          log.debug("Location found in cache: {}", id);
+          return cachedLocation;
+        }
+        log.debug("Location not found in cache, querying database: {}", id);
+      } catch (Exception e) {
+        log.warn("Cache retrieval failed for location: {}, falling back to database", id, e);
+      }
+    }
+
+    // Cache miss or disabled - query database
+    Optional<Location> location = locationRepository.findById(id).map(locationMapper::toDomain);
+
+    // Update cache on successful database hit
+    if (cacheConfigurationProperties.isCacheEnabled() && location.isPresent()) {
+      try {
+        locationCacheRedisHashOpsRepository.save(location.get());
+        log.debug("Location cached after database query: {}", id);
+      } catch (Exception e) {
+        log.warn("Failed to cache location after database query: {}", id, e);
+      }
+    }
+
+    return location;
+  }
+
+  public List<Location> findAll() {
+    log.debug("Finding all locations");
+
+    // Try cache first for full list retrieval
+    if (cacheConfigurationProperties.isCacheEnabled() && !locationCacheRedisHashOpsRepository.isEmpty()) {
+      try {
+        List<Location> cachedLocations = locationCacheRedisHashOpsRepository.retrieve();
+        if (!cachedLocations.isEmpty()) {
+          log.debug("Retrieved {} locations from cache", cachedLocations.size());
+          return cachedLocations;
+        }
+      } catch (Exception e) {
+        log.warn("Cache retrieval failed for all locations, falling back to database", e);
+      }
+    }
+
+    // Cache miss or disabled - query database
+    List<Location> locations = locationRepository.findAll().stream()
+      .map(locationMapper::toDomain)
+      .collect(Collectors.toList());
+
+    // Update cache with full list
+    if (cacheConfigurationProperties.isCacheEnabled() && !locations.isEmpty()) {
+      try {
+        locationCacheRedisHashOpsRepository.saveAll(locations);
+        log.debug("Cached {} locations after database query", locations.size());
+      } catch (Exception e) {
+        log.warn("Failed to cache locations after database query", e);
+      }
+    }
+
+    return locations;
+  }
+
+  @Transactional
+  public Location update(UUID id, Location location) {
+    log.debug("Updating location with ID: {}", id);
+    LocationEntity existingEntity = locationRepository.findById(id)
+      .orElseThrow(() -> new IllegalArgumentException("Location not found with ID: " + id));
+
+    LocationEntity updatedEntity = locationMapper.toEntity(location);
+    updatedEntity.setId(existingEntity.getId());
+    updatedEntity.setCreatedAt(existingEntity.getCreatedAt());
+
+    LocationEntity savedEntity = locationRepository.save(updatedEntity);
+    Location updatedLocation = locationMapper.toDomain(savedEntity);
+
+    // Update cache
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        locationCacheRedisHashOpsRepository.save(updatedLocation);
+        log.debug("Location cache updated with ID: {}", updatedLocation.getId());
+      } catch (Exception e) {
+        log.warn("Failed to update cache for location: {}", updatedLocation.getId(), e);
+      }
+    }
+
+    log.info("Location updated with ID: {}", savedEntity.getId());
+    return updatedLocation;
+  }
+
+  @Transactional
+  public void deleteById(UUID id) {
+    log.debug("Deleting location with ID: {}", id);
+    if (!locationRepository.existsById(id)) {
+      throw new IllegalArgumentException("Location not found with ID: " + id);
+    }
+
+    locationRepository.deleteById(id);
+
+    // Remove from cache
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        locationCacheRedisHashOpsRepository.deleteById(id);
+        log.debug("Location removed from cache: {}", id);
+      } catch (Exception e) {
+        log.warn("Failed to remove location from cache: {}", id, e);
+      }
+    }
+
+    log.info("Location deleted with ID: {}", id);
+  }
+
+  public boolean existsById(UUID id) {
+    // Check cache first for existence
+    if (cacheConfigurationProperties.isCacheEnabled()) {
+      try {
+        if (locationCacheRedisHashOpsRepository.existsById(id)) {
+          log.debug("Location exists in cache: {}", id);
+          return true;
+        }
+      } catch (Exception e) {
+        log.warn("Cache existence check failed for location: {}, falling back to database", id, e);
+      }
+    }
+
+    return locationRepository.existsById(id);
+  }
+
 
   // ================================================================
   // Read Operations
   // ================================================================
-
-  /**
-   * Finds a location by ID.
-   *
-   * @param id the location ID
-   * @return Optional containing the location if found
-   */
-  public Optional<Location> findById(UUID id) {
-    log.debug("Finding location by ID: {}", id);
-    
-    return locationRepository.findById(id)
-      .map(locationMapper::toDomain);
-  }
-
-  /**
-   * Finds all locations.
-   *
-   * @return list of all locations
-   */
-  public List<Location> findAll() {
-    log.debug("Finding all locations");
-    
-    return locationRepository.findAll().stream()
-      .map(locationMapper::toDomain)
-      .collect(Collectors.toList());
-  }
 
   /**
    * Finds all active locations.
@@ -478,70 +603,6 @@ public class LocationService {
     return locationRepository.findTop10ByOrderByCreatedAtDesc().stream()
       .map(locationMapper::toDomain)
       .collect(Collectors.toList());
-  }
-
-  // ================================================================
-  // Update Operations
-  // ================================================================
-
-  /**
-   * Updates an existing location.
-   *
-   * @param id the location ID
-   * @param location the updated location data
-   * @return the updated location
-   * @throws IllegalArgumentException if location not found
-   */
-  @Transactional
-  public Location update(UUID id, Location location) {
-    log.debug("Updating location with ID: {}", id);
-    
-    LocationEntity existingEntity = locationRepository.findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Location not found with ID: " + id));
-    
-    LocationEntity updatedEntity = locationMapper.toEntity(location);
-    updatedEntity.setId(existingEntity.getId());
-    updatedEntity.setCreatedAt(existingEntity.getCreatedAt());
-    
-    LocationEntity savedEntity = locationRepository.save(updatedEntity);
-    
-    log.info("Location updated with ID: {}", savedEntity.getId());
-    return locationMapper.toDomain(savedEntity);
-  }
-
-  // ================================================================
-  // Delete Operations
-  // ================================================================
-
-  /**
-   * Deletes a location by ID.
-   *
-   * @param id the location ID
-   */
-  @Transactional
-  public void deleteById(UUID id) {
-    log.debug("Deleting location with ID: {}", id);
-    
-    if (!locationRepository.existsById(id)) {
-      throw new IllegalArgumentException("Location not found with ID: " + id);
-    }
-    
-    locationRepository.deleteById(id);
-    log.info("Location deleted with ID: {}", id);
-  }
-
-  // ================================================================
-  // Existence Checks
-  // ================================================================
-
-  /**
-   * Checks if a location exists by ID.
-   *
-   * @param id the location ID
-   * @return true if exists, false otherwise
-   */
-  public boolean existsById(UUID id) {
-    return locationRepository.existsById(id);
   }
 
   /**

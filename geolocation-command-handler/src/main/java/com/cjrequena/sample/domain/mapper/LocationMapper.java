@@ -11,6 +11,7 @@ import org.locationtech.jts.geom.PrecisionModel;
 import org.mapstruct.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -96,6 +97,12 @@ public abstract class LocationMapper {
   @Mapping(target = "metadata",   ignore = true)   // JsonNode       → MetadataVO
   @Mapping(target = "auditInfo",  ignore = true)   // timestamps     → AuditInfoVO
   public abstract Location toDomain(LocationEntity entity);
+
+  /**
+   * Converts a list of {@link LocationEntity} into a list of {@link Location} domain aggregates.
+   * Each entity is converted using {@link #toDomain(LocationEntity)}.
+   */
+  public abstract List<Location> toDomainList(List<LocationEntity> entityList);
 
   /**
    * Fills every value-object field on {@link Location} that requires assembly
