@@ -42,4 +42,7 @@ public class CreateAreaRequestDTO {
   @Min(value = 0, message = "Population must be non-negative")
   @Schema(description = "Population count", example = "48000")
   private Long population;
+
+  @Schema(description = "Is this a area active", example = "false")
+  private Boolean active;
 }

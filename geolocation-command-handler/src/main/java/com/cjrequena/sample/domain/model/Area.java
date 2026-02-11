@@ -39,17 +39,25 @@ public class Area {
   public static Area create(
     UUID id,
     UUID cityId,
+    UUID geoShapeId,
     String name,
-    AreaType type) {
+    AreaType type,
+    PopulationVO population,
+    String postalCode,
+    Boolean active
+  ) {
 
     validateCreation(id, cityId, name);
 
     return Area.builder()
       .id(id)
       .cityId(cityId)
+      .geoShapeId(geoShapeId)
       .name(name)
       .type(type != null ? type : AreaType.defaultType())
-      .active(Boolean.TRUE)
+      .population(population)
+      .postalCode(postalCode)
+      .active(active != null ? active : Boolean.TRUE)
       .auditInfo(AuditInfoVO.create())
       .build();
   }

@@ -36,17 +36,27 @@ public class Location {
    */
   public static Location create(
     UUID id,
+    UUID zoneId,
     PointVO point,
-    String address) {
+    AltitudeVO altitude,
+    GpsAccuracyVO accuracy,
+    String address,
+    String postalCode,
+    Boolean active
+  ) {
 
     validateCreation(id, point);
 
     return Location.builder()
       .id(id)
+      .zoneId(zoneId)
       .point(point)
+      .altitude(altitude)
+      .accuracy(accuracy)
       .address(address)
+      .postalCode(postalCode)
+      .active(active != null ? active : Boolean.TRUE)
       .metadata(MetadataVO.empty())
-      .active(Boolean.TRUE)
       .auditInfo(AuditInfoVO.create())
       .build();
   }

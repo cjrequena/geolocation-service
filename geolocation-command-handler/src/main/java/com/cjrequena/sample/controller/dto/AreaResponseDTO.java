@@ -37,7 +37,7 @@ public class AreaResponseDTO {
   @Schema(description = "Associated GeoShape summary (if any)")
   private GeoShapeSummaryDTO geoShape;
 
-  @Schema(description = "Active status", example = "true")
+  @Schema(description = "Is this area active", example = "true")
   private Boolean active;
 
   @Schema(description = "Creation timestamp", example = "2024-04-12T07:30:00Z")

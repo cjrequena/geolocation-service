@@ -21,14 +21,18 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Request to create a new Region")
 public class CreateRegionRequestDTO {
 
+  @NotBlank(message = "Country ID is required")
+  @Schema(description = "Parent country ID", example = "550e8400-e29b-41d4-a716-446655440000", required = true)
+  private String countryId;
+
   @NotBlank(message = "Region name is required")
   @Size(min = 2, max = 100, message = "Region name must be between 2 and 100 characters")
   @Schema(description = "Region name", example = "California", required = true)
   private String name;
 
-  @NotBlank(message = "Country ID is required")
-  @Schema(description = "Parent country ID", example = "550e8400-e29b-41d4-a716-446655440000", required = true)
-  private String countryId;
+  @Size(min = 2, max = 10, message = "Region code must be between 2 and 10 characters")
+  @Schema(description = "Region code", example = "US-CA")
+  private String code;
 
   @NotBlank(message = "Region type is required")
   @Schema(description = "Region type", example = "STATE", required = true)

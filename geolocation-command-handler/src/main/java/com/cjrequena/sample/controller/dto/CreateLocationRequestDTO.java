@@ -10,8 +10,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Map;
-
 /**
  * Request DTO for creating a new Location.
  *
@@ -55,6 +53,9 @@ public class CreateLocationRequestDTO {
   @Schema(description = "Parent zone ID (if assigning to a zone)", example = "550e8400-e29b-41d4-a716-446655440000")
   private String zoneId;
 
-  @Schema(description = "Custom metadata as key-value pairs")
-  private Map<String, Object> metadata;
+  @Schema(description = "Is this a area active", example = "false")
+  private Boolean active;
+
+  //  @Schema(description = "Custom metadata as key-value pairs")
+  //  private Map<String, Object> metadata;
 }

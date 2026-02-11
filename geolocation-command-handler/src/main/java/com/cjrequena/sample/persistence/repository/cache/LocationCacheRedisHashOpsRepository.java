@@ -123,7 +123,7 @@ public class LocationCacheRedisHashOpsRepository implements CacheRepository<UUID
     try {
       return Optional.ofNullable(hashOps.get(KEY_PREFIX, id.toString()));
     } catch (Exception e) {
-      log.error("Failed to retrieve location from hash: {}", id, e);
+      log.warn("Failed to retrieve location from hash: {}", id);
       return Optional.empty();
     }
   }

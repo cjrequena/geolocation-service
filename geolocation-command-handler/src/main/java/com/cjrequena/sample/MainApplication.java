@@ -1,23 +1,22 @@
 package com.cjrequena.sample;
 
 import com.cjrequena.sample.domain.mapper.GeoShapeMapper;
-import com.cjrequena.sample.domain.model.Area;
-import com.cjrequena.sample.domain.model.vo.PointVO;
-import com.cjrequena.sample.persistence.entity.GeoShapeEntity;
+import com.cjrequena.sample.domain.model.GeoShape;
+import com.cjrequena.sample.domain.model.enums.GeometryType;
+import com.cjrequena.sample.domain.model.vo.CoordinateVO;
+import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.persistence.repository.GeoShapeRepository;
 import com.cjrequena.sample.service.AreaService;
+import com.cjrequena.sample.shared.common.util.WKTParserUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.Geometry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.util.List;
+import java.util.UUID;
 
 @SpringBootApplication(scanBasePackages = {
   "com.cjrequena.sample"
@@ -66,24 +65,58 @@ public class MainApplication implements CommandLineRunner {
 //    final GeoShapeEntity geoShapeEntity2 = this.geoShapeMapper.toEntity(geoShape2);
 //    final GeoShapeEntity save2 = this.geoShapeRepository.save(geoShapeEntity2);
 
-     final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+//     final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+//
+//
+//    Point point = geometryFactory.createPoint(
+//      new Coordinate(
+//        -3.655513130688699, // longitude (X)
+//        37.12474775267529   // latitude  (Y)
+//      )
+//    );
+//    point.setSRID(4326);
+//    PointVO pointVO = PointVO.of(37.12474775267529, -3.655513130688699);
+//    //final List<GeoShapeEntity> withinDistance = this.geoShapeRepository.findWithinDistance(pointVO.toWKT(), 10);
+//    final List<GeoShapeEntity> withinDistance = this.geoShapeRepository.findWithinDistance(point.toText(), 1001);
+//
+//    log.debug("{}", withinDistance);
+//
+//    final List<Area> all = areaService.findAll();
+//    log.debug("{}", all);
 
+    // POINT
+    String pointWKT = "POINT (10.5 20.3)";
+    Geometry point = WKTParserUtil.fromWKT(pointWKT, GeometryType.POINT);
+    System.out.println("POINT     → " + WKTParserUtil.toWKT(point));
+    final CoordinateVO coordinateVO = CoordinateVO.of(point.getCoordinate().y, point.getCoordinate().x);
 
-    Point point = geometryFactory.createPoint(
-      new Coordinate(
-        -3.655513130688699, // longitude (X)
-        37.12474775267529   // latitude  (Y)
-      )
+    final GeoShape point1 = GeoShape.createPoint(
+      UUID.randomUUID(),
+      "POINT",
+      coordinateVO,
+      MetadataVO.empty()
     );
-    point.setSRID(4326);
-    PointVO pointVO = PointVO.of(37.12474775267529, -3.655513130688699);
-    //final List<GeoShapeEntity> withinDistance = this.geoShapeRepository.findWithinDistance(pointVO.toWKT(), 10);
-    final List<GeoShapeEntity> withinDistance = this.geoShapeRepository.findWithinDistance(point.toText(), 1001);
 
-    log.debug("{}", withinDistance);
+    log.debug("{}", point1);
 
-    final List<Area> all = areaService.findAll();
-    log.debug("{}", all);
+    // CIRCLE (custom format → buffered polygon)
+    String circleWKT = "CIRCLE(10.0 20.0, 5.0)";
+    Geometry circle = WKTParserUtil.fromWKT(circleWKT, GeometryType.CIRCLE);
+    System.out.println("CIRCLE    → " + WKTParserUtil.toWKT(circle)); // outputs as POLYGON
 
+    // RECTANGLE (4-corner polygon)
+    String rectangleWKT = "POLYGON ((0 0, 10 0, 10 5, 0 5, 0 0))";
+    Geometry rectangle = WKTParserUtil.fromWKT(rectangleWKT, GeometryType.RECTANGLE);
+    System.out.println("RECTANGLE → " + WKTParserUtil.toWKT(rectangle));
+
+    // POLYGON
+    String polygonWKT = "POLYGON ((0 0, 4 0, 4 4, 0 4, 2 6, 0 0))";
+    Geometry polygon = WKTParserUtil.fromWKT(polygonWKT, GeometryType.POLYGON);
+    System.out.println("POLYGON   → " + WKTParserUtil.toWKT(polygon));
+
+    // LINE
+    String lineWKT = "LINESTRING (0 0, 5 5, 10 0)";
+    Geometry line = WKTParserUtil.fromWKT(lineWKT, GeometryType.LINE);
+    System.out.println("LINE      → " + WKTParserUtil.toWKT(line));
   }
 }

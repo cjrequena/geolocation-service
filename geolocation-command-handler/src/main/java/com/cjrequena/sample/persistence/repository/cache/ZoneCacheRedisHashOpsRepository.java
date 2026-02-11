@@ -123,7 +123,7 @@ public class ZoneCacheRedisHashOpsRepository implements CacheRepository<UUID, Zo
     try {
       return Optional.ofNullable(hashOps.get(KEY_PREFIX, id.toString()));
     } catch (Exception e) {
-      log.error("Failed to retrieve zone from hash: {}", id, e);
+      log.warn("Failed to retrieve zone from hash: {}", id);
       return Optional.empty();
     }
   }

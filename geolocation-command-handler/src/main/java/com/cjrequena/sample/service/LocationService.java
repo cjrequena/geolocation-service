@@ -46,7 +46,6 @@ public class LocationService {
     if(cacheConfigurationProperties.isFullLoadEnabled()) {
       List<Location> locations = this.locationMapper.toDomainList(locationRepository.findAll());
       this.locationCacheRedisHashOpsRepository.load(locations);
-      this.locationCacheRedisHashOpsRepository.retrieve();
     }
   }
 

@@ -24,8 +24,7 @@ public class MetadataVO implements Serializable {
   @Serial
   private static final long serialVersionUID = 1L;
   private static ObjectMapper objectMapper;
-
-  private final JsonNode jsonNode;
+  private final transient JsonNode jsonNode;
 
   /**
    * Lazy-load ObjectMapper to avoid static initialization issues.

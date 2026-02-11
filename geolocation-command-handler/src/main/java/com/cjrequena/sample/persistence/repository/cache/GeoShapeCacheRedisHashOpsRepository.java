@@ -123,7 +123,7 @@ public class GeoShapeCacheRedisHashOpsRepository implements CacheRepository<UUID
     try {
       return Optional.ofNullable(hashOps.get(KEY_PREFIX, id.toString()));
     } catch (Exception e) {
-      log.error("Failed to retrieve geoShape from hash: {}", id, e);
+      log.warn("Failed to retrieve geoShape from hash: {}", id);
       return Optional.empty();
     }
   }

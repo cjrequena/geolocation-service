@@ -40,16 +40,27 @@ public class City {
   public static City create(
     UUID id,
     UUID regionId,
-    String name) {
+    UUID geoShapeId,
+    String name,
+    PopulationVO population,
+    TimeZone timeZone,
+    String postalCode,
+    Boolean capital,
+    Boolean active
+  ) {
 
     validateCreation(id, regionId, name);
 
     return City.builder()
       .id(id)
       .regionId(regionId)
+      .geoShapeId(geoShapeId)
       .name(name)
-      .capital(Boolean.FALSE)
-      .active(Boolean.TRUE)
+      .population(population)
+      .timeZone(timeZone != null ? timeZone : TimeZone.getDefault())
+      .postalCode(postalCode)
+      .capital(capital != null ? capital : Boolean.FALSE)
+      .active(active != null ? active : Boolean.FALSE)
       .auditInfo(AuditInfoVO.create())
       .build();
   }

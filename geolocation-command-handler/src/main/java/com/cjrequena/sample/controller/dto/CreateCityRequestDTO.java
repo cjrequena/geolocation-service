@@ -41,4 +41,11 @@ public class CreateCityRequestDTO {
   @Min(value = 0, message = "Population must be non-negative")
   @Schema(description = "Population count", example = "873965")
   private Long population;
+
+  @Size(max = 20, message = "Postal code must not exceed 20 characters")
+  @Schema(description = "Postal code", example = "94110")
+  private String postalCode;
+
+  @Schema(description = "Is this a city active", example = "false")
+  private Boolean isActive;
 }

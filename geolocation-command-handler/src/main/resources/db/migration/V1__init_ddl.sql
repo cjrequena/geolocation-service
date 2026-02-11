@@ -85,12 +85,12 @@ CREATE TABLE region (
     id                UUID         PRIMARY KEY,
     country_id        UUID NOT NULL,
     name              VARCHAR(255) NOT NULL,
-    code              VARCHAR(50),
+    code              VARCHAR(50), -- ISO 3166-2 code, ex: US-CA for California
     region_type       VARCHAR(50), -- state, province, prefecture, etc.
     geoshape_id       UUID,
     population        BIGINT,
     timezone          VARCHAR(50),
-    active         BOOLEAN NOT NULL DEFAULT TRUE,
+    active            BOOLEAN NOT NULL DEFAULT TRUE,
     created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

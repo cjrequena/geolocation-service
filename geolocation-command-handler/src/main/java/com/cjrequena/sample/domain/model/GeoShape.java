@@ -91,6 +91,46 @@ public class GeoShape {
   }
 
   /**
+   * Factory method to create a rectangle shape.
+   */
+  public static GeoShape createRectangle(UUID id, String name, GeometryVO geometry, BoundVO bounds, MetadataVO metadata) {
+    validateRectangleCreation(geometry, bounds);
+
+    return GeoShape.builder()
+      .id(id)
+      .name(name)
+      .geometryType(GeometryType.RECTANGLE)
+      .geometry(geometry)
+      .centerCoordinates(null)
+      .radius(null)
+      .bounds(bounds)
+      .active(Boolean.TRUE)
+      .metadata(metadata != null ? metadata : MetadataVO.empty())
+      .auditInfo(AuditInfoVO.create())
+      .build();
+  }
+
+  /**
+   * Factory method to create a line shape.
+   */
+  public static GeoShape createLine(UUID id, String name, GeometryVO geometry, MetadataVO metadata) {
+    validateLineCreation(geometry);
+
+    return GeoShape.builder()
+      .id(id)
+      .name(name)
+      .geometryType(GeometryType.LINE)
+      .geometry(geometry)
+      .centerCoordinates(null)
+      .radius(null)
+      .bounds(null)
+      .active(Boolean.TRUE)
+      .metadata(metadata != null ? metadata : MetadataVO.empty())
+      .auditInfo(AuditInfoVO.create())
+      .build();
+  }
+
+  /**
    * Update the shape's geometry.
    */
   public void updateGeometry(GeometryVO newGeometry) {
@@ -132,6 +172,20 @@ public class GeoShape {
   }
 
   /**
+   * Check if this is a rectangle shape.
+   */
+  public boolean isRectangle() {
+    return GeometryType.RECTANGLE.equals(this.geometryType);
+  }
+
+  /**
+   * Check if this is a line shape.
+   */
+  public boolean isLine() {
+    return GeometryType.LINE.equals(this.geometryType);
+  }
+
+  /**
    * Get the area covered by this shape (if applicable).
    */
   public Double getAreaInSquareKm() {
@@ -168,6 +222,21 @@ public class GeoShape {
   private void validateGeometryUpdate(GeometryVO newGeometry) {
     if (newGeometry == null) {
       throw new IllegalArgumentException("Geometry cannot be null");
+    }
+  }
+
+  private static void validateRectangleCreation(GeometryVO geometry, BoundVO bounds) {
+    if (geometry == null) {
+      throw new IllegalArgumentException("Rectangle must have geometry");
+    }
+    if (bounds == null) {
+      throw new IllegalArgumentException("Rectangle must have bounds");
+    }
+  }
+
+  private static void validateLineCreation(GeometryVO geometry) {
+    if (geometry == null) {
+      throw new IllegalArgumentException("Line must have geometry");
     }
   }
 

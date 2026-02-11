@@ -123,7 +123,7 @@ public class AreaCacheRedisHashOpsRepository implements CacheRepository<UUID, Ar
     try {
       return Optional.ofNullable(hashOps.get(KEY_PREFIX, id.toString()));
     } catch (Exception e) {
-      log.error("Failed to retrieve area from hash: {}", id, e);
+      log.warn("Failed to retrieve area from hash: {}", id);
       return Optional.empty();
     }
   }

@@ -36,17 +36,23 @@ public class Zone {
   public static Zone create(
     UUID id,
     UUID areaId,
+    UUID geoShapeId,
     String name,
-    ZoneType type) {
+    ZoneType type,
+    String postalCode,
+    Boolean active
+  ) {
 
     validateCreation(id, areaId, name);
 
     return Zone.builder()
       .id(id)
       .areaId(areaId)
+      .geoShapeId(geoShapeId)
       .name(name)
       .type(type != null ? type : ZoneType.defaultType())
-      .active(Boolean.TRUE)
+      .active(active != null ? active : Boolean.TRUE)
+      .postalCode(postalCode)
       .auditInfo(AuditInfoVO.create())
       .build();
   }
