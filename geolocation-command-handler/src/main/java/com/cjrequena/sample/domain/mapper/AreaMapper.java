@@ -3,6 +3,7 @@ package com.cjrequena.sample.domain.mapper;
 import com.cjrequena.sample.domain.model.Area;
 import com.cjrequena.sample.domain.model.enums.AreaType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
+import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import com.cjrequena.sample.persistence.entity.AreaEntity;
 import com.cjrequena.sample.persistence.entity.CityEntity;
@@ -39,11 +40,13 @@ public interface AreaMapper {
   @Mapping(target = "geoShape", ignore = true)   // UUID       → shell GeoShapeEntity
   @Mapping(target = "areaType", ignore = true)   // AreaType   → String
   @Mapping(target = "population", ignore = true)   // PopulationVO → Long
+  @Mapping(target = "metadata",        ignore = true)   // MetadataVO     → JsonNode
   @Mapping(target = "createdAt", ignore = true)   // AuditInfoVO  → OffsetDateTime
   @Mapping(target = "updatedAt", ignore = true)
   AreaEntity toEntity(Area domain);
 
   @Mapping(target = "id", ignore = true)
+  @Mapping(target = "metadata",  ignore = true)   // MetadataVO     → JsonNode
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)
   void updateEntity(Area source, @MappingTarget AreaEntity target);
@@ -64,6 +67,11 @@ public interface AreaMapper {
 
     // ── PopulationVO  →  Long ──────────────────────────────────────
     entity.setPopulation(populationVOToLong(domain.getPopulation()));
+
+    // ── MetadataVO  →  JsonNode ────────────────────────────────────
+    if (domain.getMetadata() != null) {
+      entity.setMetadata(domain.getMetadata().getJsonNode());
+    }
 
     // ── AuditInfoVO  →  createdAt / updatedAt ──────────────────────
     if (domain.getAuditInfo() != null) {
@@ -88,6 +96,7 @@ public interface AreaMapper {
   @Mapping(target = "geoShapeId", ignore = true)   // GeoShapeEntity  → UUID
   @Mapping(target = "type", ignore = true)   // String          → AreaType
   @Mapping(target = "population", ignore = true)   // Long            → PopulationVO
+  @Mapping(target = "metadata",   ignore = true)   // JsonNode       → MetadataVO
   @Mapping(target = "auditInfo", ignore = true)
   // timestamps      → AuditInfoVO
   Area toDomain(AreaEntity entity);
@@ -120,6 +129,11 @@ public interface AreaMapper {
     // ── createdAt / updatedAt  →  AuditInfoVO ──────────────────────
     if (entity.getCreatedAt() != null || entity.getUpdatedAt() != null) {
       domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt()));
+    }
+
+    // ── JsonNode  →  MetadataVO ────────────────────────────────────
+    if (entity.getMetadata() != null) {
+      domain.setMetadata(MetadataVO.of(entity.getMetadata()));
     }
   }
 

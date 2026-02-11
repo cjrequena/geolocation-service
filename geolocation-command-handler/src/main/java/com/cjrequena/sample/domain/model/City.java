@@ -1,6 +1,7 @@
 package com.cjrequena.sample.domain.model;
 
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
+import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,6 +33,7 @@ public class City {
   private String postalCode;
   private Boolean capital;
   private Boolean active;
+  private MetadataVO metadata;
   private AuditInfoVO auditInfo;
 
   /**
@@ -61,6 +63,7 @@ public class City {
       .postalCode(postalCode)
       .capital(capital != null ? capital : Boolean.FALSE)
       .active(active != null ? active : Boolean.FALSE)
+      .metadata(MetadataVO.empty())
       .auditInfo(AuditInfoVO.create())
       .build();
   }
@@ -78,6 +81,17 @@ public class City {
     if (timeZone != null) {
       this.timeZone = timeZone;
     }
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Update metadata.
+   */
+  public void updateMetadata(MetadataVO metadata) {
+    if (metadata == null) {
+      throw new IllegalArgumentException("Metadata cannot be null");
+    }
+    this.metadata = metadata;
     this.auditInfo = this.auditInfo.update();
   }
 

@@ -2,6 +2,7 @@ package com.cjrequena.sample.domain.model;
 
 import com.cjrequena.sample.domain.model.enums.ZoneType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
+import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,6 +29,7 @@ public class Zone {
   private ZoneType type;
   private String postalCode;
   private Boolean active;
+  private MetadataVO metadata;
   private AuditInfoVO auditInfo;
 
   /**
@@ -53,6 +55,7 @@ public class Zone {
       .type(type != null ? type : ZoneType.defaultType())
       .active(active != null ? active : Boolean.TRUE)
       .postalCode(postalCode)
+      .metadata(MetadataVO.empty())
       .auditInfo(AuditInfoVO.create())
       .build();
   }
@@ -70,6 +73,17 @@ public class Zone {
     if (postalCode != null) {
       this.postalCode = postalCode;
     }
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Update metadata.
+   */
+  public void updateMetadata(MetadataVO metadata) {
+    if (metadata == null) {
+      throw new IllegalArgumentException("Metadata cannot be null");
+    }
+    this.metadata = metadata;
     this.auditInfo = this.auditInfo.update();
   }
 

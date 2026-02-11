@@ -2,6 +2,7 @@ package com.cjrequena.sample.domain.model;
 
 import com.cjrequena.sample.domain.model.enums.RegionType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
+import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,10 +30,10 @@ public class Region {
   private String name;
   private String code;
   private RegionType type;
-
   private PopulationVO population;
   private TimeZone timeZone;
   private Boolean active;
+  private MetadataVO metadata;
   private AuditInfoVO auditInfo;
 
   /**
@@ -54,6 +55,7 @@ public class Region {
       .code(code)
       .type(type != null ? type : RegionType.defaultType())
       .active(Boolean.TRUE)
+      .metadata(MetadataVO.empty())
       .auditInfo(AuditInfoVO.create())
       .build();
   }
@@ -71,6 +73,17 @@ public class Region {
     if (type != null) {
       this.type = type;
     }
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Update metadata.
+   */
+  public void updateMetadata(MetadataVO metadata) {
+    if (metadata == null) {
+      throw new IllegalArgumentException("Metadata cannot be null");
+    }
+    this.metadata = metadata;
     this.auditInfo = this.auditInfo.update();
   }
 

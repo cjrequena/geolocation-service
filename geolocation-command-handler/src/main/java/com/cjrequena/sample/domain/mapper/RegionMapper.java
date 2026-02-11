@@ -3,6 +3,7 @@ package com.cjrequena.sample.domain.mapper;
 import com.cjrequena.sample.domain.model.Region;
 import com.cjrequena.sample.domain.model.enums.RegionType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
+import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import com.cjrequena.sample.persistence.entity.CountryEntity;
 import com.cjrequena.sample.persistence.entity.GeoShapeEntity;
@@ -41,6 +42,7 @@ public interface RegionMapper {
   @Mapping(target = "geoShape", ignore = true)   // UUID  → shell GeoShapeEntity
   @Mapping(target = "regionType", ignore = true)   // enum  → String
   @Mapping(target = "population", ignore = true)   // VO    → Long
+  @Mapping(target = "metadata",   ignore = true)
   @Mapping(target = "createdAt", ignore = true)   // VO    → OffsetDateTime
   @Mapping(target = "updatedAt", ignore = true)
   // VO    → OffsetDateTime
@@ -65,6 +67,11 @@ public interface RegionMapper {
 
     // ── PopulationVO  →  Long ──────────────────────────────────────
     entity.setPopulation(populationVOToLong(domain.getPopulation()));
+
+    // ── MetadataVO  →  JsonNode ────────────────────────────────────
+    if (domain.getMetadata() != null) {
+      entity.setMetadata(domain.getMetadata().getJsonNode());
+    }
 
     // ── AuditInfoVO  →  createdAt / updatedAt ──────────────────────
     if (domain.getAuditInfo() != null) {
@@ -93,6 +100,7 @@ public interface RegionMapper {
   @Mapping(target = "geoShapeId", ignore = true)   // GeoShapeEntity → UUID
   @Mapping(target = "type", ignore = true)   // String         → enum
   @Mapping(target = "population", ignore = true)   // Long           → VO
+  @Mapping(target = "metadata",   ignore = true)
   @Mapping(target = "auditInfo", ignore = true)
   // timestamps     → VO
   Region toDomain(RegionEntity entity);
@@ -128,6 +136,11 @@ public interface RegionMapper {
     // ── createdAt / updatedAt  →  AuditInfoVO ──────────────────────
     if (entity.getCreatedAt() != null || entity.getUpdatedAt() != null) {
       domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt()));
+    }
+
+    // ── JsonNode  →  MetadataVO ────────────────────────────────────
+    if (entity.getMetadata() != null) {
+      domain.setMetadata(MetadataVO.of(entity.getMetadata()));
     }
   }
 

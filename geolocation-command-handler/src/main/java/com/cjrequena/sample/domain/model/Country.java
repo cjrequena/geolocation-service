@@ -2,6 +2,7 @@ package com.cjrequena.sample.domain.model;
 
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
+import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,6 +31,7 @@ public class Country {
   private String capital;
   private PopulationVO population;
   private Boolean active;
+  private MetadataVO metadata;
   private AuditInfoVO auditInfo;
 
   /**
@@ -54,6 +56,7 @@ public class Country {
       .phoneCode(phoneCode)
       .currencyCode(currencyCode)
       .active(Boolean.TRUE)
+      .metadata(MetadataVO.empty())
       .auditInfo(AuditInfoVO.create())
       .build();
   }
@@ -71,6 +74,17 @@ public class Country {
     if (currencyCode != null) {
       this.currencyCode = currencyCode;
     }
+    this.auditInfo = this.auditInfo.update();
+  }
+
+  /**
+   * Update metadata.
+   */
+  public void updateMetadata(MetadataVO metadata) {
+    if (metadata == null) {
+      throw new IllegalArgumentException("Metadata cannot be null");
+    }
+    this.metadata = metadata;
     this.auditInfo = this.auditInfo.update();
   }
 

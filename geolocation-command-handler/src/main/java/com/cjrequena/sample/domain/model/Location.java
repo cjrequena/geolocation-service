@@ -80,8 +80,8 @@ public class Location {
       .zoneId(zoneId)
       .point(point)
       .address(address)
-      .metadata(MetadataVO.empty())
       .active(Boolean.TRUE)
+      .metadata(MetadataVO.empty())
       .auditInfo(AuditInfoVO.create())
       .build();
   }
