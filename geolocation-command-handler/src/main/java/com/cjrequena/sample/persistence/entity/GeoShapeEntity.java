@@ -66,18 +66,25 @@ public class GeoShapeEntity implements Serializable {
   @Column(name = "bounds", columnDefinition = "json")
   private JsonNode bounds;
 
-  @JdbcTypeCode(SqlTypes.JSON)
-  @Column(name = "metadata", nullable = false, columnDefinition = "json")
-  private JsonNode metadata;
-
   @Column(name = "active", nullable = false)
   private Boolean active = true;
+
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "metadata", columnDefinition = "json")
+  private JsonNode metadata;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   private OffsetDateTime createdAt;
 
   @Column(name = "updated_at", nullable = false)
   private OffsetDateTime updatedAt;
+
+  @Column(name = "created_by", length = 255)
+  private String createdBy;
+
+  @Column(name = "updated_by", length = 255)
+  private String updatedBy;
+
 
   @PrePersist
   protected void onCreate() {

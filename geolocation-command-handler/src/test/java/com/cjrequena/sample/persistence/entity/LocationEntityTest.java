@@ -64,8 +64,20 @@ class LocationEntityTest {
 
     // When
     LocationEntity entity = new LocationEntity(
-      id, zone, name, point, altitude, accuracy, address,
-      postalCode, metadata, active, now, now
+      id,
+      zone,
+      name,
+      point,
+      altitude,
+      accuracy,
+      address,
+      postalCode,
+      active,
+      metadata,
+      now,
+      now,
+      null,
+      null
     );
 
     // Then

@@ -1,5 +1,8 @@
 package com.cjrequena.sample.persistence.entity;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +18,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("AreaEntity Unit Tests")
 class AreaEntityTest {
 
+  private ObjectMapper objectMapper;
+
+  @BeforeEach
+  void setUp() {
+    objectMapper = new ObjectMapper();
+  }
+
   @Test
   @DisplayName("Should create entity with no-args constructor")
   void shouldCreateEntityWithNoArgsConstructor() {
@@ -26,12 +36,12 @@ class AreaEntityTest {
     assertThat(entity.getId()).isNull();
     assertThat(entity.getName()).isNull();
     assertThat(entity.getCity()).isNull();
-//    assertThat(entity.getActive()).isNull();
+    //    assertThat(entity.getActive()).isNull();
   }
 
   @Test
   @DisplayName("Should create entity with all-args constructor")
-  void shouldCreateEntityWithAllArgsConstructor() {
+  void shouldCreateEntityWithAllArgsConstructor() throws Exception {
     // Given
     UUID id = UUID.randomUUID();
     CityEntity city = new CityEntity();
@@ -42,12 +52,24 @@ class AreaEntityTest {
     Long population = 150_000L;
     String postalCode = "28010";
     Boolean active = true;
+    JsonNode metadata = objectMapper.readTree("{}");
     OffsetDateTime now = OffsetDateTime.now();
 
     // When
     AreaEntity entity = new AreaEntity(
-      id, city, name, areaType, geoShape, population,
-      postalCode, active, now, now
+      id,
+      city,
+      name,
+      areaType,
+      geoShape,
+      population,
+      postalCode,
+      active,
+      metadata,
+      now,
+      now,
+      null,
+      null
     );
 
     // Then
@@ -79,7 +101,7 @@ class AreaEntityTest {
     assertThat(entity.getCreatedAt()).isNotNull();
     assertThat(entity.getUpdatedAt()).isNotNull();
     assertThat(entity.getActive()).isTrue(); // Default value
-    
+
     // Compare using Instant to avoid timezone issues
     assertThat(entity.getCreatedAt().toInstant())
       .isBetween(before.toInstant(), after.toInstant());

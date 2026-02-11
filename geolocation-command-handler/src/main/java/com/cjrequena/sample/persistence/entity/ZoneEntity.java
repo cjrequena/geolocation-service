@@ -1,9 +1,12 @@
 package com.cjrequena.sample.persistence.entity;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -59,11 +62,21 @@ public class ZoneEntity implements Serializable {
   @Column(name = "active", nullable = false)
   private Boolean active = true;
 
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "metadata", columnDefinition = "json")
+  private JsonNode metadata;
+
   @Column(name = "created_at", nullable = false, updatable = false)
   private OffsetDateTime createdAt;
 
   @Column(name = "updated_at", nullable = false)
   private OffsetDateTime updatedAt;
+
+  @Column(name = "created_by", length = 255)
+  private String createdBy;
+
+  @Column(name = "updated_by", length = 255)
+  private String updatedBy;
 
   @PrePersist
   protected void onCreate() {

@@ -1,5 +1,8 @@
 package com.cjrequena.sample.persistence.entity;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +18,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("CountryEntity Unit Tests")
 class CountryEntityTest {
 
+  private ObjectMapper objectMapper;
+
+  @BeforeEach
+  void setUp() {
+    objectMapper = new ObjectMapper();
+  }
+
   @Test
   @DisplayName("Should create entity with no-args constructor")
   void shouldCreateEntityWithNoArgsConstructor() {
@@ -29,7 +39,7 @@ class CountryEntityTest {
 
   @Test
   @DisplayName("Should create entity with all-args constructor")
-  void shouldCreateEntityWithAllArgsConstructor() {
+  void shouldCreateEntityWithAllArgsConstructor() throws Exception{
     // Given
     UUID id = UUID.randomUUID();
     String name = "Spain";
@@ -41,12 +51,26 @@ class CountryEntityTest {
     String capital = "Madrid";
     Long population = 47000000L;
     Boolean active = true;
+    JsonNode metadata = objectMapper.readTree("{}");
     OffsetDateTime now = OffsetDateTime.now();
 
     // When
     CountryEntity entity = new CountryEntity(
-      id, name, alpha2, alpha3, numeric, phoneCode,
-      currencyCode, capital, population, active, now, now
+      id,
+      name,
+      alpha2,
+      alpha3,
+      numeric,
+      phoneCode,
+      currencyCode,
+      capital,
+      population,
+      active,
+      metadata,
+      now,
+      now,
+      null,
+      null
     );
 
     // Then

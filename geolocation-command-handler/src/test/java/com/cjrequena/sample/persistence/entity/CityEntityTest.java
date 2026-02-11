@@ -1,5 +1,8 @@
 package com.cjrequena.sample.persistence.entity;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +17,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @DisplayName("CityEntity Unit Tests")
 class CityEntityTest {
+
+  private ObjectMapper objectMapper;
+
+  @BeforeEach
+  void setUp() {
+    objectMapper = new ObjectMapper();
+  }
 
   @Test
   @DisplayName("Should create entity with no-args constructor")
@@ -32,7 +42,7 @@ class CityEntityTest {
 
   @Test
   @DisplayName("Should create entity with all-args constructor")
-  void shouldCreateEntityWithAllArgsConstructor() {
+  void shouldCreateEntityWithAllArgsConstructor() throws Exception{
     // Given
     UUID id = UUID.randomUUID();
     RegionEntity region = new RegionEntity();
@@ -44,12 +54,25 @@ class CityEntityTest {
     String postalCode = "28001";
     Boolean capital = true;
     Boolean active = true;
+    JsonNode metadata = objectMapper.readTree("{}");
     OffsetDateTime now = OffsetDateTime.now();
 
     // When
     CityEntity entity = new CityEntity(
-      id, region, name, geoShape, population, timeZone,
-      postalCode, capital, active, now, now
+      id,
+      region,
+      name,
+      geoShape,
+      population,
+      timeZone,
+      postalCode,
+      capital,
+      active,
+      metadata,
+      now,
+      now,
+      null,
+      null
     );
 
     // Then

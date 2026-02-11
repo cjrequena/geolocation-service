@@ -95,7 +95,20 @@ class GeoShapeEntityTest {
 
     // When
     GeoShapeEntity entity = new GeoShapeEntity(
-      id, name, type, point, lat, lng, radius, bounds, metadata,Boolean.TRUE, now, now
+      id,
+      name,
+      type,
+      point,
+      lat,
+      lng,
+      radius,
+      bounds,
+      Boolean.TRUE,
+      metadata,
+      now,
+      now,
+      null,
+      null
     );
 
     // Then
