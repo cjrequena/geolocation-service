@@ -1,10 +1,7 @@
 package com.cjrequena.sample.controller.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +18,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Schema(description = "Request to create a new Location")
 public class CreateLocationRequestDTO {
+
+  @NotBlank(message = "Location name is required")
+  @Size(min = 2, max = 100, message = "Area name must be between 2 and 100 characters")
+  @Schema(description = "Location name", example = "HOTEL", required = true)
+  private String name;
 
   @NotNull(message = "Latitude is required")
   @DecimalMin(value = "-90.0", message = "Latitude must be between -90 and 90")

@@ -24,6 +24,7 @@ public class CreateLocationCommand extends Command {
     this.location = Location.create(
       getId(),
       UUID.fromString(dto.getZoneId()),
+      dto.getName(),
       PointVO.of(dto.getLatitude(), dto.getLongitude()),
       AltitudeVO.of(dto.getAltitudeMeters()),
       GpsAccuracyVO.of(dto.getAccuracyMeters()),

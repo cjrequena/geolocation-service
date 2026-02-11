@@ -22,15 +22,17 @@ CREATE TABLE geoshape (
     name                    VARCHAR(255) NOT NULL,
     geometry_type           VARCHAR(20) NOT NULL CHECK (geometry_type IN ('POINT','CIRCLE','RECTANGLE','POLYGON','LINE')),
     geometry                geometry(Geometry, 4326) NOT NULL,
-
     -- Optional fields based on geometry_type
     center_latitude         DECIMAL(9,6),
     center_longitude        DECIMAL(9,6),
     radius_meters           DECIMAL(10,2),
     bounds                  JSON,
-
+    --
     active                  BOOLEAN NOT NULL DEFAULT TRUE,
-    metadata                JSON NOT NULL DEFAULT '{}',
+    metadata                JSON DEFAULT '{}',
+    -- Auditing fields
+    created_by              VARCHAR(255),
+    updated_by              VARCHAR(255),
     created_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -56,18 +58,23 @@ COMMENT ON CONSTRAINT chk_circle_has_radius ON geoshape IS 'Circles must have ra
 -- Country (Improved)
 ----------------------------------------------------
 CREATE TABLE country (
-    id                UUID         PRIMARY KEY,
-    name              VARCHAR(255) NOT NULL,
-    iso_code_alpha2   CHAR(2) NOT NULL UNIQUE,
-    iso_code_alpha3   CHAR(3) UNIQUE,
-    iso_code_numeric  CHAR(3),
-    phone_code        VARCHAR(10),
-    currency_code     CHAR(3),
-    capital           VARCHAR(255),
-    population        BIGINT,
-    active            BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id                      UUID         PRIMARY KEY,
+    name                    VARCHAR(255) NOT NULL,
+    iso_code_alpha2         CHAR(2) NOT NULL UNIQUE,
+    iso_code_alpha3         CHAR(3) UNIQUE,
+    iso_code_numeric        CHAR(3),
+    phone_code              VARCHAR(10),
+    currency_code           CHAR(3),
+    capital                 VARCHAR(255),
+    population              BIGINT,
+    active                  BOOLEAN NOT NULL DEFAULT TRUE,
+    metadata                JSON DEFAULT '{}',
+    -- Auditing fields
+    created_by              VARCHAR(255),
+    updated_by              VARCHAR(255),
+    created_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
 
     CONSTRAINT chk_iso_alpha2_format CHECK (iso_code_alpha2 ~ '^[A-Z]{2}$'),
     CONSTRAINT chk_iso_alpha3_format CHECK (iso_code_alpha3 IS NULL OR iso_code_alpha3 ~ '^[A-Z]{3}$')
@@ -82,17 +89,22 @@ COMMENT ON TABLE country IS 'Countries with ISO codes and basic metadata';
 -- Region (Improved)
 ----------------------------------------------------
 CREATE TABLE region (
-    id                UUID         PRIMARY KEY,
-    country_id        UUID NOT NULL,
-    name              VARCHAR(255) NOT NULL,
-    code              VARCHAR(50), -- ISO 3166-2 code, ex: US-CA for California
-    region_type       VARCHAR(50), -- state, province, prefecture, etc.
-    geoshape_id       UUID,
-    population        BIGINT,
-    timezone          VARCHAR(50),
-    active            BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id                      UUID         PRIMARY KEY,
+    country_id              UUID NOT NULL,
+    name                    VARCHAR(255) NOT NULL,
+    code                    VARCHAR(50), -- ISO 3166-2 code, ex: US-CA for California
+    region_type             VARCHAR(50), -- state, province, prefecture, etc.
+    geoshape_id             UUID,
+    population              BIGINT,
+    timezone                VARCHAR(50),
+    active                  BOOLEAN NOT NULL DEFAULT TRUE,
+    metadata                JSON DEFAULT '{}',
+    -- Auditing fields
+    created_by              VARCHAR(255),
+    updated_by              VARCHAR(255),
+    created_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
 
     CONSTRAINT fk_region_country FOREIGN KEY (country_id) REFERENCES country(id) ON DELETE CASCADE,
     CONSTRAINT fk_region_geoshape FOREIGN KEY (geoshape_id) REFERENCES geoshape(id) ON DELETE SET NULL,
@@ -110,17 +122,21 @@ COMMENT ON TABLE region IS 'First-level administrative divisions (states, provin
 -- City (Improved)
 ----------------------------------------------------
 CREATE TABLE city (
-    id                UUID         PRIMARY KEY,
-    region_id         UUID,
-    name              VARCHAR(255) NOT NULL,
-    geoshape_id       UUID,
-    population        BIGINT,
-    timezone          VARCHAR(50),
-    postal_code       VARCHAR(20),
-    capital        BOOLEAN DEFAULT FALSE,
-    active         BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id                      UUID         PRIMARY KEY,
+    region_id               UUID,
+    name                    VARCHAR(255) NOT NULL,
+    geoshape_id             UUID,
+    population              BIGINT,
+    timezone                VARCHAR(50),
+    postal_code             VARCHAR(20),
+    capital                 BOOLEAN DEFAULT FALSE,
+    active                  BOOLEAN NOT NULL DEFAULT TRUE,
+    metadata                JSON DEFAULT '{}',
+    -- Auditing fields
+    created_by              VARCHAR(255),
+    updated_by              VARCHAR(255),
+    created_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_city_region FOREIGN KEY (region_id) REFERENCES region(id) ON DELETE CASCADE,
     CONSTRAINT fk_city_geoshape FOREIGN KEY (geoshape_id) REFERENCES geoshape(id) ON DELETE SET NULL,
@@ -138,16 +154,21 @@ COMMENT ON TABLE city IS 'Cities and municipalities';
 -- Area (Improved)
 ----------------------------------------------------
 CREATE TABLE area (
-    id                UUID         PRIMARY KEY,
-    city_id           UUID NOT NULL,
-    name              VARCHAR(255) NOT NULL,
-    area_type         VARCHAR(50), -- district, borough, neighborhood, etc.
-    geoshape_id       UUID,
-    population        BIGINT,
-    postal_code       VARCHAR(20),
-    active         BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id                      UUID         PRIMARY KEY,
+    city_id                 UUID NOT NULL,
+    name                    VARCHAR(255) NOT NULL,
+    area_type               VARCHAR(50), -- district, borough, neighborhood, etc.
+    geoshape_id             UUID,
+    population              BIGINT,
+    postal_code             VARCHAR(20),
+    active                  BOOLEAN NOT NULL DEFAULT TRUE,
+    metadata                JSON DEFAULT '{}',
+    -- Auditing fields
+    created_by              VARCHAR(255),
+    updated_by              VARCHAR(255),
+    created_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
 
     CONSTRAINT fk_area_city FOREIGN KEY (city_id) REFERENCES city(id) ON DELETE CASCADE,
     CONSTRAINT fk_area_geoshape FOREIGN KEY (geoshape_id) REFERENCES geoshape(id) ON DELETE SET NULL,
@@ -165,15 +186,20 @@ COMMENT ON TABLE area IS 'Sub-city areas (districts, boroughs, neighborhoods)';
 -- Zone (Improved)
 ----------------------------------------------------
 CREATE TABLE zone (
-    id                UUID         PRIMARY KEY,
-    area_id           UUID NOT NULL,
-    name              VARCHAR(255) NOT NULL,
-    zone_type         VARCHAR(50), -- block, sector, precinct, etc.
-    geoshape_id       UUID,
-    postal_code       VARCHAR(20),
-    active         BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id                      UUID         PRIMARY KEY,
+    area_id                 UUID NOT NULL,
+    name                    VARCHAR(255) NOT NULL,
+    zone_type               VARCHAR(50), -- block, sector, precinct, etc.
+    geoshape_id             UUID,
+    postal_code             VARCHAR(20),
+    active                  BOOLEAN NOT NULL DEFAULT TRUE,
+    metadata                JSON DEFAULT '{}',
+    -- Auditing fields
+    created_by              VARCHAR(255),
+    updated_by              VARCHAR(255),
+    created_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
 
     CONSTRAINT fk_zone_area FOREIGN KEY (area_id) REFERENCES area(id) ON DELETE CASCADE,
     CONSTRAINT fk_zone_geoshape FOREIGN KEY (geoshape_id) REFERENCES geoshape(id) ON DELETE SET NULL,
@@ -191,17 +217,23 @@ COMMENT ON TABLE zone IS 'Fine-grained zones within areas';
 -- Location (Improved)
 ----------------------------------------------------
 CREATE TABLE location (
-    id                UUID         PRIMARY KEY,
-    zone_id           UUID, -- Made nullable to allow flexible assignment
-    point         geometry(Point, 4326) NOT NULL,
-    altitude_meters   DECIMAL(8,2),
-    accuracy_meters   DECIMAL(8,2),
-    address           TEXT,
-    postal_code       VARCHAR(20),
-    metadata          JSON DEFAULT '{}',
-    active            BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id                      UUID         PRIMARY KEY,
+    zone_id                 UUID, -- Made nullable to allow flexible assignment
+    name                    VARCHAR(255) NOT NULL,
+    location_type           VARCHAR(50), -- district, borough, neighborhood, etc.
+    point                   geometry(Point, 4326) NOT NULL,
+    altitude_meters         DECIMAL(8,2),
+    accuracy_meters         DECIMAL(8,2),
+    address                 TEXT,
+    postal_code             VARCHAR(20),
+    active                  BOOLEAN NOT NULL DEFAULT TRUE,
+    metadata                JSON DEFAULT '{}',
+    -- Auditing fields
+    created_by              VARCHAR(255),
+    updated_by              VARCHAR(255),
+    created_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
 
     CONSTRAINT fk_location_zone FOREIGN KEY (zone_id) REFERENCES zone(id) ON DELETE SET NULL
 );

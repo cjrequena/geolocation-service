@@ -47,6 +47,9 @@ public class LocationEntity implements Serializable {
   @JoinColumn(name = "zone_id", foreignKey = @ForeignKey(name = "fk_location_zone"))
   private ZoneEntity zone;
 
+  @Column(name = "name", nullable = false, length = 255)
+  private String name;
+
   @Column(name = "point", nullable = false, columnDefinition = "geometry(Point, 4326)")
   private Point point;
 

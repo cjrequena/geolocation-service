@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -241,9 +242,11 @@ class LocationRepositoryIT {
     ZoneEntity zone, double latitude, double longitude, String address,
     String postalCode, BigDecimal altitude, BigDecimal accuracy, Boolean active
   ) {
+    Random random = new Random();
     LocationEntity location = new LocationEntity();
     location.setId(UUID.randomUUID());
     location.setZone(zone);
+    location.setName("Test Location-" + random.nextInt(100));
     
     // Create Point geometry with SRID 4326
     Point point = geometryFactory.createPoint(new Coordinate(longitude, latitude));

@@ -22,6 +22,7 @@ public class Location {
 
   private UUID id;
   private UUID zoneId;
+  private String name;
   private PointVO point;
   private AltitudeVO altitude;
   private GpsAccuracyVO accuracy;
@@ -37,6 +38,7 @@ public class Location {
   public static Location create(
     UUID id,
     UUID zoneId,
+    String name,
     PointVO point,
     AltitudeVO altitude,
     GpsAccuracyVO accuracy,
@@ -50,6 +52,7 @@ public class Location {
     return Location.builder()
       .id(id)
       .zoneId(zoneId)
+      .name(name != null ? name : "GENERIC_LOCATION")
       .point(point)
       .altitude(altitude)
       .accuracy(accuracy)

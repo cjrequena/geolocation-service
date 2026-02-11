@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -223,7 +224,9 @@ class LocationServiceIT {
   }
 
   private Location createLocationDomain(String address, double latitude, double longitude, boolean active) {
+    Random random = new Random();
     Location location = new Location();
+    location.setName("Test Location-" + random.nextInt(100));
     location.setAddress(address);
     location.setPoint(PointVO.of(latitude, longitude));
     location.setActive(active);

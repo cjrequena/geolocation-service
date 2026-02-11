@@ -49,6 +49,7 @@ class LocationEntityTest {
   void shouldCreateEntityWithAllArgsConstructor() throws Exception {
     // Given
     UUID id = UUID.randomUUID();
+    String name = "Test Location";
     ZoneEntity zone = new ZoneEntity();
     zone.setId(UUID.randomUUID());
     Point point = geometryFactory.createPoint(new Coordinate(-3.7038, 40.4168));
@@ -63,7 +64,7 @@ class LocationEntityTest {
 
     // When
     LocationEntity entity = new LocationEntity(
-      id, zone, point, altitude, accuracy, address,
+      id, zone, name, point, altitude, accuracy, address,
       postalCode, metadata, active, now, now
     );
 
