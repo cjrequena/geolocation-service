@@ -1,5 +1,6 @@
 package com.cjrequena.sample.persistence.entity;
 
+import com.cjrequena.sample.domain.model.enums.LocationType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,6 +51,7 @@ class LocationEntityTest {
     // Given
     UUID id = UUID.randomUUID();
     String name = "Test Location";
+    LocationType locationType = LocationType.GENERIC;
     ZoneEntity zone = new ZoneEntity();
     zone.setId(UUID.randomUUID());
     Point point = geometryFactory.createPoint(new Coordinate(-3.7038, 40.4168));
@@ -67,6 +69,7 @@ class LocationEntityTest {
       id,
       zone,
       name,
+      locationType,
       point,
       altitude,
       accuracy,

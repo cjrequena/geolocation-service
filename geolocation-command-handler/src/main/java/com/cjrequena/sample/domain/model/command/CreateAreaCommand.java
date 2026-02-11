@@ -3,6 +3,7 @@ package com.cjrequena.sample.domain.model.command;
 import com.cjrequena.sample.controller.dto.CreateAreaRequestDTO;
 import com.cjrequena.sample.domain.model.Area;
 import com.cjrequena.sample.domain.model.enums.AreaType;
+import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -28,7 +29,9 @@ public class CreateAreaCommand extends Command {
       AreaType.from(dto.getAreaType()),
       PopulationVO.of(dto.getPopulation()),
       dto.getPostalCode(),
-      dto.getActive()
+      dto.getActive(),
+      dto.getMetadata()!=null ? MetadataVO.of(dto.getMetadata()) : MetadataVO.empty()
+
     );
   }
 }

@@ -42,7 +42,8 @@ public class Zone {
     String name,
     ZoneType type,
     String postalCode,
-    Boolean active
+    Boolean active,
+    MetadataVO metadata
   ) {
 
     validateCreation(id, areaId, name);
@@ -55,7 +56,7 @@ public class Zone {
       .type(type != null ? type : ZoneType.defaultType())
       .active(active != null ? active : Boolean.TRUE)
       .postalCode(postalCode)
-      .metadata(MetadataVO.empty())
+      .metadata(metadata!=null ? metadata : MetadataVO.empty())
       .auditInfo(AuditInfoVO.create())
       .build();
   }

@@ -40,6 +40,8 @@ public interface CountryMapper {
   @Mapping(target = "isoCodeNumeric",  ignore = true)
   @Mapping(target = "population",      ignore = true)   // PopulationVO  →  Long
   @Mapping(target = "metadata",   ignore = true)
+  @Mapping(target = "createdBy",       ignore = true)   // AuditInfoVO    → createdBy / updatedBy
+  @Mapping(target = "updatedBy",       ignore = true)
   @Mapping(target = "createdAt",       ignore = true)   // AuditInfoVO   →  OffsetDateTime
   @Mapping(target = "updatedAt",       ignore = true)
   CountryEntity toEntity(Country domain);
@@ -72,6 +74,8 @@ public interface CountryMapper {
     if (domain.getAuditInfo() != null) {
       entity.setCreatedAt(domain.getAuditInfo().getCreatedAt());
       entity.setUpdatedAt(domain.getAuditInfo().getUpdatedAt());
+      entity.setCreatedBy(domain.getAuditInfo().getCreatedBy());
+      entity.setUpdatedBy(domain.getAuditInfo().getUpdatedBy());
     }
   }
 

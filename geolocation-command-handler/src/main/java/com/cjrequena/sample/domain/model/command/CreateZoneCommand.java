@@ -3,6 +3,7 @@ package com.cjrequena.sample.domain.model.command;
 import com.cjrequena.sample.controller.dto.CreateZoneRequestDTO;
 import com.cjrequena.sample.domain.model.Zone;
 import com.cjrequena.sample.domain.model.enums.ZoneType;
+import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,7 +27,8 @@ public class CreateZoneCommand extends Command {
       dto.getName(),
       ZoneType.from(dto.getZoneType()),
       dto.getPostalCode(),
-      dto.getActive()
+      dto.getActive(),
+      dto.getMetadata() != null ? MetadataVO.of(dto.getMetadata()) : MetadataVO.empty()
     );
   }
 }

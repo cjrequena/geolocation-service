@@ -1,5 +1,6 @@
 package com.cjrequena.sample.domain.model;
 
+import com.cjrequena.sample.domain.model.enums.LocationType;
 import com.cjrequena.sample.domain.model.vo.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +24,7 @@ public class Location {
   private UUID id;
   private UUID zoneId;
   private String name;
+  private LocationType locationType;
   private PointVO point;
   private AltitudeVO altitude;
   private GpsAccuracyVO accuracy;
@@ -44,7 +46,8 @@ public class Location {
     GpsAccuracyVO accuracy,
     String address,
     String postalCode,
-    Boolean active
+    Boolean active,
+    MetadataVO metadata
   ) {
 
     validateCreation(id, point);
@@ -59,7 +62,7 @@ public class Location {
       .address(address)
       .postalCode(postalCode)
       .active(active != null ? active : Boolean.TRUE)
-      .metadata(MetadataVO.empty())
+      .metadata(metadata!=null ? metadata : MetadataVO.empty())
       .auditInfo(AuditInfoVO.create())
       .build();
   }

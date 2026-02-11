@@ -2,6 +2,7 @@ package com.cjrequena.sample.service;
 
 import com.cjrequena.sample.domain.model.Location;
 import com.cjrequena.sample.domain.model.Zone;
+import com.cjrequena.sample.domain.model.enums.LocationType;
 import com.cjrequena.sample.domain.model.vo.AltitudeVO;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.MetadataVO;
@@ -228,6 +229,7 @@ class LocationServiceIT {
     Random random = new Random();
     Location location = new Location();
     location.setName("Test Location-" + random.nextInt(100));
+    location.setLocationType(LocationType.GENERIC);
     location.setAddress(address);
     location.setPoint(PointVO.of(latitude, longitude));
     location.setActive(active);

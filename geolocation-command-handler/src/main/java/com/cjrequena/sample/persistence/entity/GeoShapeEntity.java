@@ -85,7 +85,6 @@ public class GeoShapeEntity implements Serializable {
   @Column(name = "updated_by", length = 255)
   private String updatedBy;
 
-
   @PrePersist
   protected void onCreate() {
     if (id == null) {

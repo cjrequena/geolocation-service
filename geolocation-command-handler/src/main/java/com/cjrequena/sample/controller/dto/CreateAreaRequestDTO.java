@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 /**
  * Request DTO for creating a new Area.
  */
@@ -45,4 +47,7 @@ public class CreateAreaRequestDTO {
 
   @Schema(description = "Is this a area active", example = "false")
   private Boolean active;
+
+  @Schema(description = "Custom metadata as key-value pairs")
+  private Map<String, Object> metadata;
 }

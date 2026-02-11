@@ -28,7 +28,6 @@ public class Area {
   private UUID geoShapeId;
   private String name;
   private AreaType type;
-
   private PopulationVO population;
   private String postalCode;
   private Boolean active;
@@ -46,7 +45,8 @@ public class Area {
     AreaType type,
     PopulationVO population,
     String postalCode,
-    Boolean active
+    Boolean active,
+    MetadataVO metadata
   ) {
 
     validateCreation(id, cityId, name);
@@ -60,7 +60,7 @@ public class Area {
       .population(population)
       .postalCode(postalCode)
       .active(active != null ? active : Boolean.TRUE)
-      .metadata(MetadataVO.empty())
+      .metadata(metadata!=null ? metadata : MetadataVO.empty())
       .auditInfo(AuditInfoVO.create())
       .build();
   }

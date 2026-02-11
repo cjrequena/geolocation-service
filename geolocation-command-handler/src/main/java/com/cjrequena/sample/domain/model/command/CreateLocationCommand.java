@@ -4,6 +4,7 @@ import com.cjrequena.sample.controller.dto.CreateLocationRequestDTO;
 import com.cjrequena.sample.domain.model.Location;
 import com.cjrequena.sample.domain.model.vo.AltitudeVO;
 import com.cjrequena.sample.domain.model.vo.GpsAccuracyVO;
+import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.domain.model.vo.PointVO;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -30,7 +31,8 @@ public class CreateLocationCommand extends Command {
       GpsAccuracyVO.of(dto.getAccuracyMeters()),
       dto.getAddress(),
       dto.getPostalCode(),
-      dto.getActive()
+      dto.getActive(),
+      dto.getMetadata()!=null ? MetadataVO.of(dto.getMetadata()) : MetadataVO.empty()
     );
   }
 }

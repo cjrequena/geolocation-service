@@ -1,5 +1,6 @@
 package com.cjrequena.sample.persistence.entity;
 
+import com.cjrequena.sample.domain.model.enums.LocationType;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -49,6 +50,10 @@ public class LocationEntity implements Serializable {
 
   @Column(name = "name", nullable = false, length = 255)
   private String name;
+
+  @Column(name = "location_type", length = 20)
+  @Enumerated(EnumType.STRING)
+  private LocationType locationType;
 
   @Column(name = "point", nullable = false, columnDefinition = "geometry(Point, 4326)")
   private Point point;

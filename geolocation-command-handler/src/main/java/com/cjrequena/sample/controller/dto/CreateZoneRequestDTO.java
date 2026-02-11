@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 /**
  * Request DTO for creating a new Zone.
  */
@@ -40,4 +42,7 @@ public class CreateZoneRequestDTO {
 
   @Schema(description = "Is this a zone active", example = "false")
   private Boolean active;
+
+  @Schema(description = "Custom metadata as key-value pairs")
+  private Map<String, Object> metadata;
 }
