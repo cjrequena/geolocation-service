@@ -3,6 +3,7 @@ package com.cjrequena.sample.service;
 import com.cjrequena.sample.domain.model.Country;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
+import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import com.cjrequena.sample.persistence.repository.CountryRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -284,7 +285,8 @@ class CountryServiceIT {
     country.setName(name);
     country.setIsoCode(IsoCodeVO.of(alpha2, alpha3, "000"));
     country.setActive(active);
-    country.setAuditInfo(AuditInfoVO.of(OffsetDateTime.now(), OffsetDateTime.now()));
+    country.setMetadata(MetadataVO.empty());
+    country.setAuditInfo(AuditInfoVO.of(OffsetDateTime.now(), OffsetDateTime.now(), "created@test.com", "updated@test.com"));
     return country;
   }
 }

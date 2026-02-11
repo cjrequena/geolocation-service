@@ -5,6 +5,7 @@ import com.cjrequena.sample.domain.model.Region;
 import com.cjrequena.sample.domain.model.enums.RegionType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
+import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import com.cjrequena.sample.persistence.repository.CountryRepository;
 import com.cjrequena.sample.persistence.repository.RegionRepository;
@@ -205,6 +206,7 @@ class RegionServiceIT {
     region.setCountryId(countryId);
     region.setType(type);
     region.setActive(active);
+    region.setMetadata(MetadataVO.empty());
     region.setAuditInfo(AuditInfoVO.of(OffsetDateTime.now(), OffsetDateTime.now()));
     return region;
   }

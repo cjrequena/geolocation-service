@@ -4,6 +4,7 @@ import com.cjrequena.sample.domain.model.Location;
 import com.cjrequena.sample.domain.model.Zone;
 import com.cjrequena.sample.domain.model.vo.AltitudeVO;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
+import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.domain.model.vo.PointVO;
 import com.cjrequena.sample.persistence.repository.LocationRepository;
 import com.cjrequena.sample.persistence.repository.ZoneRepository;
@@ -230,7 +231,8 @@ class LocationServiceIT {
     location.setAddress(address);
     location.setPoint(PointVO.of(latitude, longitude));
     location.setActive(active);
-    location.setAuditInfo(AuditInfoVO.of(OffsetDateTime.now(), OffsetDateTime.now()));
+    location.setMetadata(MetadataVO.empty());
+    location.setAuditInfo(AuditInfoVO.of(OffsetDateTime.now(), OffsetDateTime.now(), "created@user.com", "updated@user.com"));
     return location;
   }
 }

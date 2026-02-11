@@ -6,6 +6,7 @@ import com.cjrequena.sample.domain.model.enums.RegionType;
 import com.cjrequena.sample.domain.model.enums.ZoneType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
+import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.persistence.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -245,6 +246,7 @@ class ZoneServiceIT {
     zone.setAreaId(areaId);
     zone.setType(type);
     zone.setActive(active);
+    zone.setMetadata(MetadataVO.empty());
     zone.setAuditInfo(AuditInfoVO.of(OffsetDateTime.now(), OffsetDateTime.now()));
     return zone;
   }

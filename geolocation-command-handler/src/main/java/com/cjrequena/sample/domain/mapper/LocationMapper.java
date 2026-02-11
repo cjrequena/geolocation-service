@@ -41,6 +41,8 @@ public abstract class LocationMapper {
   @Mapping(target = "altitudeMeters",  ignore = true)   // AltitudeVO     → BigDecimal
   @Mapping(target = "accuracyMeters",  ignore = true)   // GpsAccuracyVO  → BigDecimal
   @Mapping(target = "metadata",        ignore = true)   // MetadataVO     → JsonNode
+  @Mapping(target = "createdBy",       ignore = true)   // AuditInfoVO    → createdBy / updatedBy
+  @Mapping(target = "updatedBy",       ignore = true)
   @Mapping(target = "createdAt",       ignore = true)   // AuditInfoVO    → OffsetDateTime
   @Mapping(target = "updatedAt",       ignore = true)
   public abstract LocationEntity toEntity(Location domain);
@@ -56,6 +58,8 @@ public abstract class LocationMapper {
 
     // ── AuditInfoVO  →  createdAt / updatedAt ──────────────────────
     if (domain.getAuditInfo() != null) {
+      entity.setCreatedBy(domain.getAuditInfo().getCreatedBy());
+      entity.setUpdatedBy(domain.getAuditInfo().getUpdatedBy());
       entity.setCreatedAt(domain.getAuditInfo().getCreatedAt());
       entity.setUpdatedAt(domain.getAuditInfo().getUpdatedAt());
     }
@@ -118,7 +122,7 @@ public abstract class LocationMapper {
 
     // ── createdAt / updatedAt  →  AuditInfoVO ──────────────────────
     if (entity.getCreatedAt() != null || entity.getUpdatedAt() != null) {
-      domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt()));
+      domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt(), entity.getCreatedBy(), entity.getUpdatedBy()));
     }
 
     // ── ZoneEntity  →  UUID ────────────────────────────────────────

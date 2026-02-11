@@ -7,6 +7,7 @@ import com.cjrequena.sample.domain.model.Region;
 import com.cjrequena.sample.domain.model.enums.AreaType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
+import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import com.cjrequena.sample.persistence.repository.AreaRepository;
 import com.cjrequena.sample.persistence.repository.CityRepository;
@@ -495,6 +496,7 @@ class AreaServiceIT {
     area.setCityId(cityId);
     area.setType(areaType);
     area.setActive(active);
+    area.setMetadata(MetadataVO.empty());
     area.setAuditInfo(AuditInfoVO
       .builder()
       .createdAt(now)
