@@ -1,5 +1,6 @@
 package com.cjrequena.sample.controller.dto;
 
+import com.cjrequena.sample.domain.model.enums.ZoneType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -33,8 +34,9 @@ public class CreateZoneRequestDTO {
   private String name;
 
   @NotBlank(message = "Zone type is required")
-  @Schema(description = "Zone type", example = "PARK", required = true)
-  private String zoneType;
+  //@Pattern(regexp = "^(POINT|POLYGON|CIRCLE|RECTANGLE|LINE)$", message = "Geometry type must be POINT|POLYGON|CIRCLE|RECTANGLE|LINE")
+  @Schema(description = "Zone type", example = "COMMERCIAL", required = true)
+  private ZoneType zoneType;
 
   @Size(max = 20, message = "Postal code must not exceed 20 characters")
   @Schema(description = "Postal code", example = "94121")

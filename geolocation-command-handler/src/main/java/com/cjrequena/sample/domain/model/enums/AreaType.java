@@ -13,7 +13,7 @@ public enum AreaType {
   PARISH("PARISH"),
   SUBURB("SUBURB"),
   QUARTER("QUARTER"),
-  OTHER("OTHER");
+  GENERIC("GENERIC");
 
   private final String value;
 
@@ -29,7 +29,7 @@ public enum AreaType {
    * Default area type.
    */
   public static AreaType defaultType() {
-    return OTHER;
+    return GENERIC;
   }
 
   /**

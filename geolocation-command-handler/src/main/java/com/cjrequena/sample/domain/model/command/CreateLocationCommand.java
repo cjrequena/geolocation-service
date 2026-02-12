@@ -2,6 +2,7 @@ package com.cjrequena.sample.domain.model.command;
 
 import com.cjrequena.sample.controller.dto.CreateLocationRequestDTO;
 import com.cjrequena.sample.domain.model.Location;
+import com.cjrequena.sample.domain.model.enums.LocationType;
 import com.cjrequena.sample.domain.model.vo.AltitudeVO;
 import com.cjrequena.sample.domain.model.vo.GpsAccuracyVO;
 import com.cjrequena.sample.domain.model.vo.MetadataVO;
@@ -26,12 +27,13 @@ public class CreateLocationCommand extends Command {
       getId(),
       UUID.fromString(dto.getZoneId()),
       dto.getName(),
+      dto.getLocationType() != null ? dto.getLocationType() : LocationType.GENERIC,
       PointVO.of(dto.getLatitude(), dto.getLongitude()),
       AltitudeVO.of(dto.getAltitudeMeters()),
-      GpsAccuracyVO.of(dto.getAccuracyMeters()),
+      dto.getAccuracyMeters() != null ? GpsAccuracyVO.of(dto.getAccuracyMeters()) : null,
       dto.getAddress(),
       dto.getPostalCode(),
-      dto.getActive(),
+      dto.getActive() != null ? dto.getActive() : Boolean.TRUE,
       dto.getMetadata()!=null ? MetadataVO.of(dto.getMetadata()) : MetadataVO.empty()
     );
   }

@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 /**
  * Request DTO for creating a new City.
  */
@@ -33,7 +35,7 @@ public class CreateCityRequestDTO {
   private String timeZone;
 
   @Schema(description = "Is this a capital city", example = "false")
-  private Boolean isCapital;
+  private Boolean capital;
 
   @Schema(description = "Associated GeoShape ID", example = "660e8400-e29b-41d4-a716-446655440000")
   private String geoShapeId;
@@ -47,5 +49,9 @@ public class CreateCityRequestDTO {
   private String postalCode;
 
   @Schema(description = "Is this a city active", example = "false")
-  private Boolean isActive;
+  private Boolean active;
+
+
+  @Schema(description = "Custom metadata as key-value pairs")
+  private Map<String, Object> metadata;
 }

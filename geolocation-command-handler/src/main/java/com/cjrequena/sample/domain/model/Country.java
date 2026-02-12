@@ -44,7 +44,9 @@ public class Country {
     String phoneCode,
     String currencyCode,
     String capital,
-    PopulationVO population
+    PopulationVO population,
+    Boolean active,
+    MetadataVO metadata
   ) {
 
     validateCreation(id, name, isoCode);
@@ -55,8 +57,10 @@ public class Country {
       .isoCode(isoCode)
       .phoneCode(phoneCode)
       .currencyCode(currencyCode)
-      .active(Boolean.TRUE)
-      .metadata(MetadataVO.empty())
+      .capital(capital)
+      .population(population)
+      .active(active != null ? active : Boolean.TRUE)
+      .metadata(metadata != null ? metadata : MetadataVO.empty())
       .auditInfo(AuditInfoVO.create())
       .build();
   }

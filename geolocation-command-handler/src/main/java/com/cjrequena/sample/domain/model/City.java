@@ -48,7 +48,8 @@ public class City {
     TimeZone timeZone,
     String postalCode,
     Boolean capital,
-    Boolean active
+    Boolean active,
+    MetadataVO metadata
   ) {
 
     validateCreation(id, regionId, name);
@@ -59,11 +60,11 @@ public class City {
       .geoShapeId(geoShapeId)
       .name(name)
       .population(population)
-      .timeZone(timeZone != null ? timeZone : TimeZone.getDefault())
+      .timeZone(timeZone)
       .postalCode(postalCode)
       .capital(capital != null ? capital : Boolean.FALSE)
-      .active(active != null ? active : Boolean.FALSE)
-      .metadata(MetadataVO.empty())
+      .active(active != null ? active : Boolean.TRUE)
+      .metadata(metadata!=null ? metadata : MetadataVO.empty())
       .auditInfo(AuditInfoVO.create())
       .build();
   }

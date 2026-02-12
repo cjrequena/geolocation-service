@@ -2,6 +2,7 @@ package com.cjrequena.sample.domain.model.command;
 
 import com.cjrequena.sample.controller.dto.CreateCityRequestDTO;
 import com.cjrequena.sample.domain.model.City;
+import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -22,14 +23,15 @@ public class CreateCityCommand extends Command {
     super(UUID.randomUUID());
     this.city = City.create(
       getId(),
-      UUID.fromString(dto.getRegionId()),
-      UUID.fromString(dto.getGeoShapeId()),
+      dto.getRegionId() != null ? UUID.fromString(dto.getRegionId()) : null,
+      dto.getGeoShapeId() != null ? UUID.fromString(dto.getGeoShapeId()) : null,
       dto.getName(),
-      PopulationVO.of(dto.getPopulation()),
-      TimeZone.getTimeZone(dto.getTimeZone()),
+      dto.getPopulation() != null ? PopulationVO.of(dto.getPopulation()) : null,
+      dto.getTimeZone() != null ?TimeZone.getTimeZone(dto.getTimeZone()): null,
       dto.getPostalCode(),
-      dto.getIsCapital(),
-      dto.getIsActive()
-      );
+      dto.getCapital(),
+      dto.getActive(),
+      dto.getMetadata() != null ? MetadataVO.of(dto.getMetadata()) : MetadataVO.empty()
+    );
   }
 }

@@ -1,5 +1,6 @@
 package com.cjrequena.sample.controller.dto;
 
+import com.cjrequena.sample.domain.model.enums.LocationType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -25,6 +26,11 @@ public class CreateLocationRequestDTO {
   @Size(min = 2, max = 100, message = "Area name must be between 2 and 100 characters")
   @Schema(description = "Location name", example = "HOTEL", required = true)
   private String name;
+
+  @NotBlank(message = "Location type is required")
+  //@Pattern(regexp = "^(POINT|POLYGON|CIRCLE|RECTANGLE|LINE)$", message = "Geometry type must be POINT|POLYGON|CIRCLE|RECTANGLE|LINE")
+  @Schema(description = "Location type", example = "HOTEL")
+  private LocationType locationType;
 
   @NotNull(message = "Latitude is required")
   @DecimalMin(value = "-90.0", message = "Latitude must be between -90 and 90")
@@ -60,6 +66,6 @@ public class CreateLocationRequestDTO {
   @Schema(description = "Is this a area active", example = "false")
   private Boolean active;
 
-    @Schema(description = "Custom metadata as key-value pairs")
-    private Map<String, Object> metadata;
+  @Schema(description = "Custom metadata as key-value pairs")
+  private Map<String, Object> metadata;
 }

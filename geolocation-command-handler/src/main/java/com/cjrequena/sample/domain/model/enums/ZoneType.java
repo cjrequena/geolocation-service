@@ -15,7 +15,7 @@ public enum ZoneType {
   RESIDENTIAL("RESIDENTIAL"),
   COMMERCIAL("COMMERCIAL"),
   INDUSTRIAL("INDUSTRIAL"),
-  OTHER("OTHER");
+  GENERIC("GENERIC");
 
   private final String value;
 
@@ -31,7 +31,7 @@ public enum ZoneType {
    * Default zone type.
    */
   public static ZoneType defaultType() {
-    return OTHER;
+    return GENERIC;
   }
 
   /**

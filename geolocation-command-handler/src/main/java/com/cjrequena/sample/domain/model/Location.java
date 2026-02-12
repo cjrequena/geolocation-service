@@ -41,6 +41,7 @@ public class Location {
     UUID id,
     UUID zoneId,
     String name,
+    LocationType locationType,
     PointVO point,
     AltitudeVO altitude,
     GpsAccuracyVO accuracy,
@@ -56,6 +57,7 @@ public class Location {
       .id(id)
       .zoneId(zoneId)
       .name(name != null ? name : "GENERIC_LOCATION")
+      .locationType(locationType!= null ? locationType : LocationType.GENERIC)
       .point(point)
       .altitude(altitude)
       .accuracy(accuracy)

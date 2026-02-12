@@ -42,20 +42,29 @@ public class Region {
   public static Region create(
     UUID id,
     UUID countryId,
+    UUID geoShapeId,
     String name,
     String code,
-    RegionType type) {
+    RegionType regionType,
+    PopulationVO population,
+    TimeZone timeZone,
+    Boolean active,
+    MetadataVO metadata
+  ) {
 
     validateCreation(id, countryId, name);
 
     return Region.builder()
       .id(id)
       .countryId(countryId)
+      .geoShapeId(geoShapeId)
       .name(name)
       .code(code)
-      .type(type != null ? type : RegionType.defaultType())
-      .active(Boolean.TRUE)
-      .metadata(MetadataVO.empty())
+      .type(regionType != null ? regionType : RegionType.defaultType())
+      .population(population)
+      .timeZone(timeZone != null ? timeZone : TimeZone.getDefault())
+      .active(active != null ? active : Boolean.TRUE)
+      .metadata(metadata != null ? metadata : MetadataVO.empty())
       .auditInfo(AuditInfoVO.create())
       .build();
   }

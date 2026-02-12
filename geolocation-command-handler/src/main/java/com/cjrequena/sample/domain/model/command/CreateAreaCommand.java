@@ -24,14 +24,13 @@ public class CreateAreaCommand extends Command {
     this.area = Area.create(
       getId(),
       UUID.fromString(dto.getCityId()),
-      UUID.fromString(dto.getGeoShapeId()),
+      dto.getGeoShapeId() != null ? UUID.fromString(dto.getGeoShapeId()) : null,
       dto.getName(),
-      AreaType.from(dto.getAreaType()),
-      PopulationVO.of(dto.getPopulation()),
+      dto.getAreaType() != null ? dto.getAreaType() : AreaType.GENERIC,
+      dto.getPopulation() != null ? PopulationVO.of(dto.getPopulation()) : null,
       dto.getPostalCode(),
       dto.getActive(),
-      dto.getMetadata()!=null ? MetadataVO.of(dto.getMetadata()) : MetadataVO.empty()
-
+      dto.getMetadata() != null ? MetadataVO.of(dto.getMetadata()) : MetadataVO.empty()
     );
   }
 }

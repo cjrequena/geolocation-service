@@ -25,9 +25,9 @@ public class CreateZoneCommand extends Command {
       UUID.fromString(dto.getAreaId()),
       UUID.fromString(dto.getGeoShapeId()),
       dto.getName(),
-      ZoneType.from(dto.getZoneType()),
+      dto.getZoneType() != null ? dto.getZoneType() : ZoneType.GENERIC,
       dto.getPostalCode(),
-      dto.getActive(),
+      dto.getActive() != null ? dto.getActive() : Boolean.TRUE,
       dto.getMetadata() != null ? MetadataVO.of(dto.getMetadata()) : MetadataVO.empty()
     );
   }
