@@ -87,6 +87,7 @@ public class JacksonConfiguration {
       com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
     );
 
+
     return objectMapper;
   }
 

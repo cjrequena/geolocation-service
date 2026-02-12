@@ -1,9 +1,11 @@
 package com.cjrequena.sample.domain.model.vo;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.extern.jackson.Jacksonized;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -16,7 +18,9 @@ import java.time.temporal.ChronoUnit;
  * Enhanced Audit Info value object for tracking creation and modification timestamps.
  * Provides additional utility methods for audit trail analysis.
  */
+@Builder
 @Getter
+@Jacksonized
 @EqualsAndHashCode
 public class AuditInfoVO implements Serializable {
   @Serial
@@ -30,12 +34,11 @@ public class AuditInfoVO implements Serializable {
   private final String updatedBy;
 
   @JsonCreator
-  @Builder
   private AuditInfoVO(
-    OffsetDateTime createdAt,
-    OffsetDateTime updatedAt,
-    String createdBy,
-    String updatedBy) {
+    @JsonProperty("created_at") OffsetDateTime createdAt,
+    @JsonProperty("updated_at") OffsetDateTime updatedAt,
+    @JsonProperty("created_by") String createdBy,
+    @JsonProperty("updated_by") String updatedBy) {
 
     if (createdAt == null) {
       throw new IllegalArgumentException("createdAt cannot be null");

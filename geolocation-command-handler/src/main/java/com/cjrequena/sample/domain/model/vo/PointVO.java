@@ -1,7 +1,9 @@
 package com.cjrequena.sample.domain.model.vo;
 
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.extern.jackson.Jacksonized;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -13,6 +15,8 @@ import java.util.Objects;
  * Point value object representing a precise geographic point.
  */
 @Getter
+@Builder
+@Jacksonized
 @EqualsAndHashCode
 public final class PointVO implements Serializable {
 

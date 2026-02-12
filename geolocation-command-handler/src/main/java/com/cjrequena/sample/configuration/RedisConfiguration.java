@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -383,7 +384,7 @@ public class RedisConfiguration {
    */
   @Bean
   @Primary
-  public RedisTemplate redisTemplate(LettuceConnectionFactory connectionFactory, ObjectMapper objectMapper) {
+  public RedisTemplate redisTemplate(LettuceConnectionFactory connectionFactory, @Qualifier("redisObjectMapper") ObjectMapper objectMapper) {
 
     log.info("Configuring RedisTemplate");
 

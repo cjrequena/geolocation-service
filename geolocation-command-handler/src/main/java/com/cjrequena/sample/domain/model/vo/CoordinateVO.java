@@ -4,10 +4,11 @@ import com.cjrequena.sample.shared.common.util.JsonUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -18,7 +19,8 @@ import java.math.RoundingMode;
  * Coordinates value object representing latitude and longitude.
  */
 @Getter
-@SuperBuilder
+@Builder
+@Jacksonized
 @EqualsAndHashCode
 @ToString
 public class CoordinateVO implements Serializable {
