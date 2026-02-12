@@ -1,5 +1,6 @@
 package com.cjrequena.sample.domain.mapper;
 
+import com.cjrequena.sample.controller.dto.LocationResponseDTO;
 import com.cjrequena.sample.domain.model.Location;
 import com.cjrequena.sample.domain.model.vo.*;
 import com.cjrequena.sample.persistence.entity.LocationEntity;
@@ -30,22 +31,22 @@ public abstract class LocationMapper {
   /**
    * Converts a {@link Location} domain aggregate into a {@link LocationEntity}.
    */
-  @Mapping(target = "id",         source = "id")
+  @Mapping(target = "id", source = "id")
   @Mapping(target = "name", source = "name")
   @Mapping(target = "locationType", source = "locationType")
-  @Mapping(target = "address",    source = "address")
+  @Mapping(target = "address", source = "address")
   @Mapping(target = "postalCode", source = "postalCode")
-  @Mapping(target = "active",     source = "active")
+  @Mapping(target = "active", source = "active")
   // Handled in @AfterMapping:
-  @Mapping(target = "zone",            ignore = true)   // UUID           → shell ZoneEntity
-  @Mapping(target = "point",           ignore = true)   // PointVO        → JTS Point
-  @Mapping(target = "altitudeMeters",  ignore = true)   // AltitudeVO     → BigDecimal
-  @Mapping(target = "accuracyMeters",  ignore = true)   // GpsAccuracyVO  → BigDecimal
-  @Mapping(target = "metadata",        ignore = true)   // MetadataVO     → JsonNode
-  @Mapping(target = "createdBy",       ignore = true)   // AuditInfoVO
-  @Mapping(target = "updatedBy",       ignore = true)
-  @Mapping(target = "createdAt",       ignore = true)
-  @Mapping(target = "updatedAt",       ignore = true)
+  @Mapping(target = "zone", ignore = true)   // UUID           → shell ZoneEntity
+  @Mapping(target = "point", ignore = true)   // PointVO        → JTS Point
+  @Mapping(target = "altitudeMeters", ignore = true)   // AltitudeVO     → BigDecimal
+  @Mapping(target = "accuracyMeters", ignore = true)   // GpsAccuracyVO  → BigDecimal
+  @Mapping(target = "metadata", ignore = true)   // MetadataVO     → JsonNode
+  @Mapping(target = "createdBy", ignore = true)   // AuditInfoVO
+  @Mapping(target = "updatedBy", ignore = true)
+  @Mapping(target = "createdAt", ignore = true)
+  @Mapping(target = "updatedAt", ignore = true)
   public abstract LocationEntity toEntity(Location domain);
 
   /**
@@ -90,19 +91,19 @@ public abstract class LocationMapper {
   /**
    * Converts a {@link LocationEntity} into a {@link Location} domain 
    */
-  @Mapping(target = "id",           source = "id")
-  @Mapping(target = "name",         source = "name")
+  @Mapping(target = "id", source = "id")
+  @Mapping(target = "name", source = "name")
   @Mapping(target = "locationType", source = "locationType")
-  @Mapping(target = "address",      source = "address")
-  @Mapping(target = "postalCode",   source = "postalCode")
-  @Mapping(target = "active",       source = "active")
+  @Mapping(target = "address", source = "address")
+  @Mapping(target = "postalCode", source = "postalCode")
+  @Mapping(target = "active", source = "active")
   // Handled in @AfterMapping:
-  @Mapping(target = "zoneId",     ignore = true)   // ZoneEntity     → UUID
-  @Mapping(target = "point",      ignore = true)   // JTS Point      → PointVO
-  @Mapping(target = "altitude",   ignore = true)   // BigDecimal     → AltitudeVO
-  @Mapping(target = "accuracy",   ignore = true)   // BigDecimal     → GpsAccuracyVO
-  @Mapping(target = "metadata",   ignore = true)   // JsonNode       → MetadataVO
-  @Mapping(target = "auditInfo",  ignore = true)   // timestamps     → AuditInfoVO
+  @Mapping(target = "zoneId", ignore = true)   // ZoneEntity     → UUID
+  @Mapping(target = "point", ignore = true)   // JTS Point      → PointVO
+  @Mapping(target = "altitude", ignore = true)   // BigDecimal     → AltitudeVO
+  @Mapping(target = "accuracy", ignore = true)   // BigDecimal     → GpsAccuracyVO
+  @Mapping(target = "metadata", ignore = true)   // JsonNode       → MetadataVO
+  @Mapping(target = "auditInfo", ignore = true)   // timestamps     → AuditInfoVO
   public abstract Location toDomain(LocationEntity entity);
 
   /**
@@ -142,6 +143,66 @@ public abstract class LocationMapper {
       domain.setMetadata(MetadataVO.of(entity.getMetadata()));
     }
 
+  }
+
+  // ================================================================
+  // Domain  →  Response DTO
+  // ================================================================
+
+  /**
+   * Converts a {@link Location} domain aggregate into a {@link LocationResponseDTO}.
+   */
+  @Mapping(target = "id", expression = "java(domain.getId() != null ? domain.getId().toString() : null)")
+  //@Mapping(target = "zoneId", expression = "java(domain.getZoneId() != null ? domain.getZoneId().toString() : null)")
+  @Mapping(target = "name", source = "name")
+  @Mapping(target = "locationType", source = "locationType")
+  @Mapping(target = "address", source = "address")
+  @Mapping(target = "postalCode", source = "postalCode")
+  @Mapping(target = "active", source = "active")
+  @Mapping(target = "latitude", ignore = true)
+  @Mapping(target = "longitude", ignore = true)
+  @Mapping(target = "altitudeMeters", ignore = true)
+  @Mapping(target = "accuracyMeters", ignore = true)
+  @Mapping(target = "metadata", ignore = true)
+  @Mapping(target = "createdAt", ignore = true)
+  @Mapping(target = "updatedAt", ignore = true)
+  public abstract LocationResponseDTO toResponseDTO(Location domain);
+
+  /**
+   * Fills the flattened fields on {@link LocationResponseDTO}.
+   */
+  @AfterMapping
+  protected void populateResponseDTOFields(Location domain, @MappingTarget LocationResponseDTO dto) {
+    if (domain == null) {
+      return;
+    }
+
+    // ── PointVO  →  latitude/longitude ──────────────────────────
+    if (domain.getPoint() != null) {
+      dto.setLatitude(domain.getPoint().getLatitude());
+      dto.setLongitude(domain.getPoint().getLongitude());
+    }
+
+    // ── AltitudeVO  →  BigDecimal ──────────────────────────────────────
+    dto.setAltitudeMeters(altitudeVOToDouble(domain.getAltitude()));
+
+    // ── GpsAccuracyVO  →  BigDecimal ───────────────────────────────
+    dto.setAccuracyMeters(gpsAccuracyVOToDouble(domain.getAccuracy()));
+
+    // MetadataVO → Map<String, Object> ───────────────────────────────
+    if (domain.getMetadata() != null) {
+      dto.setMetadata(domain.getMetadata().toMap());
+    }
+
+    // ── AuditInfoVO  →  timestamps ──────────────────────
+    if (domain.getAuditInfo() != null) {
+      dto.setCreatedAt(domain.getAuditInfo().getCreatedAt() != null
+        ? domain.getAuditInfo().getCreatedAt().toString()
+        : null);
+      dto.setUpdatedAt(domain.getAuditInfo().getUpdatedAt() != null
+        ? domain.getAuditInfo().getUpdatedAt().toString()
+        : null);
+    }
   }
 
   // ================================================================
@@ -229,6 +290,20 @@ public abstract class LocationMapper {
     return AltitudeVO.of(altitudeMeters.doubleValue());
   }
 
+  static Double altitudeVOToDouble(AltitudeVO altitude) {
+    if (altitude == null || altitude.getMeters() == null) {
+      return null;
+    }
+    return altitude.getMeters().doubleValue();
+  }
+
+  static AltitudeVO doubleToAltitudeVO(BigDecimal altitudeMeters) {
+    if (altitudeMeters == null) {
+      return null;
+    }
+    return AltitudeVO.of(altitudeMeters.doubleValue());
+  }
+
   // ── GpsAccuracyVO ↔ BigDecimal ─────────────────────────────────────────────
 
   /**
@@ -250,5 +325,19 @@ public abstract class LocationMapper {
       return null;
     }
     return GpsAccuracyVO.of(accuracyMeters.doubleValue());
+  }
+
+  static Double gpsAccuracyVOToDouble(GpsAccuracyVO accuracy) {
+    if (accuracy == null || accuracy.getMeters() == null) {
+      return null;
+    }
+    return accuracy.getMeters().doubleValue();
+  }
+
+  static GpsAccuracyVO doubleToGpsAccuracyVO(Double accuracyMeters) {
+    if (accuracyMeters == null) {
+      return null;
+    }
+    return GpsAccuracyVO.of(accuracyMeters);
   }
 }

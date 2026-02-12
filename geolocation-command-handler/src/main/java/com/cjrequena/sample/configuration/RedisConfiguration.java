@@ -378,14 +378,12 @@ public class RedisConfiguration {
    * Uses String serializer for keys and JSON serializer for values.
    *
    * @param connectionFactory the Lettuce connection factory
-   * @param redisObjectMapper custom ObjectMapper with Java 8 date/time support
+   * @param objectMapper custom ObjectMapper with Java 8 date/time support
    * @return configured RedisTemplate
    */
   @Bean
   @Primary
-  public RedisTemplate redisTemplate(
-    LettuceConnectionFactory connectionFactory,
-    ObjectMapper redisObjectMapper) {
+  public RedisTemplate redisTemplate(LettuceConnectionFactory connectionFactory, ObjectMapper objectMapper) {
 
     log.info("Configuring RedisTemplate");
 
@@ -394,7 +392,7 @@ public class RedisConfiguration {
 
     // Configure serializers
     RedisSerializer<String> stringSerializer = new StringRedisSerializer();
-    RedisSerializer<Object> jsonSerializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper);
+    RedisSerializer<Object> jsonSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);
 
     // Key serializers - always use String
     template.setKeySerializer(stringSerializer);

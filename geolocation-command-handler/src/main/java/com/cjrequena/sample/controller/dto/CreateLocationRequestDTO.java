@@ -27,7 +27,7 @@ public class CreateLocationRequestDTO {
   @Schema(description = "Location name", example = "HOTEL", required = true)
   private String name;
 
-  @NotBlank(message = "Location type is required")
+  //@NotBlank(message = "Location type is required")
   //@Pattern(regexp = "^(POINT|POLYGON|CIRCLE|RECTANGLE|LINE)$", message = "Geometry type must be POINT|POLYGON|CIRCLE|RECTANGLE|LINE")
   @Schema(description = "Location type", example = "HOTEL")
   private LocationType locationType;

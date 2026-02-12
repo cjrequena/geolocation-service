@@ -1,5 +1,6 @@
 package com.cjrequena.sample.controller.dto;
 
+import com.cjrequena.sample.domain.model.enums.LocationType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +24,12 @@ public class LocationResponseDTO {
 
   @Schema(description = "Location unique identifier", example = "550e8400-e29b-41d4-a716-446655440000")
   private String id;
+
+  @Schema(description = "Location name", example = "HOTEL")
+  private String name;
+
+  @Schema(description = "Location type", example = "HOTEL")
+  private LocationType locationType;
 
   @Schema(description = "Latitude in decimal degrees", example = "37.7749")
   private Double latitude;
