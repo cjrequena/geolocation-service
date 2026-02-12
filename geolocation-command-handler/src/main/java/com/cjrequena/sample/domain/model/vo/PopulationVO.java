@@ -3,6 +3,7 @@ package com.cjrequena.sample.domain.model.vo;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.extern.jackson.Jacksonized;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -10,7 +11,9 @@ import java.io.Serializable;
 /**
  * Population value object.
  */
+@Builder
 @Getter
+@Jacksonized
 @EqualsAndHashCode
 public class PopulationVO implements Serializable {
   @Serial

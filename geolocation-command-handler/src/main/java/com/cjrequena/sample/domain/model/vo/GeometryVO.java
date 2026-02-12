@@ -1,9 +1,11 @@
 package com.cjrequena.sample.domain.model.vo;
 
 import com.cjrequena.sample.domain.model.enums.GeometryType;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.extern.jackson.Jacksonized;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -17,6 +19,7 @@ import java.util.List;
  */
 @Getter
 @Builder
+@Jacksonized
 @EqualsAndHashCode
 public class GeometryVO implements Serializable {
   @Serial
@@ -29,6 +32,7 @@ public class GeometryVO implements Serializable {
   private final PolygonVO polygon;
   private final LineVO line;
 
+  @JsonCreator
   private GeometryVO(
     GeometryType type,
     PointVO point,
