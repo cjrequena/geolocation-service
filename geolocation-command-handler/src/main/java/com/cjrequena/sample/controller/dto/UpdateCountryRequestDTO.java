@@ -2,12 +2,15 @@ package com.cjrequena.sample.controller.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Map;
 
 /**
  * Request DTO for updating an existing Country.
@@ -23,9 +26,28 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Request to update an existing country")
 public class UpdateCountryRequestDTO {
 
+  @NotBlank(message = "Country name is required")
   @Size(min = 2, max = 100, message = "Country name must be between 2 and 100 characters")
-  @Schema(description = "Country name", example = "United States")
+  @Schema(description = "Country name", example = "United States", required = true)
   private String name;
+
+  @NotBlank(message = "ISO alpha-2 code is required")
+  @Size(min = 2, max = 2, message = "ISO alpha-2 code must be exactly 2 characters")
+  @Pattern(regexp = "^[A-Z]{2}$", message = "ISO alpha-2 code must be two uppercase letters")
+  @Schema(description = "ISO 3166-1 alpha-2 code", example = "US", required = true)
+  private String isoCodeAlpha2;
+
+  @NotBlank(message = "ISO alpha-3 code is required")
+  @Size(min = 3, max = 3, message = "ISO alpha-3 code must be exactly 3 characters")
+  @Pattern(regexp = "^[A-Z]{3}$", message = "ISO alpha-3 code must be three uppercase letters")
+  @Schema(description = "ISO 3166-1 alpha-3 code", example = "USA", required = true)
+  private String isoCodeAlpha3;
+
+  @NotBlank(message = "ISO numeric code is required")
+  @Size(min = 3, max = 3, message = "ISO numeric code must be exactly 3 digits")
+  @Pattern(regexp = "^[0-9]{3}$", message = "ISO numeric code must be three digits")
+  @Schema(description = "ISO 3166-1 numeric code", example = "840", required = true)
+  private String isoCodeNumeric;
 
   @Size(max = 10, message = "Phone code must not exceed 10 characters")
   @Pattern(regexp = "^\\+[0-9]{1,4}$", message = "Phone code must start with + followed by 1-4 digits")
@@ -45,6 +67,9 @@ public class UpdateCountryRequestDTO {
   @Schema(description = "Population count", example = "331002651")
   private Long population;
 
-  @Schema(description = "Active status — set to false to deactivate", example = "true")
-  private Boolean isActive;
+  @Schema(description = "Is this a country active", example = "false")
+  private Boolean active;
+
+  @Schema(description = "Custom metadata as key-value pairs")
+  private Map<String, Object> metadata;
 }

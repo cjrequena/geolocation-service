@@ -51,7 +51,6 @@ public class CreateCityRequestDTO {
   @Schema(description = "Is this a city active", example = "false")
   private Boolean active;
 
-
   @Schema(description = "Custom metadata as key-value pairs")
   private Map<String, Object> metadata;
 }

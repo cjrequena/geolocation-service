@@ -1,12 +1,16 @@
 package com.cjrequena.sample.controller.dto;
 
+import com.cjrequena.sample.domain.model.enums.AreaType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Map;
 
 /**
  * Request DTO for updating an existing Area.
@@ -18,12 +22,19 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Request to update an existing Area")
 public class UpdateAreaRequestDTO {
 
+  @NotBlank(message = "Area name is required")
   @Size(min = 2, max = 100, message = "Area name must be between 2 and 100 characters")
-  @Schema(description = "Area name", example = "Mission District")
+  @Schema(description = "Area name", example = "Mission District", required = true)
   private String name;
 
-  @Schema(description = "Area type", example = "DISTRICT")
-  private String areaType;
+  @NotBlank(message = "City ID is required")
+  @Schema(description = "Parent city ID", example = "550e8400-e29b-41d4-a716-446655440000", required = true)
+  private String cityId;
+
+  @NotBlank(message = "Area type is required")
+  //@Pattern(regexp = "^(POINT|POLYGON|CIRCLE|RECTANGLE|LINE)$", message = "Geometry type must be POINT|POLYGON|CIRCLE|RECTANGLE|LINE")
+  @Schema(description = "Area type", example = "DISTRICT", required = true)
+  private AreaType areaType;
 
   @Size(max = 20, message = "Postal code must not exceed 20 characters")
   @Schema(description = "Postal code", example = "94110")
@@ -36,6 +47,9 @@ public class UpdateAreaRequestDTO {
   @Schema(description = "Population count", example = "48000")
   private Long population;
 
-  @Schema(description = "Active status", example = "true")
+  @Schema(description = "Is this a area active", example = "false")
   private Boolean active;
+
+  @Schema(description = "Custom metadata as key-value pairs")
+  private Map<String, Object> metadata;
 }
