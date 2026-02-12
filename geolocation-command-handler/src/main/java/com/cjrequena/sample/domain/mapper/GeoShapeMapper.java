@@ -41,6 +41,8 @@ public abstract class GeoShapeMapper {
   @Mapping(target = "centerLongitude", source = "centerCoordinates.longitude")
   @Mapping(target = "radiusMeters",    source = "radius.meters")
   @Mapping(target = "active",          source = "active")
+  @Mapping(target = "createdBy",       source = "auditInfo.createdBy")   // AuditInfoVO
+  @Mapping(target = "updatedBy",       source = "auditInfo.updatedBy")
   @Mapping(target = "createdAt",       source = "auditInfo.createdAt")
   @Mapping(target = "updatedAt",       source = "auditInfo.updatedAt")
   // These three fields have no direct path mapping; the @AfterMapping hook handles them.
@@ -135,10 +137,11 @@ public abstract class GeoShapeMapper {
       domain.setMetadata(MetadataVO.of(entity.getMetadata()));
     }
 
-    // createdAt + updatedAt  ->  AuditInfoVO
+    // ── AuditInfoVO ──────────────────────
     if (entity.getCreatedAt() != null || entity.getUpdatedAt() != null) {
-      domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt()));
+      domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt(), entity.getCreatedBy(), entity.getUpdatedBy()));
     }
+
   }
 
   // ==========================================

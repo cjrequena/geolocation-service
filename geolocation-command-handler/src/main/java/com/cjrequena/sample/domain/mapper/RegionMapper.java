@@ -43,7 +43,9 @@ public interface RegionMapper {
   @Mapping(target = "regionType", ignore = true)   // enum  → String
   @Mapping(target = "population", ignore = true)   // VO    → Long
   @Mapping(target = "metadata",   ignore = true)
-  @Mapping(target = "createdAt", ignore = true)   // VO    → OffsetDateTime
+  @Mapping(target = "createdBy",  ignore = true)   // AuditInfoVO
+  @Mapping(target = "updatedBy",  ignore = true)
+  @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)
   // VO    → OffsetDateTime
   RegionEntity toEntity(Region domain);
@@ -73,8 +75,10 @@ public interface RegionMapper {
       entity.setMetadata(domain.getMetadata().getJsonNode());
     }
 
-    // ── AuditInfoVO  →  createdAt / updatedAt ──────────────────────
+    // ── AuditInfoVO  ──────────────────────
     if (domain.getAuditInfo() != null) {
+      entity.setCreatedBy(domain.getAuditInfo().getCreatedBy());
+      entity.setUpdatedBy(domain.getAuditInfo().getUpdatedBy());
       entity.setCreatedAt(domain.getAuditInfo().getCreatedAt());
       entity.setUpdatedAt(domain.getAuditInfo().getUpdatedAt());
     }
@@ -133,14 +137,14 @@ public interface RegionMapper {
     // ── Long  →  PopulationVO ──────────────────────────────────────
     domain.setPopulation(longToPopulationVO(entity.getPopulation()));
 
-    // ── createdAt / updatedAt  →  AuditInfoVO ──────────────────────
-    if (entity.getCreatedAt() != null || entity.getUpdatedAt() != null) {
-      domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt()));
-    }
-
     // ── JsonNode  →  MetadataVO ────────────────────────────────────
     if (entity.getMetadata() != null) {
       domain.setMetadata(MetadataVO.of(entity.getMetadata()));
+    }
+
+    // ── AuditInfoVO ──────────────────────
+    if (entity.getCreatedAt() != null || entity.getUpdatedAt() != null) {
+      domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt(), entity.getCreatedBy(), entity.getUpdatedBy()));
     }
   }
 

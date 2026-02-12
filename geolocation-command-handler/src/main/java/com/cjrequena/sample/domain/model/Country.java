@@ -66,22 +66,6 @@ public class Country {
   }
 
   /**
-   * Update basic country information.
-   */
-  public void updateBasicInfo(String name, String phoneCode, String currencyCode) {
-    if (name != null) {
-      this.name = name;
-    }
-    if (phoneCode != null) {
-      this.phoneCode = phoneCode;
-    }
-    if (currencyCode != null) {
-      this.currencyCode = currencyCode;
-    }
-    this.auditInfo = this.auditInfo.update();
-  }
-
-  /**
    * Update metadata.
    */
   public void updateMetadata(MetadataVO metadata) {
@@ -89,15 +73,6 @@ public class Country {
       throw new IllegalArgumentException("Metadata cannot be null");
     }
     this.metadata = metadata;
-    this.auditInfo = this.auditInfo.update();
-  }
-
-  /**
-   * Set the capital city.
-   */
-  public void setCapital(String capital) {
-    this.capital = capital;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -108,7 +83,6 @@ public class Country {
       throw new IllegalArgumentException("PopulationVO must be non-negative");
     }
     this.population = population;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -116,7 +90,6 @@ public class Country {
    */
   public void activate() {
     this.active = Boolean.TRUE;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -124,7 +97,6 @@ public class Country {
    */
   public void deactivate() {
     this.active = Boolean.FALSE;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**

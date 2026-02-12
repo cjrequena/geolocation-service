@@ -42,6 +42,8 @@ public interface CityMapper {
   @Mapping(target = "population", ignore = true)   // PopulationVO  → Long
   @Mapping(target = "timeZone",   ignore = true)   // TimeZone      → String (IANA id)
   @Mapping(target = "metadata",   ignore = true)   // MetadataVO     → JsonNode
+  @Mapping(target = "createdBy",       ignore = true)   // AuditInfoVO    → createdBy / updatedBy
+  @Mapping(target = "updatedBy",       ignore = true)
   @Mapping(target = "createdAt",  ignore = true)   // AuditInfoVO   → OffsetDateTime
   @Mapping(target = "updatedAt",  ignore = true)   // AuditInfoVO   → OffsetDateTime
   CityEntity toEntity(City domain);
@@ -70,10 +72,12 @@ public interface CityMapper {
       entity.setMetadata(domain.getMetadata().getJsonNode());
     }
 
-    // ── AuditInfoVO  →  createdAt / updatedAt ──────────────────────
+    // ── AuditInfoVO  ──────────────────────
     if (domain.getAuditInfo() != null) {
       entity.setCreatedAt(domain.getAuditInfo().getCreatedAt());
       entity.setUpdatedAt(domain.getAuditInfo().getUpdatedAt());
+      entity.setCreatedBy(domain.getAuditInfo().getCreatedBy());
+      entity.setUpdatedBy(domain.getAuditInfo().getUpdatedBy());
     }
   }
 
@@ -126,11 +130,10 @@ public interface CityMapper {
     // ── String  →  TimeZone ────────────────────────────────────────
     domain.setTimeZone(stringToTimeZone(entity.getTimeZone()));
 
-    // ── createdAt / updatedAt  →  AuditInfoVO ──────────────────────
+    // ── AuditInfoVO ──────────────────────
     if (entity.getCreatedAt() != null || entity.getUpdatedAt() != null) {
-      domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt()));
+      domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt(), entity.getCreatedBy(), entity.getUpdatedBy()));
     }
-
     // ── JsonNode  →  MetadataVO ────────────────────────────────────
     if (entity.getMetadata() != null) {
       domain.setMetadata(MetadataVO.of(entity.getMetadata()));

@@ -38,13 +38,13 @@ public abstract class LocationMapper {
   @Mapping(target = "active",     source = "active")
   // Handled in @AfterMapping:
   @Mapping(target = "zone",            ignore = true)   // UUID           → shell ZoneEntity
-  @Mapping(target = "point",        ignore = true)   // PointVO        → JTS Point
+  @Mapping(target = "point",           ignore = true)   // PointVO        → JTS Point
   @Mapping(target = "altitudeMeters",  ignore = true)   // AltitudeVO     → BigDecimal
   @Mapping(target = "accuracyMeters",  ignore = true)   // GpsAccuracyVO  → BigDecimal
   @Mapping(target = "metadata",        ignore = true)   // MetadataVO     → JsonNode
-  @Mapping(target = "createdBy",       ignore = true)   // AuditInfoVO    → createdBy / updatedBy
+  @Mapping(target = "createdBy",       ignore = true)   // AuditInfoVO
   @Mapping(target = "updatedBy",       ignore = true)
-  @Mapping(target = "createdAt",       ignore = true)   // AuditInfoVO    → OffsetDateTime
+  @Mapping(target = "createdAt",       ignore = true)
   @Mapping(target = "updatedAt",       ignore = true)
   public abstract LocationEntity toEntity(Location domain);
 
@@ -55,14 +55,6 @@ public abstract class LocationMapper {
   protected void populateEntityFields(Location domain, @MappingTarget LocationEntity entity) {
     if (domain == null) {
       return;
-    }
-
-    // ── AuditInfoVO  →  createdAt / updatedAt ──────────────────────
-    if (domain.getAuditInfo() != null) {
-      entity.setCreatedBy(domain.getAuditInfo().getCreatedBy());
-      entity.setUpdatedBy(domain.getAuditInfo().getUpdatedBy());
-      entity.setCreatedAt(domain.getAuditInfo().getCreatedAt());
-      entity.setUpdatedAt(domain.getAuditInfo().getUpdatedAt());
     }
 
     // ── FK shell ───────────────────────────────────────────────────
@@ -82,6 +74,13 @@ public abstract class LocationMapper {
       entity.setMetadata(domain.getMetadata().getJsonNode());
     }
 
+    // ── AuditInfoVO  ──────────────────────
+    if (domain.getAuditInfo() != null) {
+      entity.setCreatedBy(domain.getAuditInfo().getCreatedBy());
+      entity.setUpdatedBy(domain.getAuditInfo().getUpdatedBy());
+      entity.setCreatedAt(domain.getAuditInfo().getCreatedAt());
+      entity.setUpdatedAt(domain.getAuditInfo().getUpdatedAt());
+    }
   }
 
   // ================================================================
@@ -121,8 +120,7 @@ public abstract class LocationMapper {
     if (entity == null) {
       return;
     }
-
-    // ── createdAt / updatedAt  →  AuditInfoVO ──────────────────────
+    // ── AuditInfoVO ──────────────────────
     if (entity.getCreatedAt() != null || entity.getUpdatedAt() != null) {
       domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt(), entity.getCreatedBy(), entity.getUpdatedBy()));
     }

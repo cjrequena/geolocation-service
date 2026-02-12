@@ -41,6 +41,8 @@ public interface AreaMapper {
   @Mapping(target = "areaType", ignore = true)   // AreaType   → String
   @Mapping(target = "population", ignore = true)   // PopulationVO → Long
   @Mapping(target = "metadata",        ignore = true)   // MetadataVO     → JsonNode
+  @Mapping(target = "createdBy",       ignore = true)   // AuditInfoVO    → createdBy / updatedBy
+  @Mapping(target = "updatedBy",       ignore = true)
   @Mapping(target = "createdAt", ignore = true)   // AuditInfoVO  → OffsetDateTime
   @Mapping(target = "updatedAt", ignore = true)
   AreaEntity toEntity(Area domain);
@@ -73,10 +75,12 @@ public interface AreaMapper {
       entity.setMetadata(domain.getMetadata().getJsonNode());
     }
 
-    // ── AuditInfoVO  →  createdAt / updatedAt ──────────────────────
+    // ── AuditInfoVO  ──────────────────────
     if (domain.getAuditInfo() != null) {
       entity.setCreatedAt(domain.getAuditInfo().getCreatedAt());
       entity.setUpdatedAt(domain.getAuditInfo().getUpdatedAt());
+      entity.setCreatedBy(domain.getAuditInfo().getCreatedBy());
+      entity.setUpdatedBy(domain.getAuditInfo().getUpdatedBy());
     }
   }
 
@@ -126,9 +130,9 @@ public interface AreaMapper {
     // ── Long  →  PopulationVO ──────────────────────────────────────
     domain.setPopulation(longToPopulationVO(entity.getPopulation()));
 
-    // ── createdAt / updatedAt  →  AuditInfoVO ──────────────────────
+    // ── AuditInfoVO ──────────────────────
     if (entity.getCreatedAt() != null || entity.getUpdatedAt() != null) {
-      domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt()));
+      domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt(), entity.getCreatedBy(), entity.getUpdatedBy()));
     }
 
     // ── JsonNode  →  MetadataVO ────────────────────────────────────

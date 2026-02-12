@@ -9,8 +9,7 @@ public enum LocationType {
   BUS_STATION("BUS_STATION"),
   PORT("PORT"),
   PICKUP("PICKUP"),
-  GENERIC("GENERIC"),
-  OTHER("OTHER");
+  GENERIC("GENERIC");
 
   private final String value;
 
@@ -26,7 +25,7 @@ public enum LocationType {
    * Default zone type.
    */
   public static LocationType defaultType() {
-    return OTHER;
+    return GENERIC;
   }
 
   /**

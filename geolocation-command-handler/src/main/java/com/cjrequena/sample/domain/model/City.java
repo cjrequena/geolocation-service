@@ -27,7 +27,6 @@ public class City {
   private UUID regionId;
   private UUID geoShapeId;
   private String name;
-
   private PopulationVO population;
   private TimeZone timeZone;
   private String postalCode;
@@ -70,22 +69,6 @@ public class City {
   }
 
   /**
-   * Update city information.
-   */
-  public void updateInfo(String name, String postalCode, TimeZone timeZone) {
-    if (name != null) {
-      this.name = name;
-    }
-    if (postalCode != null) {
-      this.postalCode = postalCode;
-    }
-    if (timeZone != null) {
-      this.timeZone = timeZone;
-    }
-    this.auditInfo = this.auditInfo.update();
-  }
-
-  /**
    * Update metadata.
    */
   public void updateMetadata(MetadataVO metadata) {
@@ -93,15 +76,13 @@ public class City {
       throw new IllegalArgumentException("Metadata cannot be null");
     }
     this.metadata = metadata;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
    * Assign geographic shape.
    */
-  public void assignGeoShape(UUID geoShapeId) {
+  public void assignGeoShapeId(UUID geoShapeId) {
     this.geoShapeId = geoShapeId;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -112,7 +93,6 @@ public class City {
       throw new IllegalArgumentException("PopulationVO must be non-negative");
     }
     this.population = population;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -120,7 +100,6 @@ public class City {
    */
   public void designateAsCapital() {
     this.capital = Boolean.TRUE;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -128,7 +107,6 @@ public class City {
    */
   public void removeCapitalDesignation() {
     this.capital = Boolean.FALSE;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -136,7 +114,6 @@ public class City {
    */
   public void activate() {
     this.active = Boolean.TRUE;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -144,7 +121,6 @@ public class City {
    */
   public void deactivate() {
     this.active = Boolean.FALSE;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**

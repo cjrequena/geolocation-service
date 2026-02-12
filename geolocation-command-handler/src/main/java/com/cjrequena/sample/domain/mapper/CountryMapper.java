@@ -70,7 +70,7 @@ public interface CountryMapper {
       entity.setMetadata(domain.getMetadata().getJsonNode());
     }
 
-    // ── AuditInfoVO  →  createdAt / updatedAt ──────────────────────
+    // ── AuditInfoVO  ──────────────────────
     if (domain.getAuditInfo() != null) {
       entity.setCreatedAt(domain.getAuditInfo().getCreatedAt());
       entity.setUpdatedAt(domain.getAuditInfo().getUpdatedAt());
@@ -125,14 +125,14 @@ public interface CountryMapper {
     // ── Long  →  PopulationVO ──────────────────────────────────────
     domain.setPopulation(longToPopulationVO(entity.getPopulation()));
 
-    // ── createdAt / updatedAt  →  AuditInfoVO ──────────────────────
-    if (entity.getCreatedAt() != null || entity.getUpdatedAt() != null) {
-      domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt()));
-    }
-
     // ── JsonNode  →  MetadataVO ────────────────────────────────────
     if (entity.getMetadata() != null) {
       domain.setMetadata(MetadataVO.of(entity.getMetadata()));
+    }
+
+    // ── AuditInfoVO ──────────────────────
+    if (entity.getCreatedAt() != null || entity.getUpdatedAt() != null) {
+      domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt(), entity.getCreatedBy(), entity.getUpdatedBy()));
     }
   }
 

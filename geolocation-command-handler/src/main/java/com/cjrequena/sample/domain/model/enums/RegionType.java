@@ -12,7 +12,7 @@ public enum RegionType {
   AUTONOMOUS_COMMUNITY("AUTONOMOUS_COMMUNITY"),
   FEDERAL_DISTRICT("FEDERAL_DISTRICT"),
   SPECIAL_ADMINISTRATIVE_REGION("SPECIAL_ADMINISTRATIVE_REGION"),
-  OTHER("OTHER");
+  GENERIC("GENERIC");
 
   private final String value;
 
@@ -28,7 +28,7 @@ public enum RegionType {
    * Default region type.
    */
   public static RegionType defaultType() {
-    return OTHER;
+    return GENERIC;
   }
 
   /**

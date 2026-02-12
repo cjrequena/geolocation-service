@@ -65,21 +65,6 @@ public class Area {
       .build();
   }
 
-  /**
-   * Update area information.
-   */
-  public void updateInfo(String name, AreaType type, String postalCode) {
-    if (name != null) {
-      this.name = name;
-    }
-    if (type != null) {
-      this.type = type;
-    }
-    if (postalCode != null) {
-      this.postalCode = postalCode;
-    }
-    this.auditInfo = this.auditInfo.update();
-  }
 
   /**
    * Update metadata.
@@ -89,15 +74,13 @@ public class Area {
       throw new IllegalArgumentException("Metadata cannot be null");
     }
     this.metadata = metadata;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
    * Assign geographic shape.
    */
-  public void assignGeoShape(UUID geoShapeId) {
+  public void assignGeoShapeId(UUID geoShapeId) {
     this.geoShapeId = geoShapeId;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -108,7 +91,6 @@ public class Area {
       throw new IllegalArgumentException("PopulationVO must be non-negative");
     }
     this.population = population;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -116,7 +98,6 @@ public class Area {
    */
   public void activate() {
     this.active = Boolean.TRUE;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -124,7 +105,6 @@ public class Area {
    */
   public void deactivate() {
     this.active = Boolean.FALSE;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**

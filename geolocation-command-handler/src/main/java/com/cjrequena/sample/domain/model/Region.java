@@ -70,22 +70,6 @@ public class Region {
   }
 
   /**
-   * Update region information.
-   */
-  public void updateInfo(String name, String code, RegionType type) {
-    if (name != null) {
-      this.name = name;
-    }
-    if (code != null) {
-      this.code = code;
-    }
-    if (type != null) {
-      this.type = type;
-    }
-    this.auditInfo = this.auditInfo.update();
-  }
-
-  /**
    * Update metadata.
    */
   public void updateMetadata(MetadataVO metadata) {
@@ -93,7 +77,6 @@ public class Region {
       throw new IllegalArgumentException("Metadata cannot be null");
     }
     this.metadata = metadata;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -101,7 +84,6 @@ public class Region {
    */
   public void assignGeoShape(UUID geoShapeId) {
     this.geoShapeId = geoShapeId;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -112,23 +94,14 @@ public class Region {
       throw new IllegalArgumentException("PopulationVO must be non-negative");
     }
     this.population = population;
-    this.auditInfo = this.auditInfo.update();
   }
 
-  /**
-   * Set timeZone.
-   */
-  public void setTimeZone(TimeZone timeZone) {
-    this.timeZone = timeZone;
-    this.auditInfo = this.auditInfo.update();
-  }
 
   /**
    * Activate the region.
    */
   public void activate() {
     this.active = Boolean.TRUE;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -136,7 +109,6 @@ public class Region {
    */
   public void deactivate() {
     this.active = Boolean.FALSE;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**

@@ -136,7 +136,6 @@ public class GeoShape {
   public void updateGeometry(GeometryVO newGeometry) {
     validateGeometryUpdate(newGeometry);
     this.geometry = newGeometry;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -147,7 +146,6 @@ public class GeoShape {
       throw new IllegalArgumentException("Metadata cannot be null");
     }
     this.metadata = newMetadata;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -245,7 +243,6 @@ public class GeoShape {
    */
   public void activate() {
     this.active = Boolean.TRUE;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -253,7 +250,6 @@ public class GeoShape {
    */
   public void deactivate() {
     this.active = Boolean.FALSE;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**

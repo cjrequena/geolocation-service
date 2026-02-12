@@ -35,11 +35,13 @@ public interface ZoneMapper {
   @Mapping(target = "postalCode", source = "postalCode")
   @Mapping(target = "active",     source = "active")
   // Handled in @AfterMapping:
-  @Mapping(target = "area",   ignore = true)   // UUID       → shell Area
+  @Mapping(target = "area",       ignore = true)   // UUID       → shell Area
   @Mapping(target = "geoShape",   ignore = true)   // UUID       → shell GeoShapeEntity
   @Mapping(target = "zoneType",   ignore = true)   // ZoneType   → String
   @Mapping(target = "metadata",   ignore = true)
-  @Mapping(target = "createdAt",  ignore = true)   // AuditInfoVO  → OffsetDateTime
+  @Mapping(target = "createdBy",  ignore = true)   // AuditInfoVO
+  @Mapping(target = "updatedBy",  ignore = true)
+  @Mapping(target = "createdAt",  ignore = true)
   @Mapping(target = "updatedAt",  ignore = true)
   ZoneEntity toEntity(Zone domain);
 
@@ -62,8 +64,10 @@ public interface ZoneMapper {
       entity.setMetadata(domain.getMetadata().getJsonNode());
     }
 
-    // ── AuditInfoVO  →  createdAt / updatedAt ──────────────────────
+    // ── AuditInfoVO  ──────────────────────
     if (domain.getAuditInfo() != null) {
+      entity.setCreatedBy(domain.getAuditInfo().getCreatedBy());
+      entity.setUpdatedBy(domain.getAuditInfo().getUpdatedBy());
       entity.setCreatedAt(domain.getAuditInfo().getCreatedAt());
       entity.setUpdatedAt(domain.getAuditInfo().getUpdatedAt());
     }
@@ -110,14 +114,14 @@ public interface ZoneMapper {
     // ── String  →  ZoneType enum ───────────────────────────────────
     domain.setType(stringToZoneType(entity.getZoneType()));
 
-    // ── createdAt / updatedAt  →  AuditInfoVO ──────────────────────
-    if (entity.getCreatedAt() != null || entity.getUpdatedAt() != null) {
-      domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt()));
-    }
-
     // ── JsonNode  →  MetadataVO ────────────────────────────────────
     if (entity.getMetadata() != null) {
       domain.setMetadata(MetadataVO.of(entity.getMetadata()));
+    }
+
+    // ── AuditInfoVO ──────────────────────
+    if (entity.getCreatedAt() != null || entity.getUpdatedAt() != null) {
+      domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt(), entity.getCreatedBy(), entity.getUpdatedBy()));
     }
   }
 

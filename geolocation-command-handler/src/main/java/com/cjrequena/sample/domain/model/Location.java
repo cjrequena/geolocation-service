@@ -99,7 +99,6 @@ public class Location {
       throw new IllegalArgumentException("Point cannot be null");
     }
     this.point = newPoint;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -112,7 +111,6 @@ public class Location {
     if (postalCode != null) {
       this.postalCode = postalCode;
     }
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -120,7 +118,6 @@ public class Location {
    */
   public void assignToZone(UUID zoneId) {
     this.zoneId = zoneId;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -128,23 +125,6 @@ public class Location {
    */
   public void removeZoneAssignment() {
     this.zoneId = null;
-    this.auditInfo = this.auditInfo.update();
-  }
-
-  /**
-   * Set altitude information.
-   */
-  public void setAltitude(AltitudeVO altitude) {
-    this.altitude = altitude;
-    this.auditInfo = this.auditInfo.update();
-  }
-
-  /**
-   * Set accuracy information.
-   */
-  public void setGpsAccuracy(GpsAccuracyVO accuracy) {
-    this.accuracy = accuracy;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -155,7 +135,6 @@ public class Location {
       throw new IllegalArgumentException("Metadata cannot be null");
     }
     this.metadata = metadata;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -163,7 +142,6 @@ public class Location {
    */
   public void activate() {
     this.active = Boolean.TRUE;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
@@ -171,7 +149,6 @@ public class Location {
    */
   public void deactivate() {
     this.active = Boolean.FALSE;
-    this.auditInfo = this.auditInfo.update();
   }
 
   /**
