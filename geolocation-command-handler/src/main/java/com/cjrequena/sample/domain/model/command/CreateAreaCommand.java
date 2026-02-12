@@ -22,7 +22,7 @@ public class CreateAreaCommand extends Command {
   public CreateAreaCommand(@NotNull CreateAreaRequestDTO dto) {
     super(UUID.randomUUID());
     this.area = Area.create(
-      getId(),
+      getDomainId(),
       UUID.fromString(dto.getCityId()),
       dto.getGeoShapeId() != null ? UUID.fromString(dto.getGeoShapeId()) : null,
       dto.getName(),

@@ -88,7 +88,7 @@ public abstract class LocationMapper {
   // ================================================================
 
   /**
-   * Converts a {@link LocationEntity} into a {@link Location} domain aggregate.
+   * Converts a {@link LocationEntity} into a {@link Location} domain 
    */
   @Mapping(target = "id",           source = "id")
   @Mapping(target = "name",         source = "name")

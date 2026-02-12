@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Summary DTO for City aggregate.
+ * Summary DTO for City 
  */
 @Data
 @Builder

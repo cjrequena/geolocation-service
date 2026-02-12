@@ -23,7 +23,7 @@ public class CreateRegionCommand extends Command {
   public CreateRegionCommand(@NotNull CreateRegionRequestDTO dto) {
     super(UUID.randomUUID());
     this.region = Region.create(
-      getId(),
+      getDomainId(),
       UUID.fromString(dto.getCountryId()),
       UUID.fromString(dto.getGeoShapeId()),
       dto.getName(),

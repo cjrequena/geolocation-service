@@ -86,7 +86,7 @@ public interface CityMapper {
   // ================================================================
 
   /**
-   * Converts a {@link CityEntity} into a {@link City} domain aggregate.
+   * Converts a {@link CityEntity} into a {@link City} domain 
    */
   @Mapping(target = "id",         source = "id")
   @Mapping(target = "name",       source = "name")

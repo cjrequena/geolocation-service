@@ -23,7 +23,7 @@ public class UpdateRegionCommand extends Command {
   public UpdateRegionCommand(@NotNull UUID id, @NotNull UpdateRegionRequestDTO dto) {
     super(id);
     this.region = Region.create(
-      getId(),
+      getDomainId(),
       UUID.fromString(dto.getCountryId()),
       UUID.fromString(dto.getGeoShapeId()),
       dto.getName(),

@@ -25,5 +25,5 @@ import java.util.UUID;
 public abstract class Command {
 
   @NotNull
-  protected final UUID id;
+  protected final UUID domainId;
 }

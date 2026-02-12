@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Summary DTO for Country aggregate.
+ * Summary DTO for Country 
  *
  * <p>Lightweight representation for list endpoints where full detail is not needed.
  * Contains only the essential fields for display in tables or dropdowns.</p>

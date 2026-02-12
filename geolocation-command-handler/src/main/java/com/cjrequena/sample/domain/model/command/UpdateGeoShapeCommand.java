@@ -33,7 +33,7 @@ public class UpdateGeoShapeCommand extends Command {
         final Geometry geometry = WKTParserUtil.fromWKT(dto.getGeometryWKT(), GeometryType.POINT);
         final CoordinateVO coordinateVO = CoordinateVO.of(geometry.getCoordinate().y, geometry.getCoordinate().x);
         this.geoShape = GeoShape.createPoint(
-          getId(),
+          getDomainId(),
           dto.getName(),
           coordinateVO,
           dto.getMetadata() != null ? MetadataVO.of(dto.getMetadata()) : MetadataVO.empty()
@@ -46,7 +46,7 @@ public class UpdateGeoShapeCommand extends Command {
         Coordinate boundaryPoint = geometry.getCoordinates()[0];
         double radius = centroid.getCoordinate().distance(boundaryPoint);
         this.geoShape = GeoShape.createCircle(
-          getId(),
+          getDomainId(),
           dto.getName(),
           coordinateVO,
           RadiusVO.of(radius),
@@ -59,7 +59,7 @@ public class UpdateGeoShapeCommand extends Command {
         final CoordinateVO coordinateVO = CoordinateVO.of(geometry.getCentroid().getY(), geometry.getCentroid().getX());
         final GeometryVO geometryVO = GeometryVO.ofCoordinates(coordinateVO);
         this.geoShape = GeoShape.createRectangle(
-          getId(),
+          getDomainId(),
           dto.getName(),
           geometryVO,
           geometryVO.getBoundingBox().toBounds(),
@@ -71,7 +71,7 @@ public class UpdateGeoShapeCommand extends Command {
         final CoordinateVO coordinateVO = CoordinateVO.of(geometry.getCentroid().getY(), geometry.getCentroid().getX());
         final GeometryVO geometryVO = GeometryVO.ofCoordinates(coordinateVO);
         this.geoShape = GeoShape.createPolygon(
-          getId(),
+          getDomainId(),
           dto.getName(),
           geometryVO,
           geometryVO.getBoundingBox().toBounds(),
@@ -83,7 +83,7 @@ public class UpdateGeoShapeCommand extends Command {
         final CoordinateVO coordinateVO = CoordinateVO.of(geometry.getCentroid().getY(), geometry.getCentroid().getX());
         final GeometryVO geometryVO = GeometryVO.ofCoordinates(coordinateVO);
         this.geoShape = GeoShape.createLine(
-          getId(),
+          getDomainId(),
           dto.getName(),
           geometryVO,
           dto.getMetadata() != null ? MetadataVO.of(dto.getMetadata()) : MetadataVO.empty()

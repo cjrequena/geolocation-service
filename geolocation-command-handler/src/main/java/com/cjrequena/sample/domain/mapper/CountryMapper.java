@@ -84,7 +84,7 @@ public interface CountryMapper {
   // ================================================================
 
   /**
-   * Converts a {@link CountryEntity} into a {@link Country} domain aggregate.
+   * Converts a {@link CountryEntity} into a {@link Country} domain 
    */
   @Mapping(target = "id",           source = "id")
   @Mapping(target = "name",         source = "name")

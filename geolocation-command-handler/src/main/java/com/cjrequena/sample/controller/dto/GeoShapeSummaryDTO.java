@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Summary DTO for GeoShape aggregate.
+ * Summary DTO for GeoShape 
  *
  * <p>Lightweight representation used in lists and as nested references in other DTOs.</p>
  */

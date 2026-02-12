@@ -21,7 +21,7 @@ public class UpdateZoneCommand extends Command {
   public UpdateZoneCommand(@NotNull UUID id, @NotNull UpdateZoneRequestDTO dto) {
     super(id);
     this.zone = Zone.create(
-      getId(),
+      getDomainId(),
       UUID.fromString(dto.getAreaId()),
       UUID.fromString(dto.getGeoShapeId()),
       dto.getName(),

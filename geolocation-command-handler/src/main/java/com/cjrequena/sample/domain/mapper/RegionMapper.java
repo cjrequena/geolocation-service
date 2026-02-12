@@ -89,7 +89,7 @@ public interface RegionMapper {
   // ================================================================
 
   /**
-   * Converts a {@link RegionEntity} into a {@link Region} domain aggregate.
+   * Converts a {@link RegionEntity} into a {@link Region} domain 
    *
    * <p>Same pattern as {@link #toEntity}: scalar fields are wired declaratively;
    * everything else lands in the {@link #populateDomainFields} hook.</p>

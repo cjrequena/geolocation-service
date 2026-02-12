@@ -24,7 +24,7 @@ public class UpdateLocationCommand extends Command {
   public UpdateLocationCommand(@NotNull UUID id, @NotNull UpdateLocationRequestDTO dto) {
     super(id);
     this.location = Location.create(
-      getId(),
+      getDomainId(),
       UUID.fromString(dto.getZoneId()),
       dto.getName(),
       dto.getLocationType() != null ? dto.getLocationType() : LocationType.GENERIC,

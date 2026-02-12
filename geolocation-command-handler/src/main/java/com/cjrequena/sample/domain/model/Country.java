@@ -4,24 +4,22 @@ import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
 import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.UUID;
 
 /**
- * Country Domain Aggregate.
+ * Country Domain 
  *
  * Represents a country with ISO codes and geographic/demographic information.
  * This is the root aggregate for country-related operations.
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Country {
+public class Country extends Domain {
 
   private UUID id;
   private String name;

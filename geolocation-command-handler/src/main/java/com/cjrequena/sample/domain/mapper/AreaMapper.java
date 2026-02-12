@@ -89,7 +89,7 @@ public interface AreaMapper {
   // ================================================================
 
   /**
-   * Converts an {@link AreaEntity} into an {@link Area} domain aggregate.
+   * Converts an {@link AreaEntity} into an {@link Area} domain 
    */
   @Mapping(target = "id", source = "id")
   @Mapping(target = "name", source = "name")

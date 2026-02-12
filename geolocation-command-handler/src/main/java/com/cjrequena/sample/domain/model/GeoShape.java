@@ -2,24 +2,22 @@ package com.cjrequena.sample.domain.model;
 
 import com.cjrequena.sample.domain.model.enums.GeometryType;
 import com.cjrequena.sample.domain.model.vo.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.UUID;
 
 /**
- * GeoShape Domain Aggregate.
+ * GeoShape Domain 
  *
  * Represents a geographic shape that can be a point, circle, rectangle, polygon, or line.
  * This is a rich domain model with business logic and validation.
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GeoShape {
+public class GeoShape extends Domain {
 
   private UUID id;
   private String name;

@@ -3,25 +3,23 @@ package com.cjrequena.sample.domain.model;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.TimeZone;
 import java.util.UUID;
 
 /**
- * City Domain Aggregate.
+ * City Domain 
  *
  * Represents a city or municipality within a region.
  * A city can be designated as a capital and contains multiple areas.
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class City {
+public class City extends Domain {
 
   private UUID id;
   private UUID regionId;
@@ -63,7 +61,7 @@ public class City {
       .postalCode(postalCode)
       .capital(capital != null ? capital : Boolean.FALSE)
       .active(active != null ? active : Boolean.TRUE)
-      .metadata(metadata!=null ? metadata : MetadataVO.empty())
+      .metadata(metadata != null ? metadata : MetadataVO.empty())
       .auditInfo(AuditInfoVO.create())
       .build();
   }

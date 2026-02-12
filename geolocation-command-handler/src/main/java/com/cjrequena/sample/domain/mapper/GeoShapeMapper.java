@@ -82,7 +82,7 @@ public abstract class GeoShapeMapper {
   // ==========================================
 
   /**
-   * Maps a {@link GeoShapeEntity} to a {@link GeoShape} domain aggregate.
+   * Maps a {@link GeoShapeEntity} to a {@link GeoShape} domain 
    *
    * <p>Simple scalar fields are wired by the annotations below.  The
    * {@link #populateDomainComplexFields} hook runs afterwards and fills every

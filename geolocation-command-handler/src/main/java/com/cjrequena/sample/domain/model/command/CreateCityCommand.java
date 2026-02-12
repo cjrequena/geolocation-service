@@ -22,7 +22,7 @@ public class CreateCityCommand extends Command {
   public CreateCityCommand(@NotNull CreateCityRequestDTO dto) {
     super(UUID.randomUUID());
     this.city = City.create(
-      getId(),
+      getDomainId(),
       dto.getRegionId() != null ? UUID.fromString(dto.getRegionId()) : null,
       dto.getGeoShapeId() != null ? UUID.fromString(dto.getGeoShapeId()) : null,
       dto.getName(),

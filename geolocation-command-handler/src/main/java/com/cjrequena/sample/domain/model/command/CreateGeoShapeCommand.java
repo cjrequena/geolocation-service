@@ -27,12 +27,20 @@ public class CreateGeoShapeCommand extends Command {
   @Builder
   public CreateGeoShapeCommand(@NotNull CreateGeoShapeRequestDTO dto) {
     super(UUID.randomUUID());
+
+    if (dto.getGeometryType() == null) {
+      throw new IllegalArgumentException("GeometryType cannot be null");
+    }
+    if (dto.getGeometryWKT() == null || dto.getGeometryWKT().isBlank()) {
+      throw new IllegalArgumentException("GeometryWKT cannot be null or blank");
+    }
+
     switch (dto.getGeometryType()) {
       case POINT -> {
         final Geometry geometry = WKTParserUtil.fromWKT(dto.getGeometryWKT(), GeometryType.POINT);
         final CoordinateVO coordinateVO = CoordinateVO.of(geometry.getCoordinate().y, geometry.getCoordinate().x);
         this.geoShape = GeoShape.createPoint(
-          getId(),
+          getDomainId(),
           dto.getName(),
           coordinateVO,
           dto.getMetadata() != null ? MetadataVO.of(dto.getMetadata()) : MetadataVO.empty()
@@ -45,7 +53,7 @@ public class CreateGeoShapeCommand extends Command {
         Coordinate boundaryPoint = geometry.getCoordinates()[0];
         double radius = centroid.getCoordinate().distance(boundaryPoint);
         this.geoShape = GeoShape.createCircle(
-          getId(),
+          getDomainId(),
           dto.getName(),
           coordinateVO,
           RadiusVO.of(radius),
@@ -58,7 +66,7 @@ public class CreateGeoShapeCommand extends Command {
         final CoordinateVO coordinateVO = CoordinateVO.of(geometry.getCentroid().getY(), geometry.getCentroid().getX());
         final GeometryVO geometryVO = GeometryVO.ofCoordinates(coordinateVO);
         this.geoShape = GeoShape.createRectangle(
-          getId(),
+          getDomainId(),
           dto.getName(),
           geometryVO,
           geometryVO.getBoundingBox().toBounds(),
@@ -70,7 +78,7 @@ public class CreateGeoShapeCommand extends Command {
         final CoordinateVO coordinateVO = CoordinateVO.of(geometry.getCentroid().getY(), geometry.getCentroid().getX());
         final GeometryVO geometryVO = GeometryVO.ofCoordinates(coordinateVO);
         this.geoShape = GeoShape.createPolygon(
-          getId(),
+          getDomainId(),
           dto.getName(),
           geometryVO,
           geometryVO.getBoundingBox().toBounds(),
@@ -82,15 +90,13 @@ public class CreateGeoShapeCommand extends Command {
         final CoordinateVO coordinateVO = CoordinateVO.of(geometry.getCentroid().getY(), geometry.getCentroid().getX());
         final GeometryVO geometryVO = GeometryVO.ofCoordinates(coordinateVO);
         this.geoShape = GeoShape.createLine(
-          getId(),
+          getDomainId(),
           dto.getName(),
           geometryVO,
           dto.getMetadata() != null ? MetadataVO.of(dto.getMetadata()) : MetadataVO.empty()
         );
       }
-      default -> {
-        throw new IllegalArgumentException("Unsupported geometry type: " + dto.getGeometryType());
-      }
+      default -> throw new IllegalArgumentException("Unsupported geometry type: " + dto.getGeometryType());
     }
   }
 }

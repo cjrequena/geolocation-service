@@ -23,7 +23,7 @@ public class UpdateAreaCommand extends Command {
   public UpdateAreaCommand(@Nonnull UUID id, @NotNull UpdateAreaRequestDTO dto) {
     super(id);
     this.area = Area.create(
-      getId(),
+      getDomainId(),
       UUID.fromString(dto.getCityId()),
       dto.getGeoShapeId() != null ? UUID.fromString(dto.getGeoShapeId()) : null,
       dto.getName(),

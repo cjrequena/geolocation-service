@@ -78,7 +78,7 @@ public interface ZoneMapper {
   // ================================================================
 
   /**
-   * Converts an {@link ZoneEntity} into an {@link Zone} domain aggregate.
+   * Converts an {@link ZoneEntity} into an {@link Zone} domain 
    */
   @Mapping(target = "id",         source = "id")
   @Mapping(target = "name",       source = "name")

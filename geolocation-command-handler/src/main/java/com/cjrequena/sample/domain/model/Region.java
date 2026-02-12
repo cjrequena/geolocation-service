@@ -4,25 +4,23 @@ import com.cjrequena.sample.domain.model.enums.RegionType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.TimeZone;
 import java.util.UUID;
 
 /**
- * Region Domain Aggregate.
+ * Region Domain 
  *
  * Represents a first-level administrative division (state, province, territory, etc.).
  * A region belongs to a country and can contain multiple cities.
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Region {
+public class Region extends Domain {
 
   private UUID id;
   private UUID countryId;
@@ -95,7 +93,6 @@ public class Region {
     }
     this.population = population;
   }
-
 
   /**
    * Activate the region.

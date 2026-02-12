@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Summary DTO for Location aggregate.
+ * Summary DTO for Location 
  *
  * <p>Lightweight representation for lists. Address may be truncated if long.</p>
  */

@@ -4,24 +4,22 @@ import com.cjrequena.sample.domain.model.enums.AreaType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.UUID;
 
 /**
- * Area Domain Aggregate.
+ * Area Domain 
  *
  * Represents a sub-city area such as a district, borough, or neighborhood.
  * An area belongs to a city and contains multiple zones.
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Area {
+public class Area extends Domain {
 
   private UUID id;
   private UUID cityId;
@@ -60,11 +58,10 @@ public class Area {
       .population(population)
       .postalCode(postalCode)
       .active(active != null ? active : Boolean.TRUE)
-      .metadata(metadata!=null ? metadata : MetadataVO.empty())
+      .metadata(metadata != null ? metadata : MetadataVO.empty())
       .auditInfo(AuditInfoVO.create())
       .build();
   }
-
 
   /**
    * Update metadata.

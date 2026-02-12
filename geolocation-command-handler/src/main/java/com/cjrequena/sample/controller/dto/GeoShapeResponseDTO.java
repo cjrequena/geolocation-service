@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.util.Map;
 
 /**
- * Response DTO for GeoShape aggregate.
+ * Response DTO for GeoShape 
  *
  * <p>Used for GET endpoints. Flattens all geometry value objects into simple fields.</p>
  */

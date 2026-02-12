@@ -24,7 +24,7 @@ public class CreateLocationCommand extends Command {
   public CreateLocationCommand(@NotNull CreateLocationRequestDTO dto) {
     super(UUID.randomUUID());
     this.location = Location.create(
-      getId(),
+      getDomainId(),
       UUID.fromString(dto.getZoneId()),
       dto.getName(),
       dto.getLocationType() != null ? dto.getLocationType() : LocationType.GENERIC,

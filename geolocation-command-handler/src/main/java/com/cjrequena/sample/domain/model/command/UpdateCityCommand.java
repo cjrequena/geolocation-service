@@ -23,7 +23,7 @@ public class UpdateCityCommand extends Command {
   public UpdateCityCommand(@Nonnull UUID id, @NotNull UpdateCityRequestDTO dto) {
     super(id);
     this.city = City.create(
-      getId(),
+      getDomainId(),
       dto.getRegionId() != null ? UUID.fromString(dto.getRegionId()) : null,
       dto.getGeoShapeId() != null ? UUID.fromString(dto.getGeoShapeId()) : null,
       dto.getName(),

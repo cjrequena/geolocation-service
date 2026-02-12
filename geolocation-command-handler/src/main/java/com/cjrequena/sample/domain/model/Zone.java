@@ -3,24 +3,22 @@ package com.cjrequena.sample.domain.model;
 import com.cjrequena.sample.domain.model.enums.ZoneType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.MetadataVO;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.UUID;
 
 /**
- * Zone Domain Aggregate.
+ * Zone Domain
  *
  * Represents a fine-grained zone within an area (block, sector, precinct).
  * A zone belongs to an area and contains multiple specific locations.
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Zone {
+public class Zone extends Domain {
 
   private UUID id;
   private UUID areaId;
@@ -56,7 +54,7 @@ public class Zone {
       .type(type != null ? type : ZoneType.defaultType())
       .active(active != null ? active : Boolean.TRUE)
       .postalCode(postalCode)
-      .metadata(metadata!=null ? metadata : MetadataVO.empty())
+      .metadata(metadata != null ? metadata : MetadataVO.empty())
       .auditInfo(AuditInfoVO.create())
       .build();
   }

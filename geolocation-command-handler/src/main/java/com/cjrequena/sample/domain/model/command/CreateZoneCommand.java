@@ -21,7 +21,7 @@ public class CreateZoneCommand extends Command {
   public CreateZoneCommand(@NotNull CreateZoneRequestDTO dto) {
     super(UUID.randomUUID());
     this.zone = Zone.create(
-      getId(),
+      getDomainId(),
       UUID.fromString(dto.getAreaId()),
       UUID.fromString(dto.getGeoShapeId()),
       dto.getName(),

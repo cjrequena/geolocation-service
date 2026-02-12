@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Response DTO for Region aggregate.
+ * Response DTO for Region 
  *
  * <p>Includes nested country and geoShape summaries to provide context without
  * circular references.</p>

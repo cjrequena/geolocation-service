@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Response DTO for Country aggregate.
+ * Response DTO for Country 
  *
  * <p>Used for GET endpoints. Flattens all value objects (IsoCodeVO, PopulationVO,
  * AuditInfoVO) into simple fields for easier JSON serialization.</p>

@@ -23,7 +23,7 @@ public class UpdateCountryCommand extends Command {
   public UpdateCountryCommand(@Nonnull UUID id, @NotNull UpdateCountryRequestDTO dto) {
     super(id);
     this.country = Country.create(
-      getId(),
+      getDomainId(),
       dto.getName(),
       IsoCodeVO.of(dto.getIsoCodeAlpha2(),dto.getIsoCodeAlpha3(),dto.getIsoCodeNumeric()),
       dto.getPhoneCode(),

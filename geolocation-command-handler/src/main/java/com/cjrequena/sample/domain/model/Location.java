@@ -2,24 +2,22 @@ package com.cjrequena.sample.domain.model;
 
 import com.cjrequena.sample.domain.model.enums.LocationType;
 import com.cjrequena.sample.domain.model.vo.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.UUID;
 
 /**
- * Location Domain Aggregate.
+ * Location Domain 
  *
  * Represents a specific point location with precise coordinates.
  * This is the finest-grained geographic entity in the model.
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Location {
+public class Location extends Domain {
 
   private UUID id;
   private UUID zoneId;
@@ -57,14 +55,14 @@ public class Location {
       .id(id)
       .zoneId(zoneId)
       .name(name != null ? name : "GENERIC_LOCATION")
-      .locationType(locationType!= null ? locationType : LocationType.GENERIC)
+      .locationType(locationType != null ? locationType : LocationType.GENERIC)
       .point(point)
       .altitude(altitude)
       .accuracy(accuracy)
       .address(address)
       .postalCode(postalCode)
       .active(active != null ? active : Boolean.TRUE)
-      .metadata(metadata!=null ? metadata : MetadataVO.empty())
+      .metadata(metadata != null ? metadata : MetadataVO.empty())
       .auditInfo(AuditInfoVO.create())
       .build();
   }

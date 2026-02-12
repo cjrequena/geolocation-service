@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.util.Map;
 
 /**
- * Response DTO for Location aggregate.
+ * Response DTO for Location 
  *
  * <p>Flattens PointVO into separate latitude/longitude fields for easier consumption
  * in JSON APIs.</p>
