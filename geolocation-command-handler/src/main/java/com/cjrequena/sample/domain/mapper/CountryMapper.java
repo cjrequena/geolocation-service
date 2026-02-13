@@ -1,10 +1,8 @@
 package com.cjrequena.sample.domain.mapper;
 
+import com.cjrequena.sample.controller.dto.CountryRequestDTO;
 import com.cjrequena.sample.controller.dto.CountryResponseDTO;
-import com.cjrequena.sample.controller.dto.CreateCountryRequestDTO;
-import com.cjrequena.sample.controller.dto.LocationResponseDTO;
 import com.cjrequena.sample.domain.model.Country;
-import com.cjrequena.sample.domain.model.Location;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
 import com.cjrequena.sample.domain.model.vo.MetadataVO;
@@ -33,22 +31,22 @@ public interface CountryMapper {
    * declaratively.  The three fan-out / flatten conversions are handled by
    * {@link #populateEntityFields}.</p>
    */
-  @Mapping(target = "id",           source = "id")
-  @Mapping(target = "name",         source = "name")
-  @Mapping(target = "phoneCode",    source = "phoneCode")
+  @Mapping(target = "id", source = "id")
+  @Mapping(target = "name", source = "name")
+  @Mapping(target = "phoneCode", source = "phoneCode")
   @Mapping(target = "currencyCode", source = "currencyCode")
-  @Mapping(target = "capital",      source = "capital")
-  @Mapping(target = "active",     source = "active")
+  @Mapping(target = "capital", source = "capital")
+  @Mapping(target = "active", source = "active")
   // Handled in @AfterMapping:
-  @Mapping(target = "isoCodeAlpha2",   ignore = true)   // IsoCodeVO  →  three columns
-  @Mapping(target = "isoCodeAlpha3",   ignore = true)
-  @Mapping(target = "isoCodeNumeric",  ignore = true)
-  @Mapping(target = "population",      ignore = true)   // PopulationVO  →  Long
-  @Mapping(target = "metadata",   ignore = true)
-  @Mapping(target = "createdBy",       ignore = true)   // AuditInfoVO    → createdBy / updatedBy
-  @Mapping(target = "updatedBy",       ignore = true)
-  @Mapping(target = "createdAt",       ignore = true)   // AuditInfoVO   →  OffsetDateTime
-  @Mapping(target = "updatedAt",       ignore = true)
+  @Mapping(target = "isoCodeAlpha2", ignore = true)   // IsoCodeVO  →  three columns
+  @Mapping(target = "isoCodeAlpha3", ignore = true)
+  @Mapping(target = "isoCodeNumeric", ignore = true)
+  @Mapping(target = "population", ignore = true)   // PopulationVO  →  Long
+  @Mapping(target = "metadata", ignore = true)
+  @Mapping(target = "createdBy", ignore = true)   // AuditInfoVO    → createdBy / updatedBy
+  @Mapping(target = "updatedBy", ignore = true)
+  @Mapping(target = "createdAt", ignore = true)   // AuditInfoVO   →  OffsetDateTime
+  @Mapping(target = "updatedAt", ignore = true)
   CountryEntity toEntity(Country domain);
 
   /**
@@ -91,17 +89,18 @@ public interface CountryMapper {
   /**
    * Converts a {@link CountryEntity} into a {@link Country} domain 
    */
-  @Mapping(target = "id",           source = "id")
-  @Mapping(target = "name",         source = "name")
-  @Mapping(target = "phoneCode",    source = "phoneCode")
+  @Mapping(target = "id", source = "id")
+  @Mapping(target = "name", source = "name")
+  @Mapping(target = "phoneCode", source = "phoneCode")
   @Mapping(target = "currencyCode", source = "currencyCode")
-  @Mapping(target = "capital",      source = "capital")
-  @Mapping(target = "active",       source = "active")
+  @Mapping(target = "capital", source = "capital")
+  @Mapping(target = "active", source = "active")
   // Handled in @AfterMapping:
-  @Mapping(target = "isoCode",      ignore = true)   // three columns  →  IsoCodeVO
-  @Mapping(target = "population",   ignore = true)   // Long           →  PopulationVO
-  @Mapping(target = "metadata",   ignore = true)
-  @Mapping(target = "auditInfo",    ignore = true)   // timestamps     →  AuditInfoVO
+  @Mapping(target = "isoCode", ignore = true)   // three columns  →  IsoCodeVO
+  @Mapping(target = "population", ignore = true)   // Long           →  PopulationVO
+  @Mapping(target = "metadata", ignore = true)
+  @Mapping(target = "auditInfo", ignore = true)
+  // timestamps     →  AuditInfoVO
   Country toDomain(CountryEntity entity);
 
   /**
@@ -146,7 +145,7 @@ public interface CountryMapper {
   // ================================================================
 
   /**
-   * Converts a {@link Location} domain aggregate into a {@link LocationResponseDTO}.
+   * Converts a {@link Country} domain aggregate into a {@link CountryResponseDTO}.
    */
   @Mapping(target = "id", expression = "java(domain.getId() != null ? domain.getId().toString() : null)")
   @Mapping(target = "name", source = "name")
@@ -156,7 +155,7 @@ public interface CountryMapper {
   CountryResponseDTO domainToResponseDTO(Country domain);
 
   /**
-   * Fills the flattened fields on {@link LocationResponseDTO}.
+   * Fills the flattened fields on {@link CountryResponseDTO}.
    */
   @AfterMapping
   default void populateResponseDTOFields(Country domain, @MappingTarget CountryResponseDTO dto) {
@@ -184,17 +183,18 @@ public interface CountryMapper {
   // DTO  →  domain
   // ================================================================
 
-  default Country requestDTOtoDomain(CreateCountryRequestDTO requestDTO) {
+  default Country requestDTOtoDomain(CountryRequestDTO requestDTO) {
     return Country.create(
       UUID.randomUUID(),
       requestDTO.getName(),
-      IsoCodeVO.of(requestDTO.getIsoCodeAlpha2(),requestDTO.getIsoCodeAlpha3(),requestDTO.getIsoCodeNumeric()),
+      IsoCodeVO.of(requestDTO.getIsoCodeAlpha2(), requestDTO.getIsoCodeAlpha3(), requestDTO.getIsoCodeNumeric()),
       requestDTO.getPhoneCode(),
       requestDTO.getCurrencyCode(),
       requestDTO.getCapital(),
       requestDTO.getPopulation() != null ? PopulationVO.of(requestDTO.getPopulation()) : null,
       requestDTO.getActive() != null ? requestDTO.getActive() : Boolean.TRUE,
-      requestDTO.getMetadata() != null ? MetadataVO.of(requestDTO.getMetadata()) : MetadataVO.empty());
+      requestDTO.getMetadata() != null ? MetadataVO.of(requestDTO.getMetadata()) : MetadataVO.empty()
+    );
   }
 
   // ================================================================

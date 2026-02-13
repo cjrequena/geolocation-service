@@ -2,9 +2,7 @@ package com.cjrequena.sample.domain.mapper;
 
 import com.cjrequena.sample.controller.dto.GeoShapeRequestDTO;
 import com.cjrequena.sample.controller.dto.GeoShapeResponseDTO;
-import com.cjrequena.sample.controller.dto.LocationResponseDTO;
 import com.cjrequena.sample.domain.model.GeoShape;
-import com.cjrequena.sample.domain.model.Location;
 import com.cjrequena.sample.domain.model.enums.GeometryType;
 import com.cjrequena.sample.domain.model.vo.*;
 import com.cjrequena.sample.persistence.entity.GeoShapeEntity;
@@ -172,7 +170,7 @@ public abstract class GeoShapeMapper {
   // ================================================================
 
   /**
-   * Converts a {@link Location} domain aggregate into a {@link LocationResponseDTO}.
+   * Converts a {@link GeoShape} domain into a {@link GeoShapeResponseDTO}.
    */
   @Mapping(target = "id", expression = "java(domain.getId() != null ? domain.getId().toString() : null)")
   @Mapping(target = "name", source = "name")
@@ -185,7 +183,7 @@ public abstract class GeoShapeMapper {
   public abstract GeoShapeResponseDTO domainToResponseDTO(GeoShape domain);
 
   /**
-   * Fills the flattened fields on {@link LocationResponseDTO}.
+   * Fills the flattened fields on {@link GeoShapeResponseDTO}.
    */
   @AfterMapping
   protected void populateResponseDTOFields(GeoShape domain, @MappingTarget GeoShapeResponseDTO dto) {

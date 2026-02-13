@@ -1,7 +1,7 @@
 package com.cjrequena.sample.controller;
 
+import com.cjrequena.sample.controller.dto.CountryRequestDTO;
 import com.cjrequena.sample.controller.dto.CountryResponseDTO;
-import com.cjrequena.sample.controller.dto.CreateCountryRequestDTO;
 import com.cjrequena.sample.domain.mapper.CountryMapper;
 import com.cjrequena.sample.domain.model.Country;
 import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
@@ -73,7 +73,7 @@ public class CountryController {
       @ApiResponse(responseCode = "400", description = "Invalid request data"),
       @ApiResponse(responseCode = "409", description = "Country with same ISO code already exists")
     })
-  public ResponseEntity<CountryResponseDTO> createCountry(@Valid @RequestBody CreateCountryRequestDTO requestDTO) {
+  public ResponseEntity<CountryResponseDTO> createCountry(@Valid @RequestBody CountryRequestDTO requestDTO) {
 
     log.info("Creating country: {}", requestDTO.getName());
 
@@ -179,7 +179,7 @@ public class CountryController {
   public ResponseEntity<CountryResponseDTO> updateCountry(
     @Parameter(description = "Country ID", required = true)
     @PathVariable UUID id,
-    @Valid @RequestBody CreateCountryRequestDTO requestDTO) {
+    @Valid @RequestBody CountryRequestDTO requestDTO) {
 
     log.info("Updating country with ID: {}", id);
 

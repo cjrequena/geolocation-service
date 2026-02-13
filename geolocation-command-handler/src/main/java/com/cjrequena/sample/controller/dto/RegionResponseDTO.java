@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 /**
  * Response DTO for Region 
  *
@@ -31,12 +33,15 @@ public class RegionResponseDTO {
   @Schema(description = "Population count", example = "39538223")
   private Long population;
 
-  @Schema(description = "Active status", example = "true")
-  private Boolean status;
+  @Schema(description = "Is this REGION active", example = "true")
+  private Boolean active;
 
-  @Schema(description = "Creation timestamp", example = "2024-02-01T09:00:00Z")
+  @Schema(description = "Custom metadata as key-value pairs")
+  private Map<String, Object> metadata;
+
+  @Schema(description = "Creation timestamp", example = "2024-06-01T12:00:00Z")
   private String createdAt;
 
-  @Schema(description = "Last update timestamp", example = "2024-08-15T17:45:00Z")
+  @Schema(description = "Last update timestamp", example = "2024-12-15T08:30:00Z")
   private String updatedAt;
 }

@@ -1,5 +1,7 @@
 package com.cjrequena.sample.domain.mapper;
 
+import com.cjrequena.sample.controller.dto.RegionRequestDTO;
+import com.cjrequena.sample.controller.dto.RegionResponseDTO;
 import com.cjrequena.sample.domain.model.Region;
 import com.cjrequena.sample.domain.model.enums.RegionType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
@@ -11,6 +13,7 @@ import com.cjrequena.sample.persistence.entity.RegionEntity;
 import org.mapstruct.*;
 
 import java.util.List;
+import java.util.TimeZone;
 import java.util.UUID;
 
 /**
@@ -42,9 +45,9 @@ public interface RegionMapper {
   @Mapping(target = "geoShape", ignore = true)   // UUID  → shell GeoShapeEntity
   @Mapping(target = "regionType", ignore = true)   // enum  → String
   @Mapping(target = "population", ignore = true)   // VO    → Long
-  @Mapping(target = "metadata",   ignore = true)
-  @Mapping(target = "createdBy",  ignore = true)   // AuditInfoVO
-  @Mapping(target = "updatedBy",  ignore = true)
+  @Mapping(target = "metadata", ignore = true)
+  @Mapping(target = "createdBy", ignore = true)   // AuditInfoVO
+  @Mapping(target = "updatedBy", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)
   // VO    → OffsetDateTime
@@ -104,7 +107,7 @@ public interface RegionMapper {
   @Mapping(target = "geoShapeId", ignore = true)   // GeoShapeEntity → UUID
   @Mapping(target = "type", ignore = true)   // String         → enum
   @Mapping(target = "population", ignore = true)   // Long           → VO
-  @Mapping(target = "metadata",   ignore = true)
+  @Mapping(target = "metadata", ignore = true)
   @Mapping(target = "auditInfo", ignore = true)
   // timestamps     → VO
   Region toDomain(RegionEntity entity);
@@ -114,7 +117,7 @@ public interface RegionMapper {
    * Each entity is converted using {@link #toDomain(RegionEntity)}.
    */
   List<Region> toDomainList(List<RegionEntity> entityList);
-  
+
   /**
    * Populates every value-object / derived field on {@link Region} that could
    * not be expressed as a simple {@code source} path.
@@ -146,6 +149,64 @@ public interface RegionMapper {
     if (entity.getCreatedAt() != null || entity.getUpdatedAt() != null) {
       domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt(), entity.getCreatedBy(), entity.getUpdatedBy()));
     }
+  }
+
+  // ================================================================
+  // Domain  →  DTO
+  // ================================================================
+
+  /**
+   * Converts a {@link Region} domain into a {@link RegionResponseDTO}.
+   */
+  @Mapping(target = "id", expression = "java(domain.getId() != null ? domain.getId().toString() : null)")
+  @Mapping(target = "name", source = "name")
+  @Mapping(target = "metadata", ignore = true)
+  @Mapping(target = "createdAt", ignore = true)
+  @Mapping(target = "updatedAt", ignore = true)
+  RegionResponseDTO domainToResponseDTO(Region domain);
+
+  /**
+   * Fills the flattened fields on {@link RegionResponseDTO}.
+   */
+  @AfterMapping
+  default void populateResponseDTOFields(Region domain, @MappingTarget RegionResponseDTO dto) {
+    if (domain == null) {
+      return;
+    }
+
+    // MetadataVO → Map<String, Object> ───────────────────────────────
+    if (domain.getMetadata() != null) {
+      dto.setMetadata(domain.getMetadata().toMap());
+    }
+
+    // ── AuditInfoVO  →  timestamps ──────────────────────
+    if (domain.getAuditInfo() != null) {
+      dto.setCreatedAt(domain.getAuditInfo().getCreatedAt() != null
+        ? domain.getAuditInfo().getCreatedAt().toString()
+        : null);
+      dto.setUpdatedAt(domain.getAuditInfo().getUpdatedAt() != null
+        ? domain.getAuditInfo().getUpdatedAt().toString()
+        : null);
+    }
+  }
+
+  // ================================================================
+  // DTO  →  domain
+  // ================================================================
+
+  default Region requestDTOtoDomain(RegionRequestDTO requestDTO) {
+    return Region.create(
+      UUID.randomUUID(),
+      UUID.fromString(requestDTO.getCountryId()),
+      requestDTO.getGeoShapeId() != null ? UUID.fromString(requestDTO.getGeoShapeId()) : null,
+      requestDTO.getName(),
+      requestDTO.getCode(),
+      RegionType.from(requestDTO.getRegionType()),
+      requestDTO.getPopulation() != null ? PopulationVO.of(requestDTO.getPopulation()) : null,
+      requestDTO.getTimeZone() != null ? TimeZone.getTimeZone(requestDTO.getTimeZone()) : null,
+      requestDTO.getActive() != null ? requestDTO.getActive() : Boolean.TRUE,
+      requestDTO.getMetadata() != null ? MetadataVO.of(requestDTO.getMetadata()) : MetadataVO.empty()
+    );
   }
 
   // ================================================================

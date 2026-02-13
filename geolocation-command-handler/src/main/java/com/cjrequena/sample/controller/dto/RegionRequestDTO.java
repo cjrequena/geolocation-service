@@ -21,11 +21,14 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "Request to create a new Region")
-public class CreateRegionRequestDTO {
+public class RegionRequestDTO {
 
   @NotBlank(message = "Country ID is required")
   @Schema(description = "Parent country ID", example = "550e8400-e29b-41d4-a716-446655440000", required = true)
   private String countryId;
+
+  @Schema(description = "Associated GeoShape ID", example = "660e8400-e29b-41d4-a716-446655440000")
+  private String geoShapeId;
 
   @NotBlank(message = "Region name is required")
   @Size(min = 2, max = 100, message = "Region name must be between 2 and 100 characters")
@@ -39,9 +42,6 @@ public class CreateRegionRequestDTO {
   @NotBlank(message = "Region type is required")
   @Schema(description = "Region type", example = "STATE", required = true)
   private String regionType;
-
-  @Schema(description = "Associated GeoShape ID", example = "660e8400-e29b-41d4-a716-446655440000")
-  private String geoShapeId;
 
   @Min(value = 0, message = "Population must be non-negative")
   @Schema(description = "Population count", example = "39538223")

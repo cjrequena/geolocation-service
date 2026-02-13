@@ -23,7 +23,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "Request to create a new country")
-public class CreateCountryRequestDTO {
+public class CountryRequestDTO {
 
   @NotBlank(message = "Country name is required")
   @Size(min = 2, max = 100, message = "Country name must be between 2 and 100 characters")
