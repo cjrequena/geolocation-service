@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 /**
  * Response DTO for Zone 
  */
@@ -28,15 +30,15 @@ public class ZoneResponseDTO {
   @Schema(description = "Postal code", example = "94121")
   private String postalCode;
 
-  @Schema(description = "Parent area summary")
-  private AreaSummaryDTO area;
-
-  @Schema(description = "Active status", example = "true")
+  @Schema(description = "Is this zone active", example = "true")
   private Boolean active;
 
-  @Schema(description = "Creation timestamp", example = "2024-05-08T11:15:00Z")
+  @Schema(description = "Custom metadata as key-value pairs")
+  private Map<String, Object> metadata;
+
+  @Schema(description = "Creation timestamp", example = "2024-06-01T12:00:00Z")
   private String createdAt;
 
-  @Schema(description = "Last update timestamp", example = "2024-10-22T09:00:00Z")
+  @Schema(description = "Last update timestamp", example = "2024-12-15T08:30:00Z")
   private String updatedAt;
 }

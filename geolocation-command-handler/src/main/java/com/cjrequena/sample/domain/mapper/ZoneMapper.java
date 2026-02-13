@@ -1,5 +1,7 @@
 package com.cjrequena.sample.domain.mapper;
 
+import com.cjrequena.sample.controller.dto.ZoneRequestDTO;
+import com.cjrequena.sample.controller.dto.ZoneResponseDTO;
 import com.cjrequena.sample.domain.model.Zone;
 import com.cjrequena.sample.domain.model.enums.ZoneType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
@@ -124,6 +126,63 @@ public interface ZoneMapper {
       domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt(), entity.getCreatedBy(), entity.getUpdatedBy()));
     }
   }
+
+  // ================================================================
+  // Domain  →  DTO
+  // ================================================================
+
+  /**
+   * Converts a {@link Zone} domain aggregate into a {@link ZoneResponseDTO}.
+   */
+  @Mapping(target = "id", expression = "java(domain.getId() != null ? domain.getId().toString() : null)")
+  @Mapping(target = "name", source = "name")
+  @Mapping(target = "metadata", ignore = true)
+  @Mapping(target = "createdAt", ignore = true)
+  @Mapping(target = "updatedAt", ignore = true)
+  ZoneResponseDTO domainToResponseDTO(Zone domain);
+
+  /**
+   * Fills the flattened fields on {@link ZoneResponseDTO}.
+   */
+  @AfterMapping
+  default void populateResponseDTOFields(Zone domain, @MappingTarget ZoneResponseDTO dto) {
+    if (domain == null) {
+      return;
+    }
+
+    // MetadataVO → Map<String, Object> ───────────────────────────────
+    if (domain.getMetadata() != null) {
+      dto.setMetadata(domain.getMetadata().toMap());
+    }
+
+    // ── AuditInfoVO  →  timestamps ──────────────────────
+    if (domain.getAuditInfo() != null) {
+      dto.setCreatedAt(domain.getAuditInfo().getCreatedAt() != null
+        ? domain.getAuditInfo().getCreatedAt().toString()
+        : null);
+      dto.setUpdatedAt(domain.getAuditInfo().getUpdatedAt() != null
+        ? domain.getAuditInfo().getUpdatedAt().toString()
+        : null);
+    }
+  }
+
+  // ================================================================
+  // DTO  →  domain
+  // ================================================================
+
+  default Zone requestDTOtoDomain(ZoneRequestDTO requestDTO) {
+    return Zone.create(
+      UUID.randomUUID(),
+      UUID.fromString(requestDTO.getAreaId()),
+      requestDTO.getGeoShapeId()!=null ? UUID.fromString(requestDTO.getGeoShapeId()) : null,
+      requestDTO.getName(),
+      requestDTO.getZoneType() != null ? requestDTO.getZoneType() : ZoneType.GENERIC,
+      requestDTO.getPostalCode(),
+      requestDTO.getActive() != null ? requestDTO.getActive() : Boolean.TRUE,
+      requestDTO.getMetadata() != null ? MetadataVO.of(requestDTO.getMetadata()) : MetadataVO.empty()
+    );
+  }
+
 
   // ================================================================
   // Static conversion helpers

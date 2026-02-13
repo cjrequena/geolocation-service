@@ -1,5 +1,7 @@
 package com.cjrequena.sample.domain.mapper;
 
+import com.cjrequena.sample.controller.dto.AreaRequestDTO;
+import com.cjrequena.sample.controller.dto.AreaResponseDTO;
 import com.cjrequena.sample.domain.model.Area;
 import com.cjrequena.sample.domain.model.enums.AreaType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
@@ -139,6 +141,63 @@ public interface AreaMapper {
     if (entity.getMetadata() != null) {
       domain.setMetadata(MetadataVO.of(entity.getMetadata()));
     }
+  }
+
+  // ================================================================
+  // Domain  →  DTO
+  // ================================================================
+
+  /**
+   * Converts a {@link Area} domain aggregate into a {@link AreaResponseDTO}.
+   */
+  @Mapping(target = "id", expression = "java(domain.getId() != null ? domain.getId().toString() : null)")
+  @Mapping(target = "name", source = "name")
+  @Mapping(target = "metadata", ignore = true)
+  @Mapping(target = "createdAt", ignore = true)
+  @Mapping(target = "updatedAt", ignore = true)
+  AreaResponseDTO domainToResponseDTO(Area domain);
+
+  /**
+   * Fills the flattened fields on {@link AreaResponseDTO}.
+   */
+  @AfterMapping
+  default void populateResponseDTOFields(Area domain, @MappingTarget AreaResponseDTO dto) {
+    if (domain == null) {
+      return;
+    }
+
+    // MetadataVO → Map<String, Object> ───────────────────────────────
+    if (domain.getMetadata() != null) {
+      dto.setMetadata(domain.getMetadata().toMap());
+    }
+
+    // ── AuditInfoVO  →  timestamps ──────────────────────
+    if (domain.getAuditInfo() != null) {
+      dto.setCreatedAt(domain.getAuditInfo().getCreatedAt() != null
+        ? domain.getAuditInfo().getCreatedAt().toString()
+        : null);
+      dto.setUpdatedAt(domain.getAuditInfo().getUpdatedAt() != null
+        ? domain.getAuditInfo().getUpdatedAt().toString()
+        : null);
+    }
+  }
+
+  // ================================================================
+  // DTO  →  domain
+  // ================================================================
+
+  default Area requestDTOtoDomain(AreaRequestDTO requestDTO) {
+    return Area.create(
+      UUID.randomUUID(),
+      UUID.fromString(requestDTO.getCityId()),
+      requestDTO.getGeoShapeId() != null ? UUID.fromString(requestDTO.getGeoShapeId()) : null,
+      requestDTO.getName(),
+      requestDTO.getAreaType() != null ? requestDTO.getAreaType() : AreaType.GENERIC,
+      requestDTO.getPopulation() != null ? PopulationVO.of(requestDTO.getPopulation()) : null,
+      requestDTO.getPostalCode(),
+      requestDTO.getActive(),
+      requestDTO.getMetadata() != null ? MetadataVO.of(requestDTO.getMetadata()) : MetadataVO.empty()
+    );
   }
 
   // ================================================================

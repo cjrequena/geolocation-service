@@ -19,7 +19,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "Request to create a new Zone")
-public class CreateZoneRequestDTO {
+public class ZoneRequestDTO {
 
   @NotBlank(message = "Area ID is required")
   @Schema(description = "Parent area ID", example = "550e8400-e29b-41d4-a716-446655440000", required = true)
@@ -33,7 +33,7 @@ public class CreateZoneRequestDTO {
   @Schema(description = "Zone name", example = "Golden Gate Park", required = true)
   private String name;
 
-  @NotBlank(message = "Zone type is required")
+  //@NotBlank(message = "Zone type is required")
   //@Pattern(regexp = "^(POINT|POLYGON|CIRCLE|RECTANGLE|LINE)$", message = "Geometry type must be POINT|POLYGON|CIRCLE|RECTANGLE|LINE")
   @Schema(description = "Zone type", example = "COMMERCIAL", required = true)
   private ZoneType zoneType;

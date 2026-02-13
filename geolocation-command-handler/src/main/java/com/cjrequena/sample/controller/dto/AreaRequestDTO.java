@@ -13,25 +13,25 @@ import lombok.NoArgsConstructor;
 import java.util.Map;
 
 /**
- * Request DTO for updating an existing Area.
+ * Request DTO for creating a new Area.
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Request to update an existing Area")
-public class UpdateAreaRequestDTO {
+@Schema(description = "Request to create a new Area")
+public class AreaRequestDTO {
+
+  @NotBlank(message = "City ID is required")
+  @Schema(description = "Parent city ID", example = "550e8400-e29b-41d4-a716-446655440000", required = true)
+  private String cityId;
 
   @NotBlank(message = "Area name is required")
   @Size(min = 2, max = 100, message = "Area name must be between 2 and 100 characters")
   @Schema(description = "Area name", example = "Mission District", required = true)
   private String name;
 
-  @NotBlank(message = "City ID is required")
-  @Schema(description = "Parent city ID", example = "550e8400-e29b-41d4-a716-446655440000", required = true)
-  private String cityId;
-
-  @NotBlank(message = "Area type is required")
+  //@NotBlank(message = "Area type is required")
   //@Pattern(regexp = "^(POINT|POLYGON|CIRCLE|RECTANGLE|LINE)$", message = "Geometry type must be POINT|POLYGON|CIRCLE|RECTANGLE|LINE")
   @Schema(description = "Area type", example = "DISTRICT", required = true)
   private AreaType areaType;

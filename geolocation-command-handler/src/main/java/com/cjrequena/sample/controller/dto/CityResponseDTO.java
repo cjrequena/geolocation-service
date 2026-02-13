@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 /**
  * Response DTO for City 
  */
@@ -29,14 +31,17 @@ public class CityResponseDTO {
   private String timeZone;
 
   @Schema(description = "Is this a capital city", example = "false")
-  private Boolean isCapital;
+  private Boolean capital;
 
-  @Schema(description = "Active status", example = "true")
-  private Boolean isActive;
+  @Schema(description = "Is this country active", example = "true")
+  private Boolean active;
 
-  @Schema(description = "Creation timestamp", example = "2024-04-12T07:30:00Z")
+  @Schema(description = "Custom metadata as key-value pairs")
+  private Map<String, Object> metadata;
+
+  @Schema(description = "Creation timestamp", example = "2024-06-01T12:00:00Z")
   private String createdAt;
 
-  @Schema(description = "Last update timestamp", example = "2024-11-01T16:00:00Z")
+  @Schema(description = "Last update timestamp", example = "2024-12-15T08:30:00Z")
   private String updatedAt;
 }

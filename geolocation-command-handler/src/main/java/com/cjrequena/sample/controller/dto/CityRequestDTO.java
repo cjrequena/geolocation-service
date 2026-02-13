@@ -12,14 +12,14 @@ import lombok.NoArgsConstructor;
 import java.util.Map;
 
 /**
- * Request DTO for updating an existing City.
+ * Request DTO for creating a new City.
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Request to update an existing City")
-public class UpdateCityRequestDTO {
+@Schema(description = "Request to create a new City")
+public class CityRequestDTO {
 
   @NotBlank(message = "City name is required")
   @Size(min = 2, max = 100, message = "City name must be between 2 and 100 characters")

@@ -1,5 +1,7 @@
 package com.cjrequena.sample.domain.mapper;
 
+import com.cjrequena.sample.controller.dto.CityRequestDTO;
+import com.cjrequena.sample.controller.dto.CityResponseDTO;
 import com.cjrequena.sample.domain.model.City;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.MetadataVO;
@@ -138,6 +140,64 @@ public interface CityMapper {
     if (entity.getMetadata() != null) {
       domain.setMetadata(MetadataVO.of(entity.getMetadata()));
     }
+  }
+
+  // ================================================================
+  // Domain  →  DTO
+  // ================================================================
+
+  /**
+   * Converts a {@link City} domain aggregate into a {@link CityResponseDTO}.
+   */
+  @Mapping(target = "id", expression = "java(domain.getId() != null ? domain.getId().toString() : null)")
+  @Mapping(target = "name", source = "name")
+  @Mapping(target = "metadata", ignore = true)
+  @Mapping(target = "createdAt", ignore = true)
+  @Mapping(target = "updatedAt", ignore = true)
+  CityResponseDTO domainToResponseDTO(City domain);
+
+  /**
+   * Fills the flattened fields on {@link CityResponseDTO}.
+   */
+  @AfterMapping
+  default void populateResponseDTOFields(City domain, @MappingTarget CityResponseDTO dto) {
+    if (domain == null) {
+      return;
+    }
+
+    // MetadataVO → Map<String, Object> ───────────────────────────────
+    if (domain.getMetadata() != null) {
+      dto.setMetadata(domain.getMetadata().toMap());
+    }
+
+    // ── AuditInfoVO  →  timestamps ──────────────────────
+    if (domain.getAuditInfo() != null) {
+      dto.setCreatedAt(domain.getAuditInfo().getCreatedAt() != null
+        ? domain.getAuditInfo().getCreatedAt().toString()
+        : null);
+      dto.setUpdatedAt(domain.getAuditInfo().getUpdatedAt() != null
+        ? domain.getAuditInfo().getUpdatedAt().toString()
+        : null);
+    }
+  }
+
+  // ================================================================
+  // DTO  →  domain
+  // ================================================================
+
+  default City requestDTOtoDomain(CityRequestDTO requestDTO) {
+    return City.create(
+      UUID.randomUUID(),
+      requestDTO.getRegionId() != null ? UUID.fromString(requestDTO.getRegionId()) : null,
+      requestDTO.getGeoShapeId() != null ? UUID.fromString(requestDTO.getGeoShapeId()) : null,
+      requestDTO.getName(),
+      requestDTO.getPopulation() != null ? PopulationVO.of(requestDTO.getPopulation()) : null,
+      requestDTO.getTimeZone() != null ?TimeZone.getTimeZone(requestDTO.getTimeZone()): null,
+      requestDTO.getPostalCode(),
+      requestDTO.getCapital(),
+      requestDTO.getActive(),
+      requestDTO.getMetadata() != null ? MetadataVO.of(requestDTO.getMetadata()) : MetadataVO.empty()
+    );
   }
 
   // ================================================================
