@@ -306,8 +306,9 @@ public abstract class GeoShapeMapper {
       }
       case RECTANGLE -> {
         final Geometry geometry = WKTParserUtil.fromWKT(requestDTO.getGeometryWKT(), GeometryType.RECTANGLE);
-        final CoordinateVO coordinateVO = CoordinateVO.of(geometry.getCentroid().getY(), geometry.getCentroid().getX());
-        final GeometryVO geometryVO = GeometryVO.ofCoordinates(coordinateVO);
+        final List<CoordinateVO> coordinateVOList = Arrays.stream(geometry.getCoordinates()).map(x -> CoordinateVO.of(x.y, x.x)).toList();
+        final PolygonVO polygonVO = PolygonVO.of(coordinateVOList);
+        final GeometryVO geometryVO = GeometryVO.ofPolygon(polygonVO);
         geoShape = GeoShape.createRectangle(
           id,
           requestDTO.getName(),
@@ -320,7 +321,6 @@ public abstract class GeoShapeMapper {
         final Geometry geometry = WKTParserUtil.fromWKT(requestDTO.getGeometryWKT(), GeometryType.POLYGON);
         final List<CoordinateVO> coordinateVOList = Arrays.stream(geometry.getCoordinates()).map(x -> CoordinateVO.of(x.y, x.x)).toList();
         final PolygonVO polygonVO = PolygonVO.of(coordinateVOList);
-        //final CoordinateVO coordinateVO = CoordinateVO.of(geometry.getCentroid().getY(), geometry.getCentroid().getX());
         final GeometryVO geometryVO = GeometryVO.ofPolygon(polygonVO);
         geoShape = GeoShape.createPolygon(
           id,
