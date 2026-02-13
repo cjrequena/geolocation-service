@@ -22,6 +22,9 @@ import java.util.Map;
 @Schema(description = "Request to create a new Location")
 public class CreateLocationRequestDTO {
 
+  @Schema(description = "Parent zone ID (if assigning to a zone)", example = "550e8400-e29b-41d4-a716-446655440000")
+  private String zoneId;
+
   @NotBlank(message = "Location name is required")
   @Size(min = 2, max = 100, message = "Area name must be between 2 and 100 characters")
   @Schema(description = "Location name", example = "HOTEL", required = true)
@@ -59,9 +62,6 @@ public class CreateLocationRequestDTO {
   @Size(max = 20, message = "Postal code must not exceed 20 characters")
   @Schema(description = "Postal code", example = "94121")
   private String postalCode;
-
-  @Schema(description = "Parent zone ID (if assigning to a zone)", example = "550e8400-e29b-41d4-a716-446655440000")
-  private String zoneId;
 
   @Schema(description = "Is this a area active", example = "false")
   private Boolean active;

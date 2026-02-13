@@ -276,11 +276,12 @@ class GeoShapeMapperIT {
     CoordinateVO center = CoordinateVO.of(40.748817, -73.985428);
     RadiusVO radius = RadiusVO.of(BigDecimal.valueOf(500));
     CircleVO circle = CircleVO.of(center, radius);
-
-    GeoShape domain = GeoShape.builder()
+    final GeometryVO geometryVO = GeometryVO.ofWKT(circle.toWKT());
+    GeoShape domain = GeoShape
+      .builder()
       .id(id)
       .geometryType(GeometryType.CIRCLE)
-      .geometry(GeometryVO.ofCircle(circle))
+      .geometry(geometryVO)
       .centerCoordinates(center)
       .radius(radius)
       .build();
@@ -350,11 +351,11 @@ class GeoShapeMapperIT {
     CoordinateVO northEast = CoordinateVO.of(40.75, -73.98);
     CoordinateVO southWest = CoordinateVO.of(40.74, -73.99);
     BoundVO bounds = BoundVO.of(northEast, southWest);
-
+    RectangleVO rectangleVO = RectangleVO.of(southWest,northEast);
     GeoShape domain = GeoShape.builder()
       .id(id)
       .geometryType(GeometryType.RECTANGLE)
-      .geometry(GeometryVO.ofCoordinates(CoordinateVO.of(40.745, -73.985)))
+      .geometry(GeometryVO.ofRectangle(rectangleVO))
       .bounds(bounds)
       .build();
 

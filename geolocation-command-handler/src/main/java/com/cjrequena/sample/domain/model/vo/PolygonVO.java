@@ -1,8 +1,11 @@
 package com.cjrequena.sample.domain.model.vo;
 
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.extern.jackson.Jacksonized;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -15,8 +18,11 @@ import java.util.stream.Collectors;
  * Defined by an ordered list of coordinates forming the boundary.
  */
 @Getter
+@Builder
+@Jacksonized
 @EqualsAndHashCode
 public class PolygonVO implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
     private static final int MIN_VERTICES = 3;
     

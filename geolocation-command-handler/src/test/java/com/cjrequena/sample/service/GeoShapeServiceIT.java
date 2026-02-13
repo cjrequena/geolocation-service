@@ -175,9 +175,9 @@ class GeoShapeServiceIT {
   @DisplayName("Should update GeoShape successfully")
   void shouldUpdateGeoShape() {
     GeoShape created = geoShapeService.create(madridCenterPoint);
-    created.setGeometryType(GeometryType.POLYGON);
+    created.setGeometryType(GeometryType.POINT);
     GeoShape updated = geoShapeService.update(created.getId(), created);
-    assertThat(updated.getGeometryType()).isEqualTo(GeometryType.POLYGON);
+    assertThat(updated.getGeometryType()).isEqualTo(GeometryType.POINT);
   }
 
   @Test

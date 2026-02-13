@@ -25,9 +25,12 @@ public class LocationResponseDTO {
   @Schema(description = "Location unique identifier", example = "550e8400-e29b-41d4-a716-446655440000")
   private String id;
 
+  @Schema(description = "Parent zone ID (if assigning to a zone)", example = "550e8400-e29b-41d4-a716-446655440000")
+  private String zoneId;
+  
   @Schema(description = "Location name", example = "HOTEL")
   private String name;
-
+  
   @Schema(description = "Location type", example = "HOTEL")
   private LocationType locationType;
 
@@ -49,14 +52,11 @@ public class LocationResponseDTO {
   @Schema(description = "Postal code", example = "94121")
   private String postalCode;
 
-  @Schema(description = "Parent zone summary (if assigned)")
-  private ZoneSummaryDTO zone;
+  @Schema(description = "Is this a area active", example = "false")
+  private Boolean active;
 
   @Schema(description = "Custom metadata as key-value pairs")
   private Map<String, Object> metadata;
-
-  @Schema(description = "Active status", example = "true")
-  private Boolean active;
 
   @Schema(description = "Creation timestamp", example = "2024-06-01T12:00:00Z")
   private String createdAt;

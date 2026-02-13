@@ -1,6 +1,6 @@
 package com.cjrequena.sample.domain.model.command;
 
-import com.cjrequena.sample.controller.dto.CreateGeoShapeRequestDTO;
+import com.cjrequena.sample.controller.dto.GeoShapeRequestDTO;
 import com.cjrequena.sample.domain.model.GeoShape;
 import com.cjrequena.sample.domain.model.enums.GeometryType;
 import com.cjrequena.sample.domain.model.vo.CoordinateVO;
@@ -25,7 +25,7 @@ public class CreateGeoShapeCommand extends Command {
   private final GeoShape geoShape;
 
   @Builder
-  public CreateGeoShapeCommand(@NotNull CreateGeoShapeRequestDTO dto) {
+  public CreateGeoShapeCommand(@NotNull GeoShapeRequestDTO dto) {
     super(UUID.randomUUID());
 
     if (dto.getGeometryType() == null) {

@@ -34,9 +34,6 @@ public class CityResponseDTO {
   @Schema(description = "Parent region summary")
   private RegionSummaryDTO region;
 
-  @Schema(description = "Associated GeoShape summary (if any)")
-  private GeoShapeSummaryDTO geoShape;
-
   @Schema(description = "Active status", example = "true")
   private Boolean isActive;
 

@@ -34,9 +34,6 @@ public class RegionResponseDTO {
   @Schema(description = "Parent country summary")
   private CountrySummaryDTO country;
 
-  @Schema(description = "Associated GeoShape summary (if any)")
-  private GeoShapeSummaryDTO geoShape;
-
   @Schema(description = "Active status", example = "true")
   private Boolean status;
 

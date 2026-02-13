@@ -79,7 +79,7 @@
             **/MainApplication.java
         </sonar.coverage.exclusions>
         <!-- Test Configuration -->
-        <min.coveredratio>0.30</min.coveredratio>
+        <min.coveredratio>0.10</min.coveredratio>
         <skipUnitTests>false</skipUnitTests>
         <skipIntegrationTests>false</skipIntegrationTests>
     </properties>

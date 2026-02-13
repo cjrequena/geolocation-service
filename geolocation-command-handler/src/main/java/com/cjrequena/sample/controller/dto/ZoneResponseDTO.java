@@ -31,9 +31,6 @@ public class ZoneResponseDTO {
   @Schema(description = "Parent area summary")
   private AreaSummaryDTO area;
 
-  @Schema(description = "Associated GeoShape summary (if any)")
-  private GeoShapeSummaryDTO geoShape;
-
   @Schema(description = "Active status", example = "true")
   private Boolean active;
 

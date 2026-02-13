@@ -105,15 +105,17 @@ public class CircleVO implements Serializable {
         return center.getLongitudeAsDouble();
     }
 
-    /**
-     * Convert to WKT (Well-Known Text) format.
-     * Note: WKT doesn't have native circle support, so we represent the center point.
-     */
-    public String toWKT() {
-        return String.format("POINT(%s %s)", 
-            center.getLongitude(), 
-            center.getLatitude());
-    }
+  /**
+   * Convert to WKT (Well-Known Text) format.
+   * Note: WKT doesn't have native circle support
+   * so we represent as Non-Standard WKT (Software Specific) CIRCLE (x x x)
+   */
+  public String toWKT() {
+    return String.format("CIRCLE(%s %s %s)",
+      center.getLongitude(),
+      center.getLatitude(),
+      radius.getMeters());
+  }
 
     @Override
     public String toString() {

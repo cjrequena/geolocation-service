@@ -81,25 +81,13 @@ public class LocationController {
       requestDTO.getName(), requestDTO.getLatitude(), requestDTO.getLongitude());
 
     // Convert DTO to domain model
-    Location location = Location.create(
-      UUID.randomUUID(),
-      requestDTO.getZoneId() != null ? UUID.fromString(requestDTO.getZoneId()) : null,
-      requestDTO.getName(),
-      requestDTO.getLocationType() != null ? requestDTO.getLocationType() : LocationType.GENERIC,
-      PointVO.of(requestDTO.getLatitude(), requestDTO.getLongitude()),
-      requestDTO.getAltitudeMeters() != null ? AltitudeVO.of(requestDTO.getAltitudeMeters()) : null,
-      requestDTO.getAccuracyMeters() != null ? GpsAccuracyVO.of(requestDTO.getAccuracyMeters()) : null,
-      requestDTO.getAddress(),
-      requestDTO.getPostalCode(),
-      requestDTO.getActive() != null ? requestDTO.getActive() : Boolean.TRUE,
-      requestDTO.getMetadata() != null ? MetadataVO.of(requestDTO.getMetadata()) : MetadataVO.empty()
-    );
+    Location location = this.locationMapper.requestDTOtoDomain(requestDTO);
 
     // Create via service
     Location created = locationService.create(location);
 
     // Convert to response DTO
-    LocationResponseDTO responseDTO = locationMapper.toResponseDTO(created);
+    LocationResponseDTO responseDTO = locationMapper.domainToResponseDTO(created);
 
     log.info("Location created with ID: {}", created.getId());
 
@@ -131,7 +119,7 @@ public class LocationController {
     log.debug("Getting location by ID: {}", id);
 
     return locationService.findById(id)
-      .map(locationMapper::toResponseDTO)
+      .map(locationMapper::domainToResponseDTO)
       .map(ResponseEntity::ok)
       .orElse(ResponseEntity.notFound().build());
   }
@@ -152,7 +140,7 @@ public class LocationController {
     List<LocationResponseDTO> locations = locationService
       .findAll()
       .stream()
-      .map(locationMapper::toResponseDTO)
+      .map(locationMapper::domainToResponseDTO)
       .collect(Collectors.toList());
 
     return ResponseEntity.ok(locations);
@@ -177,7 +165,7 @@ public class LocationController {
     log.debug("Getting locations by zone: {}", zoneId);
 
     List<LocationResponseDTO> locations = locationService.findByZoneId(zoneId).stream()
-      .map(locationMapper::toResponseDTO)
+      .map(locationMapper::domainToResponseDTO)
       .collect(Collectors.toList());
 
     return ResponseEntity.ok(locations);
@@ -199,7 +187,7 @@ public class LocationController {
     log.debug("Getting locations page: {}", pageable);
 
     Page<LocationResponseDTO> page = locationService.findByActive(true, pageable)
-      .map(locationMapper::toResponseDTO);
+      .map(locationMapper::domainToResponseDTO);
 
     return ResponseEntity.ok(page);
   }
@@ -249,7 +237,7 @@ public class LocationController {
     Location updated = locationService.update(id, location);
 
     // Convert to response DTO
-    LocationResponseDTO responseDTO = locationMapper.toResponseDTO(updated);
+    LocationResponseDTO responseDTO = locationMapper.domainToResponseDTO(updated);
 
     log.info("Location updated with ID: {}", id);
 
@@ -314,7 +302,7 @@ public class LocationController {
       List<LocationResponseDTO> locations = locationService
         .findWithinRadius(wkt, radiusMeters)
         .stream()
-        .map(locationMapper::toResponseDTO)
+        .map(locationMapper::domainToResponseDTO)
         .collect(Collectors.toList());
 
       return ResponseEntity.ok(locations);
@@ -348,7 +336,7 @@ public class LocationController {
       List<LocationResponseDTO> locations = locationService
         .findWithinPolygon(wkt)
         .stream()
-        .map(locationMapper::toResponseDTO)
+        .map(locationMapper::domainToResponseDTO)
         .collect(Collectors.toList());
 
       return ResponseEntity.ok(locations);
@@ -378,7 +366,7 @@ public class LocationController {
     List<LocationResponseDTO> locations = locationService
       .findByPostalCode(postalCode)
       .stream()
-      .map(locationMapper::toResponseDTO)
+      .map(locationMapper::domainToResponseDTO)
       .collect(Collectors.toList());
 
     return ResponseEntity.ok(locations);
@@ -405,7 +393,7 @@ public class LocationController {
     List<LocationResponseDTO> locations = locationService
       .findByAddressContaining(address)
       .stream()
-      .map(locationMapper::toResponseDTO)
+      .map(locationMapper::domainToResponseDTO)
       .collect(Collectors.toList());
 
     return ResponseEntity.ok(locations);

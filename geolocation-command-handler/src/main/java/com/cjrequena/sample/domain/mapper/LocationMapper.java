@@ -1,7 +1,9 @@
 package com.cjrequena.sample.domain.mapper;
 
+import com.cjrequena.sample.controller.dto.CreateLocationRequestDTO;
 import com.cjrequena.sample.controller.dto.LocationResponseDTO;
 import com.cjrequena.sample.domain.model.Location;
+import com.cjrequena.sample.domain.model.enums.LocationType;
 import com.cjrequena.sample.domain.model.vo.*;
 import com.cjrequena.sample.persistence.entity.LocationEntity;
 import com.cjrequena.sample.persistence.entity.ZoneEntity;
@@ -146,7 +148,7 @@ public abstract class LocationMapper {
   }
 
   // ================================================================
-  // Domain  →  Response DTO
+  // Domain  →  DTO
   // ================================================================
 
   /**
@@ -166,7 +168,7 @@ public abstract class LocationMapper {
   @Mapping(target = "metadata", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)
-  public abstract LocationResponseDTO toResponseDTO(Location domain);
+  public abstract LocationResponseDTO domainToResponseDTO(Location domain);
 
   /**
    * Fills the flattened fields on {@link LocationResponseDTO}.
@@ -203,6 +205,26 @@ public abstract class LocationMapper {
         ? domain.getAuditInfo().getUpdatedAt().toString()
         : null);
     }
+  }
+
+  // ================================================================
+  // DTO  →  domain
+  // ================================================================
+
+  public Location requestDTOtoDomain(CreateLocationRequestDTO requestDTO) {
+    return Location.create(
+      UUID.randomUUID(),
+      requestDTO.getZoneId() != null ? UUID.fromString(requestDTO.getZoneId()) : null,
+      requestDTO.getName(),
+      requestDTO.getLocationType() != null ? requestDTO.getLocationType() : LocationType.GENERIC,
+      PointVO.of(requestDTO.getLatitude(), requestDTO.getLongitude()),
+      requestDTO.getAltitudeMeters() != null ? AltitudeVO.of(requestDTO.getAltitudeMeters()) : null,
+      requestDTO.getAccuracyMeters() != null ? GpsAccuracyVO.of(requestDTO.getAccuracyMeters()) : null,
+      requestDTO.getAddress(),
+      requestDTO.getPostalCode(),
+      requestDTO.getActive() != null ? requestDTO.getActive() : Boolean.TRUE,
+      requestDTO.getMetadata() != null ? MetadataVO.of(requestDTO.getMetadata()) : MetadataVO.empty()
+    );
   }
 
   // ================================================================

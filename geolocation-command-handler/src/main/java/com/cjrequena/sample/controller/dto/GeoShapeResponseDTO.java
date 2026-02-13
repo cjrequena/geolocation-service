@@ -1,5 +1,6 @@
 package com.cjrequena.sample.controller.dto;
 
+import com.cjrequena.sample.domain.model.enums.GeometryType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,20 +24,14 @@ public class GeoShapeResponseDTO {
   @Schema(description = "GeoShape unique identifier", example = "550e8400-e29b-41d4-a716-446655440000")
   private String id;
 
-  @Schema(description = "Shape name", example = "San Francisco Bay Area")
+  @Schema(description = "Shape name", example = "San Francisco Bay Area", required = true)
   private String name;
 
-  @Schema(description = "Geometry type", example = "Polygon", allowableValues = {"Point", "Polygon", "MultiPolygon"})
-  private String geometryType;
+  @Schema(description = "Geometry type", example = "Polygon", required = true)
+  private GeometryType geometryType;
 
-  @Schema(description = "Area in square meters", example = "1200000000.50")
-  private Double areaSqMeters;
-
-  @Schema(description = "Perimeter in meters", example = "250000.75")
-  private Double perimeterMeters;
-
-  @Schema(description = "Bounding box radius in meters", example = "50000.0")
-  private Double radiusMeters;
+  @Schema(description = "Geometry in WKT format", example = "POLYGON((-122.5 37.5, -122.5 38.5, -121.5 38.5, -121.5 37.5, -122.5 37.5))", required = true)
+  private String geometryWKT;
 
   @Schema(description = "Custom metadata as key-value pairs")
   private Map<String, Object> metadata;

@@ -64,6 +64,7 @@ public class GeoShape extends Domain {
       .centerCoordinates(center)
       .radius(radius)
       .bounds(null)
+      .active(Boolean.TRUE)
       .metadata(metadata != null ? metadata : MetadataVO.empty())
       .auditInfo(AuditInfoVO.create())
       .build();
@@ -83,6 +84,7 @@ public class GeoShape extends Domain {
       .centerCoordinates(null)
       .radius(null)
       .bounds(bounds)
+      .active(Boolean.TRUE)
       .metadata(metadata != null ? metadata : MetadataVO.empty())
       .auditInfo(AuditInfoVO.create())
       .build();
