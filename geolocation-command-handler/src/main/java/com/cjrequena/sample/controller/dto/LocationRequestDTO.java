@@ -20,7 +20,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "Request to create a new Location")
-public class CreateLocationRequestDTO {
+public class LocationRequestDTO {
 
   @Schema(description = "Parent zone ID (if assigning to a zone)", example = "550e8400-e29b-41d4-a716-446655440000")
   private String zoneId;

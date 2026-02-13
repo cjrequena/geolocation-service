@@ -1,6 +1,6 @@
 package com.cjrequena.sample.domain.model.command;
 
-import com.cjrequena.sample.controller.dto.CreateLocationRequestDTO;
+import com.cjrequena.sample.controller.dto.LocationRequestDTO;
 import com.cjrequena.sample.domain.model.Location;
 import com.cjrequena.sample.domain.model.enums.LocationType;
 import com.cjrequena.sample.domain.model.vo.AltitudeVO;
@@ -21,7 +21,7 @@ public class CreateLocationCommand extends Command {
   private final Location location;
 
   @Builder
-  public CreateLocationCommand(@NotNull CreateLocationRequestDTO dto) {
+  public CreateLocationCommand(@NotNull LocationRequestDTO dto) {
     super(UUID.randomUUID());
     this.location = Location.create(
       getDomainId(),

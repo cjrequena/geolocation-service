@@ -1,8 +1,7 @@
 package com.cjrequena.sample.controller;
 
-import com.cjrequena.sample.controller.dto.CreateLocationRequestDTO;
+import com.cjrequena.sample.controller.dto.LocationRequestDTO;
 import com.cjrequena.sample.controller.dto.LocationResponseDTO;
-import com.cjrequena.sample.controller.dto.UpdateLocationRequestDTO;
 import com.cjrequena.sample.domain.mapper.LocationMapper;
 import com.cjrequena.sample.domain.model.Location;
 import com.cjrequena.sample.domain.model.enums.LocationType;
@@ -75,7 +74,7 @@ public class LocationController {
     @ApiResponse(responseCode = "400", description = "Invalid request data"),
     @ApiResponse(responseCode = "404", description = "Parent zone not found")
   })
-  public ResponseEntity<LocationResponseDTO> createLocation(@Valid @RequestBody CreateLocationRequestDTO requestDTO) {
+  public ResponseEntity<LocationResponseDTO> createLocation(@Valid @RequestBody LocationRequestDTO requestDTO) {
 
     log.info("Creating location: {} at ({}, {})",
       requestDTO.getName(), requestDTO.getLatitude(), requestDTO.getLongitude());
@@ -213,7 +212,7 @@ public class LocationController {
   public ResponseEntity<LocationResponseDTO> updateLocation(
     @Parameter(description = "Location ID", required = true)
     @PathVariable UUID id,
-    @Valid @RequestBody UpdateLocationRequestDTO requestDTO
+    @Valid @RequestBody LocationRequestDTO requestDTO
   ) {
 
     log.info("Updating location with ID: {}", id);

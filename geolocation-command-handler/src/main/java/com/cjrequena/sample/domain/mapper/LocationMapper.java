@@ -1,6 +1,6 @@
 package com.cjrequena.sample.domain.mapper;
 
-import com.cjrequena.sample.controller.dto.CreateLocationRequestDTO;
+import com.cjrequena.sample.controller.dto.LocationRequestDTO;
 import com.cjrequena.sample.controller.dto.LocationResponseDTO;
 import com.cjrequena.sample.domain.model.Location;
 import com.cjrequena.sample.domain.model.enums.LocationType;
@@ -211,7 +211,7 @@ public abstract class LocationMapper {
   // DTO  →  domain
   // ================================================================
 
-  public Location requestDTOtoDomain(CreateLocationRequestDTO requestDTO) {
+  public Location requestDTOtoDomain(LocationRequestDTO requestDTO) {
     return Location.create(
       UUID.randomUUID(),
       requestDTO.getZoneId() != null ? UUID.fromString(requestDTO.getZoneId()) : null,
