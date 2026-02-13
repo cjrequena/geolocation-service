@@ -285,6 +285,39 @@ curl -G http://localhost:8080/api/v1/locations/within \
   --data-urlencode "wkt=POLYGON((-122.52 37.75, -122.35 37.75, -122.35 37.85, -122.52 37.85, -122.52 37.75))"
 ```
 
+### 4.4 Find Locations Within a Circle (Non-Standard WKT)
+
+Find all locations within a circular area using the CIRCLE extension:
+
+```bash
+curl -X GET "http://localhost:8080/api/v1/locations/within?wkt=CIRCLE(-122.4783%2037.8199%202000)"
+```
+
+**CIRCLE WKT Format (Non-Standard Extension):**
+```
+CIRCLE(longitude latitude radiusMeters)
+```
+
+**Example:**
+- `CIRCLE(-122.4783 37.8199 2000)` - Circle centered at Golden Gate Bridge with 2km radius
+- Longitude: -122.4783 (must be between -180 and 180)
+- Latitude: 37.8199 (must be between -90 and 90)
+- Radius: 2000 meters (must be positive)
+
+**URL-encoded:**
+```
+CIRCLE(-122.4783%2037.8199%202000)
+```
+
+**Alternative (using --data-urlencode):**
+
+```bash
+curl -G http://localhost:8080/api/v1/locations/within \
+  --data-urlencode "wkt=CIRCLE(-122.4783 37.8199 2000)"
+```
+
+**Note:** CIRCLE is a non-standard WKT extension. Standard WKT doesn't include circles. This format is specific to this API and some spatial databases like PostGIS.
+
 ---
 
 ## Step 5: Search and Filter
@@ -491,9 +524,38 @@ chmod +x test-locations.sh
 ### Issue: 400 Bad Request on polygon query
 **Solution**: Check WKT format and URL encoding:
 ```bash
-# Correct format
+# Correct POLYGON format
 POLYGON((-122.52 37.75, -122.35 37.75, -122.35 37.85, -122.52 37.85, -122.52 37.75))
+
+# Correct CIRCLE format (non-standard extension)
+CIRCLE(-122.4783 37.8199 2000)
+```
+
+### Issue: "Unsupported WKT type: CIRCLE"
+**Solution**: Ensure you're using the correct CIRCLE format with 3 values:
+```bash
+# Correct: longitude latitude radiusMeters
+CIRCLE(-122.4783 37.8199 2000)
+
+# Wrong: missing radius
+CIRCLE(-122.4783 37.8199)
 ```
 
 ### Issue: Foreign key constraint violation
 **Solution**: Create the full hierarchy (Country → Region → City → Area → Zone) before creating locations
+
+---
+
+## Supported WKT Formats
+
+### Standard WKT (OGC Specification)
+- `POINT(longitude latitude)` - Single point
+- `LINESTRING(lon1 lat1, lon2 lat2, ...)` - Line with multiple points
+- `POLYGON((lon1 lat1, lon2 lat2, ...))` - Closed polygon
+
+### Non-Standard Extensions
+- `CIRCLE(longitude latitude radiusMeters)` - Circle with center and radius
+  - Example: `CIRCLE(-122.4783 37.8199 2000)`
+  - Longitude: -180 to 180
+  - Latitude: -90 to 90
+  - Radius: positive number in meters

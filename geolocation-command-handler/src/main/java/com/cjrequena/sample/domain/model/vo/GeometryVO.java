@@ -145,7 +145,26 @@ public class GeometryVO implements Serializable {
   }
 
   /**
-   * Create geometry of WKT (Well-Known Text) string.
+   * Create geometry from WKT (Well-Known Text) string.
+   * 
+   * <p>Supports standard WKT types (POINT, LINESTRING, POLYGON) and 
+   * non-standard CIRCLE extension.</p>
+   * 
+   * <p><b>Standard WKT formats:</b></p>
+   * <ul>
+   *   <li>POINT(longitude latitude)</li>
+   *   <li>LINESTRING(lon1 lat1, lon2 lat2, ...)</li>
+   *   <li>POLYGON((lon1 lat1, lon2 lat2, ...))</li>
+   * </ul>
+   * 
+   * <p><b>Non-standard CIRCLE extension:</b></p>
+   * <ul>
+   *   <li>CIRCLE(longitude latitude radiusMeters)</li>
+   * </ul>
+   * 
+   * @param wkt the WKT string to parse
+   * @return GeometryVO representing the parsed geometry
+   * @throws IllegalArgumentException if WKT is null, empty, or has invalid format
    */
   public static GeometryVO ofWKT(String wkt) {
     if (wkt == null || wkt.trim().isEmpty()) {
@@ -156,6 +175,8 @@ public class GeometryVO implements Serializable {
 
     if (upperWkt.startsWith("POINT")) {
       return parseWKTPoint(wkt);
+    } else if (upperWkt.startsWith("CIRCLE")) {
+      return parseWKTCircle(wkt);
     } else if (upperWkt.startsWith("LINESTRING")) {
       return parseWKTLineVOString(wkt);
     } else if (upperWkt.startsWith("POLYGON")) {
@@ -354,7 +375,7 @@ public class GeometryVO implements Serializable {
         return point.toWKT();
       case CIRCLE:
         // WKT doesn't have native circle, use point + comment
-        return circle.toWKT() + " /* CIRCLE radius=" + circle.getRadius() + " */";
+        return circle.toWKT();
       case RECTANGLE:
         return rectangle.toWKT();
       case POLYGON:
@@ -419,6 +440,9 @@ public class GeometryVO implements Serializable {
 
   // Helper methods for WKT parsing
 
+  /**
+   * Parse WKT POINT format: "POINT(longitude latitude)"
+   */
   private static GeometryVO parseWKTPoint(String wkt) {
     // Simple WKT point parser: "POINT(lon lat)"
     String coords = wkt.substring(wkt.indexOf('(') + 1, wkt.indexOf(')'));
@@ -429,6 +453,82 @@ public class GeometryVO implements Serializable {
     double lon = Double.parseDouble(parts[0]);
     double lat = Double.parseDouble(parts[1]);
     return ofPoint(PointVO.of(lat, lon));
+  }
+
+  /**
+   * Parse non-standard WKT CIRCLE format: "CIRCLE(longitude latitude radiusMeters)"
+   * 
+   * <p>This is a non-standard extension to WKT. The format is:</p>
+   * <pre>CIRCLE(longitude latitude radiusMeters)</pre>
+   * 
+   * <p>Example: {@code CIRCLE(-73.985428 40.748817 500.0)}</p>
+   * 
+   * @param wkt the CIRCLE WKT string
+   * @return GeometryVO containing a CircleVO
+   * @throws IllegalArgumentException if format is invalid or values cannot be parsed
+   */
+  private static GeometryVO parseWKTCircle(String wkt) {
+    try {
+      // Extract content between parentheses: CIRCLE(lon lat radius)
+      int startIdx = wkt.indexOf('(');
+      int endIdx = wkt.lastIndexOf(')');
+      
+      if (startIdx == -1 || endIdx == -1 || endIdx <= startIdx) {
+        throw new IllegalArgumentException(
+          "Invalid CIRCLE WKT format - missing or malformed parentheses: " + wkt
+        );
+      }
+      
+      String content = wkt.substring(startIdx + 1, endIdx).trim();
+      String[] parts = content.split("\\s+");
+      
+      if (parts.length != 3) {
+        throw new IllegalArgumentException(
+          String.format(
+            "Invalid CIRCLE WKT format. Expected 3 values (longitude latitude radiusMeters), got %d: %s",
+            parts.length, wkt
+          )
+        );
+      }
+      
+      double longitude = Double.parseDouble(parts[0]);
+      double latitude = Double.parseDouble(parts[1]);
+      double radiusMeters = Double.parseDouble(parts[2]);
+      
+      // Validate coordinate ranges
+      if (latitude < -90 || latitude > 90) {
+        throw new IllegalArgumentException(
+          String.format("Invalid latitude value: %f (must be between -90 and 90)", latitude)
+        );
+      }
+      if (longitude < -180 || longitude > 180) {
+        throw new IllegalArgumentException(
+          String.format("Invalid longitude value: %f (must be between -180 and 180)", longitude)
+        );
+      }
+      if (radiusMeters <= 0) {
+        throw new IllegalArgumentException(
+          String.format("Invalid radius value: %f (must be positive)", radiusMeters)
+        );
+      }
+      
+      CoordinateVO center = CoordinateVO.of(latitude, longitude);
+      CircleVO circle = CircleVO.of(center, RadiusVO.of(radiusMeters));
+      
+      return GeometryVO.ofCircle(circle);
+      
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException(
+        "Invalid numeric values in CIRCLE WKT: " + wkt + " - " + e.getMessage(), e
+      );
+    } catch (IllegalArgumentException e) {
+      // Re-throw our own validation exceptions
+      throw e;
+    } catch (Exception e) {
+      throw new IllegalArgumentException(
+        "Failed to parse CIRCLE WKT: " + wkt + " - " + e.getMessage(), e
+      );
+    }
   }
 
   private static GeometryVO parseWKTLineVOString(String wkt) {

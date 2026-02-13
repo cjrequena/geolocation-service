@@ -25,10 +25,14 @@ import java.util.function.Function;
  * </ul>
  *
  * <p><b>Important note on CIRCLE:</b> WKT has no native circle type. This class represents
- * circles using the custom format {@code CIRCLE(cx cy, radius)}, e.g. {@code CIRCLE(0 0, 5.0)}.
+ * circles using the custom format {@code CIRCLE(longitude latitude radiusMeters)}, 
+ * e.g. {@code CIRCLE(-73.985428 40.748817 500.0)}.
  * When parsing, a circle is approximated as a buffered {@link Point} with configurable precision.
  * When writing, a circle Geometry (which is stored as a Polygon in JTS) writes back as a
  * standard {@code POLYGON(...)} WKT — store the original CIRCLE WKT if you need to round-trip it.
+ * 
+ * <p>Legacy format {@code CIRCLE(cx cy, radius)} with comma separator is also supported for
+ * backward compatibility.
  */
 @UtilityClass
 public class WKTParserUtil {
@@ -118,40 +122,115 @@ public class WKTParserUtil {
 
   /**
    * Parses a custom CIRCLE WKT string and approximates it as a buffered polygon.
-   * Expected format: {@code CIRCLE(cx cy, radius)}
-   * Example:         {@code CIRCLE(10.0 20.0, 5.0)}
+   * 
+   * <p>Supports two formats:</p>
+   * <ul>
+   *   <li>Standard format: {@code CIRCLE(longitude latitude radiusMeters)} - space-separated</li>
+   *   <li>Legacy format: {@code CIRCLE(cx cy, radius)} - comma-separated (deprecated)</li>
+   * </ul>
+   * 
+   * <p>Examples:</p>
+   * <ul>
+   *   <li>{@code CIRCLE(-73.985428 40.748817 500.0)} - 500m radius circle</li>
+   *   <li>{@code CIRCLE(10.0 20.0, 5.0)} - legacy format</li>
+   * </ul>
+   * 
+   * @param wkt the CIRCLE WKT string
+   * @return Polygon approximation of the circle
+   * @throws IllegalArgumentException if format is invalid
    */
   private static Polygon parseCircle(String wkt) {
     String upper = wkt.toUpperCase();
     if (!upper.startsWith("CIRCLE")) {
-      throw new IllegalArgumentException("Expected CIRCLE WKT format: CIRCLE(cx cy, radius). Got: " + wkt);
+      throw new IllegalArgumentException("Expected CIRCLE WKT format. Got: " + wkt);
     }
-    // Extract content inside parentheses: "cx cy, radius"
+    
+    // Extract content inside parentheses
     int start = wkt.indexOf('(');
     int end = wkt.lastIndexOf(')');
     if (start == -1 || end == -1 || end <= start) {
-      throw new IllegalArgumentException("Malformed CIRCLE WKT: " + wkt);
+      throw new IllegalArgumentException("Malformed CIRCLE WKT - missing or invalid parentheses: " + wkt);
     }
-    String inner = wkt.substring(start + 1, end).trim(); // e.g. "10.0 20.0, 5.0"
-    String[] parts = inner.split(",");
-    if (parts.length != 2) {
-      throw new IllegalArgumentException("CIRCLE WKT must have format CIRCLE(cx cy, radius). Got: " + wkt);
+    
+    String inner = wkt.substring(start + 1, end).trim();
+    
+    double cx, cy, radius;
+    
+    // Try standard format first: CIRCLE(lon lat radius) - space-separated
+    if (!inner.contains(",")) {
+      String[] parts = inner.split("\\s+");
+      if (parts.length != 3) {
+        throw new IllegalArgumentException(
+          String.format(
+            "CIRCLE WKT must have format CIRCLE(longitude latitude radiusMeters). Expected 3 values, got %d: %s",
+            parts.length, wkt
+          )
+        );
+      }
+      
+      try {
+        cx = Double.parseDouble(parts[0]);
+        cy = Double.parseDouble(parts[1]);
+        radius = Double.parseDouble(parts[2]);
+      } catch (NumberFormatException e) {
+        throw new IllegalArgumentException("Invalid numeric values in CIRCLE WKT: " + wkt, e);
+      }
+      
+      // Validate coordinate ranges
+      if (cy < -90 || cy > 90) {
+        throw new IllegalArgumentException(
+          String.format("Invalid latitude value: %f (must be between -90 and 90)", cy)
+        );
+      }
+      if (cx < -180 || cx > 180) {
+        throw new IllegalArgumentException(
+          String.format("Invalid longitude value: %f (must be between -180 and 180)", cx)
+        );
+      }
+    } 
+    // Try legacy format: CIRCLE(cx cy, radius) - comma-separated
+    else {
+      String[] parts = inner.split(",");
+      if (parts.length != 2) {
+        throw new IllegalArgumentException(
+          "CIRCLE WKT legacy format must be CIRCLE(cx cy, radius). Got: " + wkt
+        );
+      }
+      
+      String[] centerParts = parts[0].trim().split("\\s+");
+      if (centerParts.length != 2) {
+        throw new IllegalArgumentException(
+          "CIRCLE center must be two space-separated coordinates. Got: " + parts[0]
+        );
+      }
+      
+      try {
+        cx = Double.parseDouble(centerParts[0]);
+        cy = Double.parseDouble(centerParts[1]);
+        radius = Double.parseDouble(parts[1].trim());
+      } catch (NumberFormatException e) {
+        throw new IllegalArgumentException("Invalid numeric values in CIRCLE WKT: " + wkt, e);
+      }
     }
-    String[] centerParts = parts[0].trim().split("\\s+");
-    if (centerParts.length != 2) {
-      throw new IllegalArgumentException("CIRCLE center must be two space-separated coordinates. Got: " + parts[0]);
-    }
-    double cx = Double.parseDouble(centerParts[0]);
-    double cy = Double.parseDouble(centerParts[1]);
-    double radius = Double.parseDouble(parts[1].trim());
-
+    
+    // Validate radius
     if (radius <= 0) {
-      throw new IllegalArgumentException("Circle radius must be positive. Got: " + radius);
+      throw new IllegalArgumentException(
+        String.format("Circle radius must be positive. Got: %f", radius)
+      );
     }
 
     Point center = GEOMETRY_FACTORY.createPoint(new Coordinate(cx, cy));
+    
+    // Convert radius from meters to degrees for JTS buffer operation
+    // At the equator: 1 degree ≈ 111,320 meters
+    // For latitude, this is constant
+    // For longitude, it varies by cos(latitude)
+    // We use an approximation at the circle's center latitude
+    double radiusInDegrees = radius / 111320.0; // Approximate conversion
+    
     // Buffer the center point to approximate a circle polygon
-    return (Polygon) center.buffer(radius, CIRCLE_SEGMENTS);
+    return (Polygon) center.buffer(radiusInDegrees, CIRCLE_SEGMENTS);
   }
 
   /**

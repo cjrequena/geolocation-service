@@ -33,6 +33,21 @@ public class GeoShapeResponseDTO {
   @Schema(description = "Geometry in WKT format", example = "POLYGON((-122.5 37.5, -122.5 38.5, -121.5 38.5, -121.5 37.5, -122.5 37.5))", required = true)
   private String geometryWKT;
 
+  @Schema(description = "Area in square meters", example = "1200000000.50")
+  private Double areaSqMeters;
+
+  @Schema(description = "Perimeter in meters", example = "250000.75")
+  private Double perimeterMeters;
+
+  @Schema(description = "Bounding box radius in meters", example = "50000.0")
+  private Double radiusMeters;
+
+  @Schema(description = "Latitude in decimal degrees", example = "37.7749")
+  private Double centroidLatitude;
+
+  @Schema(description = "Longitude in decimal degrees", example = "-122.4194")
+  private Double centroidLongitude;
+
   @Schema(description = "Custom metadata as key-value pairs")
   private Map<String, Object> metadata;
 

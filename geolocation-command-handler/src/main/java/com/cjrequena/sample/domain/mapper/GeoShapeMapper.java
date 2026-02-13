@@ -9,7 +9,10 @@ import com.cjrequena.sample.domain.model.enums.GeometryType;
 import com.cjrequena.sample.domain.model.vo.*;
 import com.cjrequena.sample.persistence.entity.GeoShapeEntity;
 import com.cjrequena.sample.shared.common.util.WKTParserUtil;
-import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.mapstruct.*;
 
 import java.math.BigDecimal;
@@ -67,12 +70,20 @@ public abstract class GeoShapeMapper {
       return;
     }
 
-
     // GeometryVO  ->  JTS Geometry
     if (domain.getGeometry() != null) {
-      final String wkt = domain.getGeometry().toWKT();
-      final Geometry geometry = WKTParserUtil.fromWKT(wkt, domain.getGeometryType());
-      entity.setGeometry(geometry);
+      // For CIRCLE, store just the center point (not buffered polygon)
+      // The radius is stored separately in radiusMeters field
+      if (domain.getGeometryType() == GeometryType.CIRCLE && domain.getGeometry().isCircle()) {
+        CircleVO circle = domain.getGeometry().getCircle();
+        CoordinateVO center = circle.getCenter();
+        entity.setGeometry(geometryVOToJTSPoint(domain.getGeometry()));
+      } else {
+        // For other geometry types, use WKTParserUtil
+        final String wkt = domain.getGeometry().toWKT();
+        final Geometry geometry = WKTParserUtil.fromWKT(wkt, domain.getGeometryType());
+        entity.setGeometry(geometry);
+      }
     }
 
     // BoundVO  ->  JsonNode
@@ -186,6 +197,15 @@ public abstract class GeoShapeMapper {
       dto.setGeometryWKT(domain.getGeometry().toWKT());
     }
 
+    if (domain.getRadius() != null && domain.getRadius().getMeters() != null) {
+      dto.setRadiusMeters(domain.getRadius().getMeters().doubleValue());
+    }
+
+    if (domain.getGeometry() != null && domain.getGeometry().getCentroid() != null) {
+      dto.setCentroidLongitude(domain.getGeometry().getCentroid().getLongitudeAsDouble());
+      dto.setCentroidLatitude(domain.getGeometry().getCentroid().getLatitudeAsDouble());
+    }
+
     // MetadataVO → Map<String, Object> ───────────────────────────────
     if (domain.getMetadata() != null) {
       dto.setMetadata(domain.getMetadata().toMap());
@@ -229,19 +249,60 @@ public abstract class GeoShapeMapper {
         );
       }
       case CIRCLE -> {
-        final Geometry geometry = WKTParserUtil.fromWKT(requestDTO.getGeometryWKT(), GeometryType.CIRCLE);
-        final CoordinateVO coordinateVO = CoordinateVO.of(geometry.getCentroid().getY(), geometry.getCentroid().getX());
-        final Point centroid = geometry.getCentroid();
-        Coordinate boundaryPoint = geometry.getCoordinates()[0];
-        double radius = centroid.getCoordinate().distance(boundaryPoint);
+        // Parse CIRCLE WKT directly to extract center and radius
+        // Format: CIRCLE(longitude latitude radiusMeters)
+        String wkt = requestDTO.getGeometryWKT().trim();
+
+        if (!wkt.toUpperCase().startsWith("CIRCLE")) {
+          throw new IllegalArgumentException("Expected CIRCLE WKT format for CIRCLE geometry type");
+        }
+
+        // Extract content between parentheses
+        int start = wkt.indexOf('(');
+        int end = wkt.lastIndexOf(')');
+        if (start == -1 || end == -1 || end <= start) {
+          throw new IllegalArgumentException("Malformed CIRCLE WKT: " + wkt);
+        }
+
+        String inner = wkt.substring(start + 1, end).trim();
+
+        // Parse based on format (with or without comma)
+        double longitude, latitude, radiusMeters;
+
+        if (!inner.contains(",")) {
+          // Standard format: CIRCLE(lon lat radius)
+          String[] parts = inner.split("\\s+");
+          if (parts.length != 3) {
+            throw new IllegalArgumentException(
+              String.format("CIRCLE WKT must have 3 values (longitude latitude radiusMeters), got %d", parts.length)
+            );
+          }
+          longitude = Double.parseDouble(parts[0]);
+          latitude = Double.parseDouble(parts[1]);
+          radiusMeters = Double.parseDouble(parts[2]);
+        } else {
+          // Legacy format: CIRCLE(cx cy, radius)
+          String[] parts = inner.split(",");
+          if (parts.length != 2) {
+            throw new IllegalArgumentException("CIRCLE WKT legacy format must be CIRCLE(cx cy, radius)");
+          }
+          String[] centerParts = parts[0].trim().split("\\s+");
+          if (centerParts.length != 2) {
+            throw new IllegalArgumentException("CIRCLE center must be two space-separated coordinates");
+          }
+          longitude = Double.parseDouble(centerParts[0]);
+          latitude = Double.parseDouble(centerParts[1]);
+          radiusMeters = Double.parseDouble(parts[1].trim());
+        }
+
+        final CoordinateVO coordinateVO = CoordinateVO.of(latitude, longitude);
         geoShape = GeoShape.createCircle(
           id,
           requestDTO.getName(),
           coordinateVO,
-          RadiusVO.of(radius),
+          RadiusVO.of(radiusMeters),
           requestDTO.getMetadata() != null ? MetadataVO.of(requestDTO.getMetadata()) : MetadataVO.empty()
         );
-
       }
       case RECTANGLE -> {
         final Geometry geometry = WKTParserUtil.fromWKT(requestDTO.getGeometryWKT(), GeometryType.RECTANGLE);
@@ -284,9 +345,6 @@ public abstract class GeoShapeMapper {
     }
     return geoShape;
   }
-
-
-
 
   // ==========================================
   // Private conversion helpers
