@@ -1,6 +1,10 @@
 package com.cjrequena.sample.domain.mapper;
 
+import com.cjrequena.sample.controller.dto.CountryResponseDTO;
+import com.cjrequena.sample.controller.dto.CreateCountryRequestDTO;
+import com.cjrequena.sample.controller.dto.LocationResponseDTO;
 import com.cjrequena.sample.domain.model.Country;
+import com.cjrequena.sample.domain.model.Location;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
 import com.cjrequena.sample.domain.model.vo.MetadataVO;
@@ -9,6 +13,7 @@ import com.cjrequena.sample.persistence.entity.CountryEntity;
 import org.mapstruct.*;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  *
@@ -134,6 +139,62 @@ public interface CountryMapper {
     if (entity.getCreatedAt() != null || entity.getUpdatedAt() != null) {
       domain.setAuditInfo(AuditInfoVO.of(entity.getCreatedAt(), entity.getUpdatedAt(), entity.getCreatedBy(), entity.getUpdatedBy()));
     }
+  }
+
+  // ================================================================
+  // Domain  →  DTO
+  // ================================================================
+
+  /**
+   * Converts a {@link Location} domain aggregate into a {@link LocationResponseDTO}.
+   */
+  @Mapping(target = "id", expression = "java(domain.getId() != null ? domain.getId().toString() : null)")
+  @Mapping(target = "name", source = "name")
+  @Mapping(target = "metadata", ignore = true)
+  @Mapping(target = "createdAt", ignore = true)
+  @Mapping(target = "updatedAt", ignore = true)
+  CountryResponseDTO domainToResponseDTO(Country domain);
+
+  /**
+   * Fills the flattened fields on {@link LocationResponseDTO}.
+   */
+  @AfterMapping
+  default void populateResponseDTOFields(Country domain, @MappingTarget CountryResponseDTO dto) {
+    if (domain == null) {
+      return;
+    }
+
+    // MetadataVO → Map<String, Object> ───────────────────────────────
+    if (domain.getMetadata() != null) {
+      dto.setMetadata(domain.getMetadata().toMap());
+    }
+
+    // ── AuditInfoVO  →  timestamps ──────────────────────
+    if (domain.getAuditInfo() != null) {
+      dto.setCreatedAt(domain.getAuditInfo().getCreatedAt() != null
+        ? domain.getAuditInfo().getCreatedAt().toString()
+        : null);
+      dto.setUpdatedAt(domain.getAuditInfo().getUpdatedAt() != null
+        ? domain.getAuditInfo().getUpdatedAt().toString()
+        : null);
+    }
+  }
+
+  // ================================================================
+  // DTO  →  domain
+  // ================================================================
+
+  default Country requestDTOtoDomain(CreateCountryRequestDTO requestDTO) {
+    return Country.create(
+      UUID.randomUUID(),
+      requestDTO.getName(),
+      IsoCodeVO.of(requestDTO.getIsoCodeAlpha2(),requestDTO.getIsoCodeAlpha3(),requestDTO.getIsoCodeNumeric()),
+      requestDTO.getPhoneCode(),
+      requestDTO.getCurrencyCode(),
+      requestDTO.getCapital(),
+      requestDTO.getPopulation() != null ? PopulationVO.of(requestDTO.getPopulation()) : null,
+      requestDTO.getActive() != null ? requestDTO.getActive() : Boolean.TRUE,
+      requestDTO.getMetadata() != null ? MetadataVO.of(requestDTO.getMetadata()) : MetadataVO.empty());
   }
 
   // ================================================================

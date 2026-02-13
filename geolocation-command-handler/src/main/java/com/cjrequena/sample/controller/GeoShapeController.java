@@ -44,7 +44,7 @@ import static com.cjrequena.sample.shared.common.util.Constant.VND_SAMPLE_SERVIC
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Tag(name = "GeoShapes", description = "Geographic shape management and spatial query endpoints")
 public class GeoShapeController {
-  public static final String ENDPOINT = "/geolocation-service/api/geoshapes/";
+  public static final String ENDPOINT = "/geolocation-service/api/geoshapes";
   public static final String ACCEPT_VERSION = "Accept-Version=" + VND_SAMPLE_SERVICE_V1;
 
   private final GeoShapeService geoShapeService;
@@ -212,12 +212,16 @@ public class GeoShapeController {
    * @return list of shapes containing the point
    */
   @GetMapping("/contains-point")
-  @Operation(summary = "Find shapes containing a point",
-    description = "Finds all shapes that contain the specified point using spatial query")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Query completed successfully"),
-    @ApiResponse(responseCode = "400", description = "Invalid WKT format")
-  })
+  @Operation(
+    summary = "Find shapes containing a point",
+    description = "Finds all shapes that contain the specified point using spatial query"
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(responseCode = "200", description = "Query completed successfully"),
+      @ApiResponse(responseCode = "400", description = "Invalid WKT format")
+    }
+  )
   public ResponseEntity<List<GeoShapeResponseDTO>> findShapesContainingPoint(
     @Parameter(description = "Point in WKT format (e.g., 'POINT(-3.7038 40.4168)')", required = true)
     @RequestParam String wkt) {
@@ -247,17 +251,22 @@ public class GeoShapeController {
    * @return list of shapes within the distance
    */
   @GetMapping("/within-distance")
-  @Operation(summary = "Find shapes within distance",
-    description = "Finds all shapes within specified distance from a point")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Query completed successfully"),
-    @ApiResponse(responseCode = "400", description = "Invalid WKT format or distance")
-  })
+  @Operation(
+    summary = "Find shapes within distance",
+    description = "Finds all shapes within specified distance from a point"
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(responseCode = "200", description = "Query completed successfully"),
+      @ApiResponse(responseCode = "400", description = "Invalid WKT format or distance")
+    }
+  )
   public ResponseEntity<List<GeoShapeResponseDTO>> findShapesWithinDistance(
     @Parameter(description = "Center point in WKT format", required = true)
     @RequestParam String wkt,
     @Parameter(description = "Distance in meters", required = true)
-    @RequestParam double distanceMeters) {
+    @RequestParam("distance_meters") double distanceMeters
+  ) {
 
     log.debug("Finding shapes within {} meters of {}", distanceMeters, wkt);
 
