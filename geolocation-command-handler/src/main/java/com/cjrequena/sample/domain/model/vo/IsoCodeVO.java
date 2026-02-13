@@ -3,6 +3,7 @@ package com.cjrequena.sample.domain.model.vo;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.extern.jackson.Jacksonized;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -13,6 +14,7 @@ import java.util.regex.Pattern;
  */
 @Builder
 @Getter
+@Jacksonized
 @EqualsAndHashCode
 public class IsoCodeVO implements Serializable {
   @Serial

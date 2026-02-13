@@ -31,9 +31,6 @@ public class CityResponseDTO {
   @Schema(description = "Is this a capital city", example = "false")
   private Boolean isCapital;
 
-  @Schema(description = "Parent region summary")
-  private RegionSummaryDTO region;
-
   @Schema(description = "Active status", example = "true")
   private Boolean isActive;
 

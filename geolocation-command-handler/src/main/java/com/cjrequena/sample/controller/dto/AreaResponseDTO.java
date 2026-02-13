@@ -31,9 +31,6 @@ public class AreaResponseDTO {
   @Schema(description = "Population count", example = "48000")
   private Long population;
 
-  @Schema(description = "Parent city summary")
-  private CitySummaryDTO city;
-
   @Schema(description = "Is this area active", example = "true")
   private Boolean active;
 

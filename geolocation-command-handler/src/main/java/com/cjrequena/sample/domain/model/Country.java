@@ -5,6 +5,7 @@ import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
 import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import lombok.*;
+import lombok.extern.jackson.Jacksonized;
 
 import java.util.UUID;
 
@@ -17,6 +18,7 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
+@Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
 public class Country extends Domain {

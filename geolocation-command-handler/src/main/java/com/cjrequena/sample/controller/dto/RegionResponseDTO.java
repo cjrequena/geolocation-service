@@ -31,9 +31,6 @@ public class RegionResponseDTO {
   @Schema(description = "Population count", example = "39538223")
   private Long population;
 
-  @Schema(description = "Parent country summary")
-  private CountrySummaryDTO country;
-
   @Schema(description = "Active status", example = "true")
   private Boolean status;
 
