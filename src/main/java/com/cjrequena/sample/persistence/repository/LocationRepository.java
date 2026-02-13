@@ -4,7 +4,9 @@ import com.cjrequena.sample.persistence.entity.LocationEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -26,7 +28,7 @@ import java.util.UUID;
  * to ensure proper parameter binding with PostGIS. Example: "POINT(-3.7038 40.4168)"</p>
  */
 @Repository
-public interface LocationRepository extends JpaRepository<LocationEntity, UUID> {
+public interface LocationRepository extends JpaRepository<LocationEntity, UUID>, JpaSpecificationExecutor<LocationEntity>, QuerydslPredicateExecutor<LocationEntity> {
 
   // ================================================================
   // Active / Inactive filtering

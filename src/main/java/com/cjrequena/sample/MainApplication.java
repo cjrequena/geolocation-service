@@ -1,14 +1,19 @@
 package com.cjrequena.sample;
 
 import com.cjrequena.sample.domain.mapper.GeoShapeMapper;
+import com.cjrequena.sample.persistence.entity.LocationEntity;
 import com.cjrequena.sample.persistence.repository.GeoShapeRepository;
+import com.cjrequena.sample.persistence.repository.LocationRepository;
 import com.cjrequena.sample.service.AreaService;
+import io.github.perplexhub.rsql.RSQLJPASupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import java.util.List;
 
 @SpringBootApplication(scanBasePackages = {
   "com.cjrequena.sample"
@@ -20,7 +25,7 @@ public class MainApplication implements CommandLineRunner {
   private final GeoShapeMapper geoShapeMapper;
   private final GeoShapeRepository geoShapeRepository;
   private final AreaService areaService;
-
+  private final LocationRepository locationRepository;
 
   public static void main(String... args) {
     SpringApplication.run(MainApplication.class, args);
@@ -111,5 +116,9 @@ public class MainApplication implements CommandLineRunner {
     //    String lineWKT = "LINESTRING (0 0, 5 5, 10 0)";
     //    Geometry line = WKTParserUtil.fromWKT(lineWKT, GeometryType.LINE);
     //    System.out.println("LINE      → " + WKTParserUtil.toWKT(line));
+    String filter= "active==false";
+
+//    final List<LocationEntity> locationEntityList = this.locationRepository.findAll(RSQLJPASupport.toSpecification(filter));
+//    log.debug("{}", locationEntityList);
   }
 }
