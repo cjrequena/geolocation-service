@@ -24,6 +24,9 @@ public class RegionResponseDTO {
   @Schema(description = "Region unique identifier", example = "550e8400-e29b-41d4-a716-446655440000")
   private String id;
 
+  @Schema(description = "Parent country ID", example = "550e8400-e29b-41d4-a716-446655440000")
+  private String countryId;
+
   @Schema(description = "Region name", example = "California")
   private String name;
 

@@ -159,6 +159,7 @@ public interface RegionMapper {
    * Converts a {@link Region} domain into a {@link RegionResponseDTO}.
    */
   @Mapping(target = "id", expression = "java(domain.getId() != null ? domain.getId().toString() : null)")
+  @Mapping(target = "countryId", expression = "java(domain.getCountryId() != null ? domain.getCountryId().toString() : null)")
   @Mapping(target = "name", source = "name")
   @Mapping(target = "metadata", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
