@@ -21,9 +21,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,6 +51,10 @@ public class LocationController {
   private final LocationService locationService;
   private final LocationMapper locationMapper;
 
+  // ================================================================
+  // CRUD Standard Operations
+  // ================================================================
+
   /**
    * Create a new location.
    *
@@ -74,7 +75,7 @@ public class LocationController {
     @ApiResponse(responseCode = "400", description = "Invalid request data"),
     @ApiResponse(responseCode = "404", description = "Parent zone not found")
   })
-  public ResponseEntity<LocationResponseDTO> createLocation(@Valid @RequestBody LocationRequestDTO requestDTO) {
+  public ResponseEntity<LocationResponseDTO> create(@Valid @RequestBody LocationRequestDTO requestDTO) {
 
     log.info("Creating location: {} at ({}, {})",
       requestDTO.getName(), requestDTO.getLatitude(), requestDTO.getLongitude());
@@ -110,85 +111,96 @@ public class LocationController {
       content = @Content(schema = @Schema(implementation = LocationResponseDTO.class))),
     @ApiResponse(responseCode = "404", description = "Location not found")
   })
-  public ResponseEntity<LocationResponseDTO> getLocationById(
+  public ResponseEntity<LocationResponseDTO> retrieveById(
     @Parameter(description = "Location ID", required = true)
     @PathVariable UUID id
   ) {
 
     log.debug("Getting location by ID: {}", id);
 
-    return locationService.findById(id)
+    return locationService
+      .findById(id)
       .map(locationMapper::domainToResponseDTO)
       .map(ResponseEntity::ok)
       .orElse(ResponseEntity.notFound().build());
   }
 
   /**
-   * Get all locations.
+   * Get all locations with optional filtering, sorting, and pagination.
    *
-   * @return list of all locations
+   * @param filters RSQL filter expression (e.g., "active==true;postalCode==94102")
+   * @param offset the offset for pagination (0-based)
+   * @param limit the maximum number of results to return
+   * @param sort the sort expression (e.g., "id,asc" or "name,desc;createdAt,asc")
+   * @return list of locations matching the criteria
    */
   @GetMapping
-  @Operation(summary = "Get all locations", description = "Retrieves all locations")
+  @Operation(
+    summary = "Get all locations with filtering, sorting, and pagination",
+    description = "Retrieves locations with optional RSQL filters, sorting, and pagination support"
+  )
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Locations retrieved successfully")
+    @ApiResponse(responseCode = "200", description = "Locations retrieved successfully"),
+    @ApiResponse(responseCode = "400", description = "Invalid filter or sort expression")
   })
-  public ResponseEntity<List<LocationResponseDTO>> getAllLocations() {
-    log.debug("Getting all locations");
+  public ResponseEntity<List<LocationResponseDTO>> retrieve(
+    @Parameter(
+      name = "filters",
+      description = "RSQL filter expression (e.g., 'active==true', 'postalCode==94102', 'name=like=\"Bridge\"')",
+      example = "active==true;postalCode==94102"
+    )
+    @RequestParam(value = "filters", required = false) String filters,
 
-    List<LocationResponseDTO> locations = locationService
-      .findAll()
-      .stream()
-      .map(locationMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
+    @Parameter(
+      name = "offset",
+      description = "Offset for pagination (0-based)",
+      example = "0"
+    )
+    @RequestParam(value = "offset", required = false) Integer offset,
 
-    return ResponseEntity.ok(locations);
-  }
+    @Parameter(
+      name = "limit",
+      description = "Maximum number of results to return",
+      example = "20"
+    )
+    @RequestParam(value = "limit", required = false) Integer limit,
 
-  /**
-   * Get locations by zone.
-   *
-   * @param zoneId the zone ID
-   * @return list of locations in the zone
-   */
-  @GetMapping("/zone/{zoneId}")
-  @Operation(summary = "Get locations by zone", description = "Retrieves all locations within a specific zone")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Locations retrieved successfully")
-  })
-  public ResponseEntity<List<LocationResponseDTO>> getLocationsByZone(
-    @Parameter(description = "Zone ID", required = true)
-    @PathVariable UUID zoneId
+    @Parameter(
+      name = "sort",
+      description = "Sort expression (e.g., 'id,asc', 'name,desc', 'postalCode,asc;name,desc')",
+      example = "name,asc"
+    )
+    @RequestParam(value = "sort", required = false) String sort
   ) {
+    log.debug("Getting locations with filters: {}, offset: {}, limit: {}, sort: {}",
+      filters, offset, limit, sort);
 
-    log.debug("Getting locations by zone: {}", zoneId);
+    try {
+      // If no filters, offset, limit, or sort provided, use the cached findAll()
+      if (filters == null && offset == null && limit == null && sort == null) {
+        List<LocationResponseDTO> locations = locationService
+          .findAll()
+          .stream()
+          .map(locationMapper::domainToResponseDTO)
+          .collect(Collectors.toList());
+        return ResponseEntity.ok(locations);
+      }
 
-    List<LocationResponseDTO> locations = locationService.findByZoneId(zoneId).stream()
-      .map(locationMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
+      // Otherwise, use the search method with filters/sorting/pagination
+      List<LocationResponseDTO> locations = locationService
+        .findAll(filters, offset, limit, sort)
+        .stream()
+        .map(locationMapper::domainToResponseDTO)
+        .collect(Collectors.toList());
 
-    return ResponseEntity.ok(locations);
-  }
-
-  /**
-   * Get locations with pagination.
-   *
-   * @param pageable pagination parameters
-   * @return page of locations
-   */
-  @GetMapping("/page")
-  @Operation(summary = "Get locations with pagination", description = "Retrieves locations with pagination support")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Locations retrieved successfully")
-  })
-  public ResponseEntity<Page<LocationResponseDTO>> getLocationsPage(@PageableDefault(size = 20) Pageable pageable) {
-
-    log.debug("Getting locations page: {}", pageable);
-
-    Page<LocationResponseDTO> page = locationService.findByActive(true, pageable)
-      .map(locationMapper::domainToResponseDTO);
-
-    return ResponseEntity.ok(page);
+      return ResponseEntity.ok(locations);
+    } catch (IllegalArgumentException e) {
+      log.error("Invalid request parameters: {}", e.getMessage());
+      return ResponseEntity.badRequest().build();
+    } catch (Exception e) {
+      log.error("Error retrieving locations: {}", e.getMessage(), e);
+      return ResponseEntity.badRequest().build();
+    }
   }
 
   /**
@@ -209,7 +221,7 @@ public class LocationController {
     @ApiResponse(responseCode = "404", description = "Location not found"),
     @ApiResponse(responseCode = "400", description = "Invalid request data")
   })
-  public ResponseEntity<LocationResponseDTO> updateLocation(
+  public ResponseEntity<LocationResponseDTO> update(
     @Parameter(description = "Location ID", required = true)
     @PathVariable UUID id,
     @Valid @RequestBody LocationRequestDTO requestDTO
@@ -250,12 +262,17 @@ public class LocationController {
    * @return 204 No Content on success
    */
   @DeleteMapping("/{id}")
-  @Operation(summary = "Delete a location", description = "Deletes a location by ID")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "204", description = "Location deleted successfully"),
-    @ApiResponse(responseCode = "404", description = "Location not found")
-  })
-  public ResponseEntity<Void> deleteLocation(
+  @Operation(
+    summary = "Delete a location",
+    description = "Deletes a location by ID"
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(responseCode = "204", description = "Location deleted successfully"),
+      @ApiResponse(responseCode = "404", description = "Location not found")
+    }
+  )
+  public ResponseEntity<Void> delete(
     @Parameter(description = "Location ID", required = true)
     @PathVariable UUID id
   ) {
@@ -268,6 +285,53 @@ public class LocationController {
 
     return ResponseEntity.noContent().build();
   }
+
+  /**
+   * Check if a location exists by ID.
+   *
+   * @param id the location ID
+   * @return 200 if exists, 404 if not
+   */
+  @GetMapping("/{id}/exists")
+  @Operation(summary = "Check if location exists", description = "Checks if a location exists by ID")
+  @ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "Location exists"),
+    @ApiResponse(responseCode = "404", description = "Location does not exist")
+  })
+  public ResponseEntity<Void> checkExists(
+    @Parameter(description = "Location ID", required = true)
+    @PathVariable UUID id
+  ) {
+
+    log.debug("Checking if location exists: {}", id);
+
+    return locationService
+      .existsById(id)
+      ? ResponseEntity.ok().build()
+      : ResponseEntity.notFound().build();
+  }
+
+  /**
+   * Get total count of locations.
+   *
+   * @return the count
+   */
+  @GetMapping("/count")
+  @Operation(summary = "Get location count", description = "Returns the total number of locations")
+  @ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "Count retrieved successfully")
+  })
+  public ResponseEntity<Long> count() {
+    log.debug("Getting location count");
+
+    long count = locationService.count();
+
+    return ResponseEntity.ok(count);
+  }
+
+  // ================================================================
+  // Spatial Operations — Proximity
+  // ================================================================
 
   /**
    * Find locations near a point.
@@ -284,7 +348,7 @@ public class LocationController {
     @ApiResponse(responseCode = "200", description = "Query completed successfully"),
     @ApiResponse(responseCode = "400", description = "Invalid coordinates or radius")
   })
-  public ResponseEntity<List<LocationResponseDTO>> findLocationsNear(
+  public ResponseEntity<List<LocationResponseDTO>> searchLocationsNear(
     @Parameter(description = "Latitude", required = true)
     @RequestParam double latitude,
     @Parameter(description = "Longitude", required = true)
@@ -324,7 +388,7 @@ public class LocationController {
     @ApiResponse(responseCode = "200", description = "Query completed successfully"),
     @ApiResponse(responseCode = "400", description = "Invalid WKT format")
   })
-  public ResponseEntity<List<LocationResponseDTO>> findLocationsWithin(
+  public ResponseEntity<List<LocationResponseDTO>> searchLocationsWithin(
     @Parameter(description = "Geometry in WKT format", required = true)
     @RequestParam String wkt
   ) {
@@ -345,98 +409,4 @@ public class LocationController {
     }
   }
 
-  /**
-   * Get locations by postal code.
-   *
-   * @param postalCode the postal code
-   * @return list of locations with the postal code
-   */
-  @GetMapping("/postal-code/{postalCode}")
-  @Operation(summary = "Get locations by postal code", description = "Retrieves locations by postal code")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Locations retrieved successfully")
-  })
-  public ResponseEntity<List<LocationResponseDTO>> getLocationsByPostalCode(
-    @Parameter(description = "Postal code", required = true)
-    @PathVariable String postalCode) {
-
-    log.debug("Getting locations by postal code: {}", postalCode);
-
-    List<LocationResponseDTO> locations = locationService
-      .findByPostalCode(postalCode)
-      .stream()
-      .map(locationMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
-
-    return ResponseEntity.ok(locations);
-  }
-
-  /**
-   * Search locations by address.
-   *
-   * @param address the address substring to search for
-   * @return list of matching locations
-   */
-  @GetMapping("/search")
-  @Operation(summary = "Search locations by address",
-    description = "Searches locations by address (case-insensitive partial match)")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Search completed successfully")
-  })
-  public ResponseEntity<List<LocationResponseDTO>> searchLocationsByAddress(
-    @Parameter(description = "Address substring to search for", required = true)
-    @RequestParam String address) {
-
-    log.debug("Searching locations by address: {}", address);
-
-    List<LocationResponseDTO> locations = locationService
-      .findByAddressContaining(address)
-      .stream()
-      .map(locationMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
-
-    return ResponseEntity.ok(locations);
-  }
-
-  /**
-   * Check if a location exists by ID.
-   *
-   * @param id the location ID
-   * @return 200 if exists, 404 if not
-   */
-  @GetMapping("/{id}/exists")
-  @Operation(summary = "Check if location exists", description = "Checks if a location exists by ID")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Location exists"),
-    @ApiResponse(responseCode = "404", description = "Location does not exist")
-  })
-  public ResponseEntity<Void> checkLocationExists(
-    @Parameter(description = "Location ID", required = true)
-    @PathVariable UUID id
-  ) {
-
-    log.debug("Checking if location exists: {}", id);
-
-    return locationService.existsById(id)
-      ? ResponseEntity.ok().build()
-      : ResponseEntity.notFound().build();
-  }
-
-  /**
-   * Get total count of locations.
-   *
-   * @return the count
-   */
-  @GetMapping("/count")
-  @Operation(summary = "Get location count", description = "Returns the total number of locations")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Count retrieved successfully")
-  })
-  public ResponseEntity<Long> getLocationCount() {
-    log.debug("Getting location count");
-
-    long count = locationService.count();
-
-    return ResponseEntity.ok(count);
-  }
 }

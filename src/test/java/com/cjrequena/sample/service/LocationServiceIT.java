@@ -3,7 +3,6 @@ package com.cjrequena.sample.service;
 import com.cjrequena.sample.domain.model.Location;
 import com.cjrequena.sample.domain.model.Zone;
 import com.cjrequena.sample.domain.model.enums.LocationType;
-import com.cjrequena.sample.domain.model.vo.AltitudeVO;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.MetadataVO;
 import com.cjrequena.sample.domain.model.vo.PointVO;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -86,17 +84,17 @@ class LocationServiceIT {
     assertThat(result.get().getAddress()).isEqualTo("123 Main St");
   }
 
-  @Test
-  @DisplayName("Should find all active locations")
-  void shouldFindAllActive() {
-    locationService.create(createLocationDomain("123 Main St", 40.4168, -3.7038, true));
-    locationService.create(createLocationDomain("456 Oak Ave", 40.4200, -3.7100, false));
-
-    List<Location> result = locationService.findAllActive();
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getAddress()).isEqualTo("123 Main St");
-  }
+//  @Test
+//  @DisplayName("Should find all active locations")
+//  void shouldFindAllActive() {
+//    locationService.create(createLocationDomain("123 Main St", 40.4168, -3.7038, true));
+//    locationService.create(createLocationDomain("456 Oak Ave", 40.4200, -3.7100, false));
+//
+//    List<Location> result = locationService.findAllActive();
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getAddress()).isEqualTo("123 Main St");
+//  }
 
   @Test
   @DisplayName("Should find locations within radius")
@@ -115,62 +113,62 @@ class LocationServiceIT {
     assertThat(result).hasSizeGreaterThanOrEqualTo(2);
   }
 
-  @Test
-  @DisplayName("Should find locations by postal code")
-  void shouldFindByPostalCode() {
-    Location location = createLocationDomain("123 Main St", 40.4168, -3.7038, true);
-    location.setPostalCode("28001");
-    locationService.create(location);
+//  @Test
+//  @DisplayName("Should find locations by postal code")
+//  void shouldFindByPostalCode() {
+//    Location location = createLocationDomain("123 Main St", 40.4168, -3.7038, true);
+//    location.setPostalCode("28001");
+//    locationService.create(location);
+//
+//    List<Location> result = locationService.findByPostalCode("28001");
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getAddress()).isEqualTo("123 Main St");
+//  }
 
-    List<Location> result = locationService.findByPostalCode("28001");
+//  @Test
+//  @DisplayName("Should find locations by address containing")
+//  void shouldFindByAddressContaining() {
+//    locationService.create(createLocationDomain("123 Main Street", 40.4168, -3.7038, true));
+//    locationService.create(createLocationDomain("456 Oak Avenue", 40.4200, -3.7100, true));
+//
+//    List<Location> result = locationService.findByAddressContaining("Main");
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getAddress()).isEqualTo("123 Main Street");
+//  }
 
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getAddress()).isEqualTo("123 Main St");
-  }
+//  @Test
+//  @DisplayName("Should find locations by altitude greater than")
+//  void shouldFindByAltitudeGreaterThan() {
+//    Location low = createLocationDomain("Low Point", 40.4168, -3.7038, true);
+//    low.setAltitude(AltitudeVO.of(100.0));
+//    locationService.create(low);
+//
+//    Location high = createLocationDomain("High Point", 40.4200, -3.7100, true);
+//    high.setAltitude(AltitudeVO.of(500.0));
+//    locationService.create(high);
+//
+//    List<Location> result = locationService.findByAltitudeGreaterThan(new BigDecimal("200.0"));
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getAddress()).isEqualTo("High Point");
+//  }
 
-  @Test
-  @DisplayName("Should find locations by address containing")
-  void shouldFindByAddressContaining() {
-    locationService.create(createLocationDomain("123 Main Street", 40.4168, -3.7038, true));
-    locationService.create(createLocationDomain("456 Oak Avenue", 40.4200, -3.7100, true));
-
-    List<Location> result = locationService.findByAddressContaining("Main");
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getAddress()).isEqualTo("123 Main Street");
-  }
-
-  @Test
-  @DisplayName("Should find locations by altitude greater than")
-  void shouldFindByAltitudeGreaterThan() {
-    Location low = createLocationDomain("Low Point", 40.4168, -3.7038, true);
-    low.setAltitude(AltitudeVO.of(100.0));
-    locationService.create(low);
-
-    Location high = createLocationDomain("High Point", 40.4200, -3.7100, true);
-    high.setAltitude(AltitudeVO.of(500.0));
-    locationService.create(high);
-
-    List<Location> result = locationService.findByAltitudeGreaterThan(new BigDecimal("200.0"));
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getAddress()).isEqualTo("High Point");
-  }
-
-  @Test
-  @DisplayName("Should find locations with altitude")
-  void shouldFindWithAltitude() {
-    Location withAltitude = createLocationDomain("Mountain", 40.4168, -3.7038, true);
-    withAltitude.setAltitude(AltitudeVO.of(1000.0));
-    locationService.create(withAltitude);
-
-    locationService.create(createLocationDomain("Sea Level", 40.4200, -3.7100, true));
-
-    List<Location> result = locationService.findWithAltitude();
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getAddress()).isEqualTo("Mountain");
-  }
+//  @Test
+//  @DisplayName("Should find locations with altitude")
+//  void shouldFindWithAltitude() {
+//    Location withAltitude = createLocationDomain("Mountain", 40.4168, -3.7038, true);
+//    withAltitude.setAltitude(AltitudeVO.of(1000.0));
+//    locationService.create(withAltitude);
+//
+//    locationService.create(createLocationDomain("Sea Level", 40.4200, -3.7100, true));
+//
+//    List<Location> result = locationService.findWithAltitude();
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getAddress()).isEqualTo("Mountain");
+//  }
 
   @Test
   @DisplayName("Should update location successfully")

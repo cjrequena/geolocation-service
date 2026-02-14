@@ -6,11 +6,14 @@ import com.cjrequena.sample.domain.model.Country;
 import com.cjrequena.sample.persistence.entity.CountryEntity;
 import com.cjrequena.sample.persistence.repository.CountryRepository;
 import com.cjrequena.sample.persistence.repository.cache.CountryCacheRedisHashOpsRepository;
+import com.cjrequena.sample.service.base.BaseService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +21,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -32,12 +36,40 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class CountryService {
+public class CountryService extends BaseService<CountryEntity, Country> {
 
   private final CountryRepository countryRepository;
   private final CountryCacheRedisHashOpsRepository countryCacheRedisHashOpsRepository;
   private final CacheConfigurationProperties cacheConfigurationProperties;
   private final CountryMapper countryMapper;
+
+  // ================================================================
+  // BaseService Implementation
+  // ================================================================
+
+  @Override
+  protected JpaRepository<CountryEntity, ?> getRepository() {
+    return countryRepository;
+  }
+
+  @Override
+  protected JpaSpecificationExecutor<CountryEntity> getSpecificationExecutor() {
+    return countryRepository;
+  }
+
+  @Override
+  protected Function<CountryEntity, Country> getEntityToDomainMapper() {
+    return countryMapper::toDomain;
+  }
+
+  @Override
+  protected Class<CountryEntity> getEntityClass() {
+    return CountryEntity.class;
+  }
+
+  // ================================================================
+  // Cache Initialization
+  // ================================================================
 
   @PostConstruct
   public void loadUpCache() {
@@ -118,7 +150,9 @@ public class CountryService {
   }
 
   /**
-   * Finds all countries.
+   * Finds all countries without any filtering or pagination.
+   * 
+   * <p>This method tries cache first, then falls back to database if cache is disabled or empty.</p>
    *
    * @return list of all countries
    */
@@ -154,6 +188,22 @@ public class CountryService {
     }
 
     return countries;
+  }
+
+  /**
+   * Finds all countries with optional RSQL filtering, sorting, and pagination.
+   *
+   * <p>This method does NOT use cache and always queries the database to ensure
+   * accurate filtering and sorting results.</p>
+   *
+   * @param filters RSQL filter expression (e.g., "active==true;name=like='United'")
+   * @param offset the offset for pagination (0-based)
+   * @param limit the maximum number of results to return
+   * @param sort the sort expression (e.g., "name,asc" or "name,desc;population,desc")
+   * @return list of countries matching the criteria
+   */
+  public List<Country> search(String filters, Integer offset, Integer limit, String sort) {
+    return super.findAllWithFiltersAndSort(filters, offset, limit, sort);
   }
 
   /**
