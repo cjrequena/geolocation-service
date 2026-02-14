@@ -19,9 +19,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,6 +49,10 @@ public class CountryController {
   private final CountryService countryService;
   private final CountryMapper countryMapper;
 
+  // ================================================================
+  // CRUD Standard Operations
+  // ================================================================
+
   /**
    * Create a new country.
    *
@@ -73,7 +74,7 @@ public class CountryController {
       @ApiResponse(responseCode = "400", description = "Invalid request data"),
       @ApiResponse(responseCode = "409", description = "Country with same ISO code already exists")
     })
-  public ResponseEntity<CountryResponseDTO> createCountry(@Valid @RequestBody CountryRequestDTO requestDTO) {
+  public ResponseEntity<CountryResponseDTO> create(@Valid @RequestBody CountryRequestDTO requestDTO) {
 
     log.info("Creating country: {}", requestDTO.getName());
 
@@ -101,13 +102,21 @@ public class CountryController {
    * @return the country if found, 404 otherwise
    */
   @GetMapping("/{id}")
-  @Operation(summary = "Get country by ID", description = "Retrieves a country by its unique identifier")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Country found",
-      content = @Content(schema = @Schema(implementation = CountryResponseDTO.class))),
-    @ApiResponse(responseCode = "404", description = "Country not found")
-  })
-  public ResponseEntity<CountryResponseDTO> getCountryById(
+  @Operation(
+    summary = "Get country by ID",
+    description = "Retrieves a country by its unique identifier"
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        description = "Country found",
+        content = @Content(schema = @Schema(implementation = CountryResponseDTO.class))
+      ),
+      @ApiResponse(responseCode = "404", description = "Country not found")
+    }
+  )
+  public ResponseEntity<CountryResponseDTO> retrieveById(
     @Parameter(description = "Country ID", required = true)
     @PathVariable UUID id) {
 
@@ -120,45 +129,81 @@ public class CountryController {
   }
 
   /**
-   * Get all countries.
+   * Get all countries with optional filtering, sorting, and pagination.
    *
-   * @return list of all countries
+   * @param filters RSQL filter expression (e.g., "active==true;postalCode==94102")
+   * @param offset the offset for pagination (0-based)
+   * @param limit the maximum number of results to return
+   * @param sort the sort expression (e.g., "id,asc" or "name,desc;createdAt,asc")
+   * @return list of countries matching the criteria
    */
   @GetMapping
-  @Operation(summary = "Get all countries", description = "Retrieves all countries")
+  @Operation(
+    summary = "Get all countries with filtering, sorting, and pagination",
+    description = "Retrieves countries with optional RSQL filters, sorting, and pagination support"
+  )
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Countries retrieved successfully")
+    @ApiResponse(responseCode = "200", description = "Countries retrieved successfully"),
+    @ApiResponse(responseCode = "400", description = "Invalid filter or sort expression")
   })
-  public ResponseEntity<List<CountryResponseDTO>> getAllCountries() {
-    log.debug("Getting all countries");
+  public ResponseEntity<List<CountryResponseDTO>> retrieve(
+    @Parameter(
+      name = "filters",
+      description = "RSQL filter expression (e.g., 'active==true', 'postalCode==94102', 'name=like=\"Bridge\"')",
+      example = "active==true;postalCode==94102"
+    )
+    @RequestParam(value = "filters", required = false) String filters,
 
-    List<CountryResponseDTO> countries = countryService.findAll().stream()
-      .map(countryMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
+    @Parameter(
+      name = "offset",
+      description = "Offset for pagination (0-based)",
+      example = "0"
+    )
+    @RequestParam(value = "offset", required = false) Integer offset,
 
-    return ResponseEntity.ok(countries);
-  }
+    @Parameter(
+      name = "limit",
+      description = "Maximum number of results to return",
+      example = "20"
+    )
+    @RequestParam(value = "limit", required = false) Integer limit,
 
-  /**
-   * Get countries with pagination.
-   *
-   * @param pageable pagination parameters
-   * @return page of countries
-   */
-  @GetMapping("/page")
-  @Operation(summary = "Get countries with pagination", description = "Retrieves countries with pagination support")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Countries retrieved successfully")
-  })
-  public ResponseEntity<Page<CountryResponseDTO>> getCountriesPage(
-    @PageableDefault(size = 20) Pageable pageable) {
+    @Parameter(
+      name = "sort",
+      description = "Sort expression (e.g., 'id,asc', 'name,desc', 'postalCode,asc;name,desc')",
+      example = "name,asc"
+    )
+    @RequestParam(value = "sort", required = false) String sort
+  ) {
+    log.debug("Getting countries with filters: {}, offset: {}, limit: {}, sort: {}",
+      filters, offset, limit, sort);
 
-    log.debug("Getting countries page: {}", pageable);
+    try {
+      // If no filters, offset, limit, or sort provided, use the cached findAll()
+      if (filters == null && offset == null && limit == null && sort == null) {
+        List<CountryResponseDTO> countries = countryService
+          .findAll()
+          .stream()
+          .map(countryMapper::domainToResponseDTO)
+          .collect(Collectors.toList());
+        return ResponseEntity.ok(countries);
+      }
 
-    Page<CountryResponseDTO> page = countryService.findByActive(true, pageable)
-      .map(countryMapper::domainToResponseDTO);
+      // Otherwise, use the search method with filters/sorting/pagination
+      List<CountryResponseDTO> countries = countryService
+        .findAll(filters, offset, limit, sort)
+        .stream()
+        .map(countryMapper::domainToResponseDTO)
+        .collect(Collectors.toList());
 
-    return ResponseEntity.ok(page);
+      return ResponseEntity.ok(countries);
+    } catch (IllegalArgumentException e) {
+      log.error("Invalid request parameters: {}", e.getMessage());
+      return ResponseEntity.badRequest().build();
+    } catch (Exception e) {
+      log.error("Error retrieving countries: {}", e.getMessage(), e);
+      return ResponseEntity.badRequest().build();
+    }
   }
 
   /**
@@ -169,14 +214,22 @@ public class CountryController {
    * @return the updated country
    */
   @PutMapping("/{id}")
-  @Operation(summary = "Update a country", description = "Updates an existing country")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Country updated successfully",
-      content = @Content(schema = @Schema(implementation = CountryResponseDTO.class))),
-    @ApiResponse(responseCode = "404", description = "Country not found"),
-    @ApiResponse(responseCode = "400", description = "Invalid request data")
-  })
-  public ResponseEntity<CountryResponseDTO> updateCountry(
+  @Operation(
+    summary = "Update a country",
+    description = "Updates an existing country"
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        description = "Country updated successfully",
+        content = @Content(schema = @Schema(implementation = CountryResponseDTO.class))
+      ),
+      @ApiResponse(responseCode = "404", description = "Country not found"),
+      @ApiResponse(responseCode = "400", description = "Invalid request data")
+    }
+  )
+  public ResponseEntity<CountryResponseDTO> update(
     @Parameter(description = "Country ID", required = true)
     @PathVariable UUID id,
     @Valid @RequestBody CountryRequestDTO requestDTO) {
@@ -219,7 +272,7 @@ public class CountryController {
     @ApiResponse(responseCode = "204", description = "Country deleted successfully"),
     @ApiResponse(responseCode = "404", description = "Country not found")
   })
-  public ResponseEntity<Void> deleteCountry(
+  public ResponseEntity<Void> delete(
     @Parameter(description = "Country ID", required = true)
     @PathVariable UUID id) {
 
@@ -230,102 +283,6 @@ public class CountryController {
     log.info("Country deleted with ID: {}", id);
 
     return ResponseEntity.noContent().build();
-  }
-
-  /**
-   * Get country by ISO alpha-2 code.
-   *
-   * @param alpha2 the ISO alpha-2 code
-   * @return the country if found
-   */
-  @GetMapping("/iso-alpha2/{alpha2}")
-  @Operation(summary = "Get country by ISO alpha-2 code", description = "Retrieves a country by its ISO 3166-1 alpha-2 code")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Country found"),
-    @ApiResponse(responseCode = "404", description = "Country not found")
-  })
-  public ResponseEntity<CountryResponseDTO> getCountryByIsoAlpha2(
-    @Parameter(description = "ISO alpha-2 code (e.g., US, ES)", required = true)
-    @PathVariable String alpha2) {
-
-    log.debug("Getting country by ISO alpha-2: {}", alpha2);
-
-    return countryService.findByIsoAlpha2(alpha2.toUpperCase())
-      .map(countryMapper::domainToResponseDTO)
-      .map(ResponseEntity::ok)
-      .orElse(ResponseEntity.notFound().build());
-  }
-
-  /**
-   * Get country by ISO alpha-3 code.
-   *
-   * @param alpha3 the ISO alpha-3 code
-   * @return the country if found
-   */
-  @GetMapping("/iso-alpha3/{alpha3}")
-  @Operation(summary = "Get country by ISO alpha-3 code", description = "Retrieves a country by its ISO 3166-1 alpha-3 code")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Country found"),
-    @ApiResponse(responseCode = "404", description = "Country not found")
-  })
-  public ResponseEntity<CountryResponseDTO> getCountryByIsoAlpha3(
-    @Parameter(description = "ISO alpha-3 code (e.g., USA, ESP)", required = true)
-    @PathVariable String alpha3) {
-
-    log.debug("Getting country by ISO alpha-3: {}", alpha3);
-
-    return countryService.findByIsoAlpha3(alpha3.toUpperCase())
-      .map(countryMapper::domainToResponseDTO)
-      .map(ResponseEntity::ok)
-      .orElse(ResponseEntity.notFound().build());
-  }
-
-  /**
-   * Search countries by name.
-   *
-   * @param name the name substring to search for
-   * @return list of matching countries
-   */
-  @GetMapping("/search")
-  @Operation(summary = "Search countries by name", description = "Searches countries by name (case-insensitive partial match)")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Search completed successfully")
-  })
-  public ResponseEntity<List<CountryResponseDTO>> searchCountriesByName(
-    @Parameter(description = "Name substring to search for", required = true)
-    @RequestParam String name) {
-
-    log.debug("Searching countries by name: {}", name);
-
-    List<CountryResponseDTO> countries = countryService.findByNameContaining(name).stream()
-      .map(countryMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
-
-    return ResponseEntity.ok(countries);
-  }
-
-  /**
-   * Get countries by currency code.
-   *
-   * @param currencyCode the currency code
-   * @return list of countries using the currency
-   */
-  @GetMapping("/currency/{currencyCode}")
-  @Operation(summary = "Get countries by currency", description = "Retrieves all countries using a specific currency")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Countries retrieved successfully")
-  })
-  public ResponseEntity<List<CountryResponseDTO>> getCountriesByCurrency(
-    @Parameter(description = "ISO 4217 currency code (e.g., USD, EUR)", required = true)
-    @PathVariable String currencyCode) {
-
-    log.debug("Getting countries by currency: {}", currencyCode);
-
-    List<CountryResponseDTO> countries = countryService.findByCurrencyCode(currencyCode.toUpperCase()).stream()
-      .map(countryMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
-
-    return ResponseEntity.ok(countries);
   }
 
   /**
@@ -340,7 +297,7 @@ public class CountryController {
     @ApiResponse(responseCode = "200", description = "Country exists"),
     @ApiResponse(responseCode = "404", description = "Country does not exist")
   })
-  public ResponseEntity<Void> checkCountryExists(
+  public ResponseEntity<Void> checkExists(
     @Parameter(description = "Country ID", required = true)
     @PathVariable UUID id) {
 
@@ -361,7 +318,7 @@ public class CountryController {
   @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Count retrieved successfully")
   })
-  public ResponseEntity<Long> getCountryCount() {
+  public ResponseEntity<Long> count() {
     log.debug("Getting country count");
 
     long count = countryService.count();

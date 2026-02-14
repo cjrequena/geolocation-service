@@ -127,23 +127,81 @@ public class GeoShapeController {
   }
 
   /**
-   * Get all geographic shapes.
+   * Get all geoShapes with optional filtering, sorting, and pagination.
    *
-   * @return list of all shapes
+   * @param filters RSQL filter expression (e.g., "active==true;postalCode==94102")
+   * @param offset the offset for pagination (0-based)
+   * @param limit the maximum number of results to return
+   * @param sort the sort expression (e.g., "id,asc" or "name,desc;createdAt,asc")
+   * @return list of geoShapes matching the criteria
    */
   @GetMapping
-  @Operation(summary = "Get all shapes", description = "Retrieves all geographic shapes")
+  @Operation(
+    summary = "Get all geoShapes with filtering, sorting, and pagination",
+    description = "Retrieves geoShapes with optional RSQL filters, sorting, and pagination support"
+  )
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Shapes retrieved successfully")
+    @ApiResponse(responseCode = "200", description = "GeoShapes retrieved successfully"),
+    @ApiResponse(responseCode = "400", description = "Invalid filter or sort expression")
   })
-  public ResponseEntity<List<GeoShapeResponseDTO>> retrieve() {
-    log.debug("Getting all GeoShapes");
+  public ResponseEntity<List<GeoShapeResponseDTO>> retrieve(
+    @Parameter(
+      name = "filters",
+      description = "RSQL filter expression (e.g., 'active==true', 'postalCode==94102', 'name=like=\"Bridge\"')",
+      example = "active==true;postalCode==94102"
+    )
+    @RequestParam(value = "filters", required = false) String filters,
 
-    List<GeoShapeResponseDTO> shapes = geoShapeService.findAll().stream()
-      .map(geoShapeMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
+    @Parameter(
+      name = "offset",
+      description = "Offset for pagination (0-based)",
+      example = "0"
+    )
+    @RequestParam(value = "offset", required = false) Integer offset,
 
-    return ResponseEntity.ok(shapes);
+    @Parameter(
+      name = "limit",
+      description = "Maximum number of results to return",
+      example = "20"
+    )
+    @RequestParam(value = "limit", required = false) Integer limit,
+
+    @Parameter(
+      name = "sort",
+      description = "Sort expression (e.g., 'id,asc', 'name,desc', 'postalCode,asc;name,desc')",
+      example = "name,asc"
+    )
+    @RequestParam(value = "sort", required = false) String sort
+  ) {
+    log.debug("Getting geoShapes with filters: {}, offset: {}, limit: {}, sort: {}",
+      filters, offset, limit, sort);
+
+    try {
+      // If no filters, offset, limit, or sort provided, use the cached findAll()
+      if (filters == null && offset == null && limit == null && sort == null) {
+        List<GeoShapeResponseDTO> geoShapes = geoShapeService
+          .findAll()
+          .stream()
+          .map(geoShapeMapper::domainToResponseDTO)
+          .collect(Collectors.toList());
+        return ResponseEntity.ok(geoShapes);
+      }
+
+      // Otherwise, use the search method with filters/sorting/pagination
+      List<GeoShapeResponseDTO> geoShapes = geoShapeService
+        .findAll(filters, offset, limit, sort)
+        .stream()
+        .map(geoShapeMapper::domainToResponseDTO)
+        .collect(Collectors.toList());
+
+      return ResponseEntity.ok(geoShapes);
+    } catch (IllegalArgumentException e) {
+      log.error("Invalid request parameters: {}", e.getMessage());
+      return ResponseEntity.badRequest().build();
+    } catch (Exception e) {
+      log.error("Error retrieving geoShapes: {}", e.getMessage(), e);
+      return ResponseEntity.badRequest().build();
+    }
   }
 
   /**

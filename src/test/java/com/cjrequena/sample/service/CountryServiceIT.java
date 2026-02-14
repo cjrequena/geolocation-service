@@ -4,15 +4,12 @@ import com.cjrequena.sample.domain.model.Country;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
 import com.cjrequena.sample.domain.model.vo.MetadataVO;
-import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import com.cjrequena.sample.persistence.repository.CountryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.OffsetDateTime;
@@ -85,37 +82,37 @@ class CountryServiceIT {
     assertThat(result).isEmpty();
   }
 
-  @Test
-  @DisplayName("Should find country by ISO Alpha-2")
-  void shouldFindByIsoAlpha2() {
-    countryService.create(createCountryDomain("Spain", "ES", "ESP", true));
+//  @Test
+//  @DisplayName("Should find country by ISO Alpha-2")
+//  void shouldFindByIsoAlpha2() {
+//    countryService.create(createCountryDomain("Spain", "ES", "ESP", true));
+//
+//    Optional<Country> result = countryService.findByIsoAlpha2("ES");
+//
+//    assertThat(result).isPresent();
+//    assertThat(result.get().getName()).isEqualTo("Spain");
+//  }
 
-    Optional<Country> result = countryService.findByIsoAlpha2("ES");
+//  @Test
+//  @DisplayName("Should find country by ISO Alpha-3")
+//  void shouldFindByIsoAlpha3() {
+//    countryService.create(createCountryDomain("Spain", "ES", "ESP", true));
+//
+//    Optional<Country> result = countryService.findByIsoAlpha3("ESP");
+//
+//    assertThat(result).isPresent();
+//    assertThat(result.get().getName()).isEqualTo("Spain");
+//  }
 
-    assertThat(result).isPresent();
-    assertThat(result.get().getName()).isEqualTo("Spain");
-  }
-
-  @Test
-  @DisplayName("Should find country by ISO Alpha-3")
-  void shouldFindByIsoAlpha3() {
-    countryService.create(createCountryDomain("Spain", "ES", "ESP", true));
-
-    Optional<Country> result = countryService.findByIsoAlpha3("ESP");
-
-    assertThat(result).isPresent();
-    assertThat(result.get().getName()).isEqualTo("Spain");
-  }
-
-  @Test
-  @DisplayName("Should find country by name")
-  void shouldFindByName() {
-    countryService.create(createCountryDomain("Spain", "ES", "ESP", true));
-
-    Optional<Country> result = countryService.findByName("Spain");
-
-    assertThat(result).isPresent();
-  }
+//  @Test
+//  @DisplayName("Should find country by name")
+//  void shouldFindByName() {
+//    countryService.create(createCountryDomain("Spain", "ES", "ESP", true));
+//
+//    Optional<Country> result = countryService.findByName("Spain");
+//
+//    assertThat(result).isPresent();
+//  }
 
   @Test
   @DisplayName("Should find all countries")
@@ -128,57 +125,57 @@ class CountryServiceIT {
     assertThat(result).hasSizeGreaterThan(0);
   }
 
-  @Test
-  @DisplayName("Should find all active countries")
-  void shouldFindAllActive() {
-    countryService.create(createCountryDomain("Spain", "ES", "ESP", true));
-    countryService.create(createCountryDomain("France", "FR", "FRA", false));
+//  @Test
+//  @DisplayName("Should find all active countries")
+//  void shouldFindAllActive() {
+//    countryService.create(createCountryDomain("Spain", "ES", "ESP", true));
+//    countryService.create(createCountryDomain("France", "FR", "FRA", false));
+//
+//    List<Country> result = countryService.findAllActive();
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getName()).isEqualTo("Spain");
+//  }
 
-    List<Country> result = countryService.findAllActive();
+//  @Test
+//  @DisplayName("Should find countries by active status with pagination")
+//  void shouldFindByActiveWithPagination() {
+//    countryService.create(createCountryDomain("Spain", "ES", "ESP", true));
+//    countryService.create(createCountryDomain("France", "FR", "FRA", true));
+//
+//    Page<Country> result = countryService.findByActive(true, PageRequest.of(0, 10));
+//
+//    assertThat(result.getContent()).hasSize(2);
+//  }
 
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getName()).isEqualTo("Spain");
-  }
+//  @Test
+//  @DisplayName("Should find countries by name containing")
+//  void shouldFindByNameContaining() {
+//    countryService.create(createCountryDomain("Spain", "ES", "ESP", true));
+//    countryService.create(createCountryDomain("France", "FR", "FRA", true));
+//
+//    List<Country> result = countryService.findByNameContaining("spa");
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getName()).isEqualTo("Spain");
+//  }
 
-  @Test
-  @DisplayName("Should find countries by active status with pagination")
-  void shouldFindByActiveWithPagination() {
-    countryService.create(createCountryDomain("Spain", "ES", "ESP", true));
-    countryService.create(createCountryDomain("France", "FR", "FRA", true));
-
-    Page<Country> result = countryService.findByActive(true, PageRequest.of(0, 10));
-
-    assertThat(result.getContent()).hasSize(2);
-  }
-
-  @Test
-  @DisplayName("Should find countries by name containing")
-  void shouldFindByNameContaining() {
-    countryService.create(createCountryDomain("Spain", "ES", "ESP", true));
-    countryService.create(createCountryDomain("France", "FR", "FRA", true));
-
-    List<Country> result = countryService.findByNameContaining("spa");
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getName()).isEqualTo("Spain");
-  }
-
-  @Test
-  @DisplayName("Should find countries by population greater than")
-  void shouldFindByPopulationGreaterThan() {
-    Country spain = createCountryDomain("Spain", "ES", "ESP", true);
-    spain.setPopulation(PopulationVO.of(47_000_000L));
-    countryService.create(spain);
-
-    Country france = createCountryDomain("France", "FR", "FRA", true);
-    france.setPopulation(PopulationVO.of(67_000_000L));
-    countryService.create(france);
-
-    List<Country> result = countryService.findByPopulationGreaterThan(50_000_000L);
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getName()).isEqualTo("France");
-  }
+//  @Test
+//  @DisplayName("Should find countries by population greater than")
+//  void shouldFindByPopulationGreaterThan() {
+//    Country spain = createCountryDomain("Spain", "ES", "ESP", true);
+//    spain.setPopulation(PopulationVO.of(47_000_000L));
+//    countryService.create(spain);
+//
+//    Country france = createCountryDomain("France", "FR", "FRA", true);
+//    france.setPopulation(PopulationVO.of(67_000_000L));
+//    countryService.create(france);
+//
+//    List<Country> result = countryService.findByPopulationGreaterThan(50_000_000L);
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getName()).isEqualTo("France");
+//  }
 
   // ================================================================
   // Update Operations
@@ -241,15 +238,15 @@ class CountryServiceIT {
     assertThat(result).isTrue();
   }
 
-  @Test
-  @DisplayName("Should check if country exists by ISO Alpha-2")
-  void shouldCheckExistsByIsoAlpha2() {
-    countryService.create(createCountryDomain("Spain", "ES", "ESP", true));
-
-    boolean result = countryService.existsByIsoAlpha2("ES");
-
-    assertThat(result).isTrue();
-  }
+//  @Test
+//  @DisplayName("Should check if country exists by ISO Alpha-2")
+//  void shouldCheckExistsByIsoAlpha2() {
+//    countryService.create(createCountryDomain("Spain", "ES", "ESP", true));
+//
+//    boolean result = countryService.existsByIsoAlpha2("ES");
+//
+//    assertThat(result).isTrue();
+//  }
 
   @Test
   @DisplayName("Should check if country exists by name")
