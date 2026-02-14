@@ -6,22 +6,22 @@ import com.cjrequena.sample.domain.model.GeoShape;
 import com.cjrequena.sample.persistence.entity.GeoShapeEntity;
 import com.cjrequena.sample.persistence.repository.GeoShapeRepository;
 import com.cjrequena.sample.persistence.repository.cache.GeoShapeCacheRedisHashOpsRepository;
+import com.cjrequena.sample.service.base.BaseService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -37,12 +37,40 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class GeoShapeService {
+public class GeoShapeService extends BaseService<GeoShapeEntity, GeoShape> {
 
   private final GeoShapeRepository geoShapeRepository;
   private final GeoShapeCacheRedisHashOpsRepository geoShapeCacheRedisHashOpsRepository;
   private final CacheConfigurationProperties cacheConfigurationProperties;
   private final GeoShapeMapper geoShapeMapper;
+
+  // ================================================================
+  // BaseService Implementation
+  // ================================================================
+
+  @Override
+  protected JpaRepository<GeoShapeEntity, ?> getRepository() {
+    return geoShapeRepository;
+  }
+
+  @Override
+  protected JpaSpecificationExecutor<GeoShapeEntity> getSpecificationExecutor() {
+    return geoShapeRepository;
+  }
+
+  @Override
+  protected Function<GeoShapeEntity, GeoShape> getEntityToDomainMapper() {
+    return geoShapeMapper::toDomain;
+  }
+
+  @Override
+  protected Class<GeoShapeEntity> getEntityClass() {
+    return GeoShapeEntity.class;
+  }
+
+  // ================================================================
+  // Cache Initialization
+  // ================================================================
 
   @PostConstruct
   public void loadUpCache() {
@@ -145,6 +173,22 @@ public class GeoShapeService {
     return geoShapes;
   }
 
+  /**
+   * Finds all geoShapes with optional RSQL filtering, sorting, and pagination.
+   *
+   * <p>This method does NOT use cache and always queries the database to ensure
+   * accurate filtering and sorting results.</p>
+   *
+   * @param filters RSQL filter expression (e.g., "active==true;postalCode==94102")
+   * @param offset the offset for pagination (0-based)
+   * @param limit the maximum number of results to return
+   * @param sort the sort expression (e.g., "name,asc" or "name,desc;createdAt,asc")
+   * @return list of geoShapes matching the criteria
+   */
+  public List<GeoShape> findAll(String filters, Integer offset, Integer limit, String sort) {
+    return super.findAllWithFiltersAndSort(filters, offset, limit, sort);
+  }
+
   @Transactional
   public GeoShape update(UUID id, GeoShape geoShape) {
     log.debug("Updating geoShape with ID: {}", id);
@@ -194,6 +238,12 @@ public class GeoShapeService {
     log.info("GeoShape deleted with ID: {}", id);
   }
 
+
+
+  // ================================================================
+  // Existence Checks
+  // ================================================================
+
   public boolean existsById(UUID id) {
     // Check cache first for existence
     if (cacheConfigurationProperties.isCacheEnabled()) {
@@ -210,76 +260,31 @@ public class GeoShapeService {
     return geoShapeRepository.existsById(id);
   }
 
-  // ================================================================
-  // Read Operations
-  // ================================================================
-
   /**
-   * Finds a GeoShape by name.
+   * Checks if a GeoShape exists by name.
    *
    * @param name the GeoShape name
-   * @return Optional containing the GeoShape if found
+   * @return true if exists, false otherwise
    */
-  public Optional<GeoShape> findByName(String name) {
-    log.debug("Finding GeoShape by name: {}", name);
-    
-    return geoShapeRepository.findByName(name)
-      .map(geoShapeMapper::toDomain);
+  public boolean existsByName(String name) {
+    return geoShapeRepository.existsByName(name);
   }
 
-  /**
-   * Finds all active GeoShapes.
-   *
-   * @return list of active GeoShapes
-   */
-  public List<GeoShape> findAllActive() {
-    log.debug("Finding all active GeoShapes");
-    
-    return geoShapeRepository.findByActiveTrue().stream()
-      .map(geoShapeMapper::toDomain)
-      .collect(Collectors.toList());
-  }
+
+
+  // ================================================================
+  // Count Operations
+  // ================================================================
 
   /**
-   * Finds all inactive GeoShapes.
+   * Counts all GeoShapes.
    *
-   * @return list of inactive GeoShapes
+   * @return total count of GeoShapes
    */
-  public List<GeoShape> findAllInactive() {
-    log.debug("Finding all inactive GeoShapes");
-    
-    return geoShapeRepository.findByActiveFalse().stream()
-      .map(geoShapeMapper::toDomain)
-      .collect(Collectors.toList());
+  public long count() {
+    return geoShapeRepository.count();
   }
 
-  /**
-   * Finds GeoShapes by active status with pagination.
-   *
-   * @param active the active status
-   * @param pageable pagination information
-   * @return page of GeoShapes
-   */
-  public Page<GeoShape> findByActive(Boolean active, Pageable pageable) {
-    log.debug("Finding GeoShapes by active status: {} with pagination", active);
-    
-    return geoShapeRepository.findByActive(active, pageable)
-      .map(geoShapeMapper::toDomain);
-  }
-
-  /**
-   * Finds GeoShapes where the name contains the given substring (case-insensitive).
-   *
-   * @param namePart the substring to search for
-   * @return list of matching GeoShapes
-   */
-  public List<GeoShape> findByNameContaining(String namePart) {
-    log.debug("Finding GeoShapes by name containing: {}", namePart);
-    
-    return geoShapeRepository.findByNameContainingIgnoreCase(namePart).stream()
-      .map(geoShapeMapper::toDomain)
-      .collect(Collectors.toList());
-  }
 
   // ================================================================
   // Spatial Queries — Point Containment
@@ -397,72 +402,4 @@ public class GeoShapeService {
       .collect(Collectors.toList());
   }
 
-  // ================================================================
-  // Temporal Queries
-  // ================================================================
-
-  /**
-   * Finds GeoShapes created within a time range.
-   *
-   * @param start start date/time
-   * @param end end date/time
-   * @return list of GeoShapes
-   */
-  public List<GeoShape> findByCreatedAtBetween(OffsetDateTime start, OffsetDateTime end) {
-    log.debug("Finding GeoShapes created between {} and {}", start, end);
-    
-    return geoShapeRepository.findByCreatedAtBetween(start, end).stream()
-      .map(geoShapeMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  /**
-   * Finds the 10 most recently updated GeoShapes.
-   *
-   * @return list of recently updated GeoShapes
-   */
-  public List<GeoShape> findRecentlyUpdated() {
-    log.debug("Finding recently updated GeoShapes");
-    
-    return geoShapeRepository.findTop10ByOrderByUpdatedAtDesc(PageRequest.of(0, 10)).stream()
-      .map(geoShapeMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  // ================================================================
-  // Existence Checks
-  // ================================================================
-
-  /**
-   * Checks if a GeoShape exists by name.
-   *
-   * @param name the GeoShape name
-   * @return true if exists, false otherwise
-   */
-  public boolean existsByName(String name) {
-    return geoShapeRepository.existsByName(name);
-  }
-
-  /**
-   * Checks if an active GeoShape exists by name.
-   *
-   * @param name the GeoShape name
-   * @return true if exists, false otherwise
-   */
-  public boolean existsActiveByName(String name) {
-    return geoShapeRepository.existsByNameAndActiveTrue(name);
-  }
-
-  // ================================================================
-  // Count Operations
-  // ================================================================
-
-  /**
-   * Counts all GeoShapes.
-   *
-   * @return total count of GeoShapes
-   */
-  public long count() {
-    return geoShapeRepository.count();
-  }
 }

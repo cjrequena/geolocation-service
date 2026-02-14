@@ -50,6 +50,10 @@ public class GeoShapeController {
   private final GeoShapeService geoShapeService;
   private final GeoShapeMapper geoShapeMapper;
 
+  // ================================================================
+  // CRUD Standard Operations
+  // ================================================================
+
   /**
    * Create a new geographic shape.
    *
@@ -71,7 +75,7 @@ public class GeoShapeController {
     ),
     @ApiResponse(responseCode = "400", description = "Invalid WKT geometry or request data")
   })
-  public ResponseEntity<GeoShapeResponseDTO> createGeoShape(@Valid @RequestBody GeoShapeRequestDTO requestDTO) {
+  public ResponseEntity<GeoShapeResponseDTO> create(@Valid @RequestBody GeoShapeRequestDTO requestDTO) {
 
     log.info("Creating GeoShape: {} of type {}", requestDTO.getName(), requestDTO.getGeometryType());
 
@@ -109,7 +113,7 @@ public class GeoShapeController {
       content = @Content(schema = @Schema(implementation = GeoShapeResponseDTO.class))),
     @ApiResponse(responseCode = "404", description = "Shape not found")
   })
-  public ResponseEntity<GeoShapeResponseDTO> getGeoShapeById(
+  public ResponseEntity<GeoShapeResponseDTO> retrieveById(
     @Parameter(description = "Shape ID", required = true)
     @PathVariable UUID id
   ) {
@@ -132,7 +136,7 @@ public class GeoShapeController {
   @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Shapes retrieved successfully")
   })
-  public ResponseEntity<List<GeoShapeResponseDTO>> getAllGeoShapes() {
+  public ResponseEntity<List<GeoShapeResponseDTO>> retrieve() {
     log.debug("Getting all GeoShapes");
 
     List<GeoShapeResponseDTO> shapes = geoShapeService.findAll().stream()
@@ -150,14 +154,21 @@ public class GeoShapeController {
    * @return the updated shape
    */
   @PutMapping("/{id}")
-  @Operation(summary = "Update a shape", description = "Updates an existing geographic shape")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Shape updated successfully",
-      content = @Content(schema = @Schema(implementation = GeoShapeResponseDTO.class))),
-    @ApiResponse(responseCode = "404", description = "Shape not found"),
-    @ApiResponse(responseCode = "400", description = "Invalid request data")
-  })
-  public ResponseEntity<GeoShapeResponseDTO> updateGeoShape(
+  @Operation(
+    summary = "Update a shape",
+    description = "Updates an existing geographic shape"
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        description = "Shape updated successfully",
+        content = @Content(schema = @Schema(implementation = GeoShapeResponseDTO.class))
+      ),
+      @ApiResponse(responseCode = "404", description = "Shape not found"),
+      @ApiResponse(responseCode = "400", description = "Invalid request data")
+    })
+  public ResponseEntity<GeoShapeResponseDTO> update(
     @Parameter(description = "Shape ID", required = true)
     @PathVariable UUID id,
     @Valid @RequestBody GeoShapeRequestDTO requestDTO
@@ -187,12 +198,17 @@ public class GeoShapeController {
    * @return 204 No Content on success
    */
   @DeleteMapping("/{id}")
-  @Operation(summary = "Delete a shape", description = "Deletes a geographic shape by ID")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "204", description = "Shape deleted successfully"),
-    @ApiResponse(responseCode = "404", description = "Shape not found")
-  })
-  public ResponseEntity<Void> deleteGeoShape(
+  @Operation(
+    summary = "Delete a shape",
+    description = "Deletes a geographic shape by ID"
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(responseCode = "204", description = "Shape deleted successfully"),
+      @ApiResponse(responseCode = "404", description = "Shape not found")
+    }
+  )
+  public ResponseEntity<Void> delete(
     @Parameter(description = "Shape ID", required = true)
     @PathVariable UUID id) {
 
@@ -204,6 +220,28 @@ public class GeoShapeController {
 
     return ResponseEntity.noContent().build();
   }
+
+  /**
+   * Get total count of shapes.
+   *
+   * @return the count
+   */
+  @GetMapping("/count")
+  @Operation(summary = "Get shape count", description = "Returns the total number of geographic shapes")
+  @ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "Count retrieved successfully")
+  })
+  public ResponseEntity<Long> getShapeCount() {
+    log.debug("Getting shape count");
+
+    long count = geoShapeService.count();
+
+    return ResponseEntity.ok(count);
+  }
+
+  // ================================================================
+  // Spatial Operations
+  // ================================================================
 
   /**
    * Find shapes containing a point.
@@ -313,49 +351,6 @@ public class GeoShapeController {
       log.error("Invalid WKT format: {}", wkt, e);
       return ResponseEntity.badRequest().build();
     }
-  }
-
-  /**
-   * Search shapes by name.
-   *
-   * @param name the name substring to search for
-   * @return list of matching shapes
-   */
-  @GetMapping("/search")
-  @Operation(summary = "Search shapes by name",
-    description = "Searches shapes by name (case-insensitive partial match)")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Search completed successfully")
-  })
-  public ResponseEntity<List<GeoShapeResponseDTO>> searchShapesByName(
-    @Parameter(description = "Name substring to search for", required = true)
-    @RequestParam String name) {
-
-    log.debug("Searching shapes by name: {}", name);
-
-    List<GeoShapeResponseDTO> shapes = geoShapeService.findByNameContaining(name).stream()
-      .map(geoShapeMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
-
-    return ResponseEntity.ok(shapes);
-  }
-
-  /**
-   * Get total count of shapes.
-   *
-   * @return the count
-   */
-  @GetMapping("/count")
-  @Operation(summary = "Get shape count", description = "Returns the total number of geographic shapes")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Count retrieved successfully")
-  })
-  public ResponseEntity<Long> getShapeCount() {
-    log.debug("Getting shape count");
-
-    long count = geoShapeService.count();
-
-    return ResponseEntity.ok(count);
   }
 
   // ================================================================

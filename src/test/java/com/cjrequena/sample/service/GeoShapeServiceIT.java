@@ -123,24 +123,24 @@ class GeoShapeServiceIT {
     assertThat(result).isPresent();
   }
 
-  @Test
-  @DisplayName("Should find all active GeoShapes")
-  void shouldFindAllActive() {
-    geoShapeService.create(activePoint);
-    geoShapeService.create(inactivePoint);
-    List<GeoShape> result = geoShapeService.findAllActive();
+//  @Test
+//  @DisplayName("Should find all active GeoShapes")
+//  void shouldFindAllActive() {
+//    geoShapeService.create(activePoint);
+//    geoShapeService.create(inactivePoint);
+//    List<GeoShape> result = geoShapeService.findAllActive();
+//
+//    assertThat(result).hasSize(1);
+//  }
 
-    assertThat(result).hasSize(1);
-  }
-
-  @Test
-  @DisplayName("Should find GeoShapes by name containing")
-  void shouldFindByNameContaining() {
-    geoShapeService.create(madridCenterPoint);
-    geoShapeService.create(barcelonaCenterPoint);
-    List<GeoShape> result = geoShapeService.findByNameContaining("Madrid");
-    assertThat(result).hasSize(1);
-  }
+//  @Test
+//  @DisplayName("Should find GeoShapes by name containing")
+//  void shouldFindByNameContaining() {
+//    geoShapeService.create(madridCenterPoint);
+//    geoShapeService.create(barcelonaCenterPoint);
+//    List<GeoShape> result = geoShapeService.findByNameContaining("Madrid");
+//    assertThat(result).hasSize(1);
+//  }
 
   @Test
   @DisplayName("Should find GeoShapes containing point")

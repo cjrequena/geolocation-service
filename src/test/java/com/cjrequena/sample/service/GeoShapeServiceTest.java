@@ -97,40 +97,40 @@ class GeoShapeServiceTest {
     assertThat(result).isPresent();
   }
 
-  @Test
-  @DisplayName("Should find GeoShape by name")
-  void shouldFindByName() {
-    when(geoShapeRepository.findByName("Test Shape")).thenReturn(Optional.of(geoShapeEntity));
-    when(geoShapeMapper.toDomain(geoShapeEntity)).thenReturn(geoShapeDomain);
+//  @Test
+//  @DisplayName("Should find GeoShape by name")
+//  void shouldFindByName() {
+//    when(geoShapeRepository.findByName("Test Shape")).thenReturn(Optional.of(geoShapeEntity));
+//    when(geoShapeMapper.toDomain(geoShapeEntity)).thenReturn(geoShapeDomain);
+//
+//    Optional<GeoShape> result = geoShapeService.findByName("Test Shape");
+//
+//    assertThat(result).isPresent();
+//  }
 
-    Optional<GeoShape> result = geoShapeService.findByName("Test Shape");
+//  @Test
+//  @DisplayName("Should find all active GeoShapes")
+//  void shouldFindAllActive() {
+//    List<GeoShapeEntity> entities = Arrays.asList(geoShapeEntity);
+//    when(geoShapeRepository.findByActiveTrue()).thenReturn(entities);
+//    when(geoShapeMapper.toDomain(any(GeoShapeEntity.class))).thenReturn(geoShapeDomain);
+//
+//    List<GeoShape> result = geoShapeService.findAllActive();
+//
+//    assertThat(result).hasSize(1);
+//  }
 
-    assertThat(result).isPresent();
-  }
-
-  @Test
-  @DisplayName("Should find all active GeoShapes")
-  void shouldFindAllActive() {
-    List<GeoShapeEntity> entities = Arrays.asList(geoShapeEntity);
-    when(geoShapeRepository.findByActiveTrue()).thenReturn(entities);
-    when(geoShapeMapper.toDomain(any(GeoShapeEntity.class))).thenReturn(geoShapeDomain);
-
-    List<GeoShape> result = geoShapeService.findAllActive();
-
-    assertThat(result).hasSize(1);
-  }
-
-  @Test
-  @DisplayName("Should find GeoShapes by name containing")
-  void shouldFindByNameContaining() {
-    List<GeoShapeEntity> entities = Arrays.asList(geoShapeEntity);
-    when(geoShapeRepository.findByNameContainingIgnoreCase("test")).thenReturn(entities);
-    when(geoShapeMapper.toDomain(any(GeoShapeEntity.class))).thenReturn(geoShapeDomain);
-
-    List<GeoShape> result = geoShapeService.findByNameContaining("test");
-
-    assertThat(result).hasSize(1);
-  }
+//  @Test
+//  @DisplayName("Should find GeoShapes by name containing")
+//  void shouldFindByNameContaining() {
+//    List<GeoShapeEntity> entities = Arrays.asList(geoShapeEntity);
+//    when(geoShapeRepository.findByNameContainingIgnoreCase("test")).thenReturn(entities);
+//    when(geoShapeMapper.toDomain(any(GeoShapeEntity.class))).thenReturn(geoShapeDomain);
+//
+//    List<GeoShape> result = geoShapeService.findByNameContaining("test");
+//
+//    assertThat(result).hasSize(1);
+//  }
 
   @Test
   @DisplayName("Should find GeoShapes containing point")
