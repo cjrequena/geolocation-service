@@ -1,5 +1,6 @@
 package com.cjrequena.sample.service;
 
+import com.cjrequena.sample.domain.exception.ZoneNotFoundException;
 import com.cjrequena.sample.domain.model.*;
 import com.cjrequena.sample.domain.model.enums.AreaType;
 import com.cjrequena.sample.domain.model.enums.RegionType;
@@ -215,7 +216,9 @@ class ZoneServiceIT {
 
     zoneService.deleteById(created.getId());
 
-    assertThat(zoneService.findById(created.getId())).isEmpty();
+    assertThatThrownBy(() -> zoneService.findById(created.getId()))
+      .isInstanceOf(ZoneNotFoundException.class)
+      .hasMessageContaining("Zone not found");
   }
 
 //  @Test

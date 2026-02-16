@@ -1,9 +1,15 @@
 package com.cjrequena.sample.service;
 
 import com.cjrequena.sample.configuration.CacheConfigurationProperties;
+import com.cjrequena.sample.domain.exception.AreaNotFoundException;
+import com.cjrequena.sample.domain.exception.AreaRequiredException;
+import com.cjrequena.sample.domain.exception.GeoShapeNotFoundException;
+import com.cjrequena.sample.domain.exception.ZoneNotFoundException;
 import com.cjrequena.sample.domain.mapper.ZoneMapper;
 import com.cjrequena.sample.domain.model.Zone;
 import com.cjrequena.sample.persistence.entity.ZoneEntity;
+import com.cjrequena.sample.persistence.repository.AreaRepository;
+import com.cjrequena.sample.persistence.repository.GeoShapeRepository;
 import com.cjrequena.sample.persistence.repository.ZoneRepository;
 import com.cjrequena.sample.persistence.repository.cache.ZoneCacheRedisHashOpsRepository;
 import com.cjrequena.sample.service.base.BaseService;
@@ -36,6 +42,9 @@ import java.util.stream.Collectors;
 public class ZoneService extends BaseService<ZoneEntity, Zone> {
 
   private final ZoneRepository zoneRepository;
+  private final AreaRepository areaRepository;
+  private final GeoShapeRepository geoShapeRepository;
+
   private final ZoneCacheRedisHashOpsRepository zoneCacheRedisHashOpsRepository;
   private final CacheConfigurationProperties cacheConfigurationProperties;
   private final ZoneMapper zoneMapper;
@@ -84,6 +93,21 @@ public class ZoneService extends BaseService<ZoneEntity, Zone> {
   @Transactional
   public Zone create(Zone zone) {
     log.debug("Creating zone: {}", zone.getName());
+
+    if (zone.getAreaId() != null) {
+      areaRepository
+        .findById(zone.getAreaId())
+        .orElseThrow(() -> new AreaNotFoundException("Area not found with ID: %s".formatted(zone.getAreaId())));
+    }else {
+      throw new AreaRequiredException("Area ID is required for creating a zone");
+    }
+
+    if(zone.getGeoShapeId()!=null) {
+      geoShapeRepository
+        .findById(zone.getGeoShapeId())
+        .orElseThrow(() -> new GeoShapeNotFoundException("GeoShape not found with ID: %s".formatted(zone.getGeoShapeId())));
+    }
+
     ZoneEntity entity = zoneMapper.toEntity(zone);
     ZoneEntity savedEntity = zoneRepository.save(entity);
     Zone createdZone = zoneMapper.toDomain(savedEntity);
@@ -120,19 +144,23 @@ public class ZoneService extends BaseService<ZoneEntity, Zone> {
     }
 
     // Cache miss or disabled - query database
-    Optional<Zone> zone = zoneRepository.findById(id).map(zoneMapper::toDomain);
+    Zone zone = zoneRepository
+      .findById(id)
+      .map(zoneMapper::toDomain)
+      .orElseThrow(() -> new ZoneNotFoundException("Zone not found with ID: %s".formatted(id)));
+
 
     // Update cache on successful database hit
-    if (cacheConfigurationProperties.isCacheEnabled() && zone.isPresent()) {
+    if (cacheConfigurationProperties.isCacheEnabled()) {
       try {
-        zoneCacheRedisHashOpsRepository.save(zone.get());
+        zoneCacheRedisHashOpsRepository.save(zone);
         log.debug("Zone cached after database query: {}", id);
       } catch (Exception e) {
         log.warn("Failed to cache zone after database query: {}", id, e);
       }
     }
 
-    return zone;
+    return Optional.of(zone);
   }
 
   public List<Zone> findAll() {
@@ -189,8 +217,16 @@ public class ZoneService extends BaseService<ZoneEntity, Zone> {
   @Transactional
   public Zone update(UUID id, Zone zone) {
     log.debug("Updating zone with ID: {}", id);
-    ZoneEntity existingEntity = zoneRepository.findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Zone not found with ID: " + id));
+
+    if(zone.getGeoShapeId()!=null) {
+      geoShapeRepository
+        .findById(zone.getGeoShapeId())
+        .orElseThrow(() -> new AreaNotFoundException("GeoShape not found with ID: %s".formatted(zone.getGeoShapeId())));
+    }
+
+    ZoneEntity existingEntity = zoneRepository
+      .findById(id)
+      .orElseThrow(() -> new IllegalArgumentException("Zone not found with ID: %s ".formatted(id)));
 
     ZoneEntity updatedEntity = zoneMapper.toEntity(zone);
     updatedEntity.setId(existingEntity.getId());
@@ -217,7 +253,7 @@ public class ZoneService extends BaseService<ZoneEntity, Zone> {
   public void deleteById(UUID id) {
     log.debug("Deleting zone with ID: {}", id);
     if (!zoneRepository.existsById(id)) {
-      throw new IllegalArgumentException("Zone not found with ID: " + id);
+      throw new ZoneNotFoundException("Zone not found with ID: %s".formatted(id));
     }
 
     zoneRepository.deleteById(id);

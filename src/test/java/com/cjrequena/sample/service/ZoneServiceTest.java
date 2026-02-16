@@ -3,7 +3,10 @@ package com.cjrequena.sample.service;
 import com.cjrequena.sample.configuration.CacheConfigurationProperties;
 import com.cjrequena.sample.domain.mapper.ZoneMapper;
 import com.cjrequena.sample.domain.model.Zone;
+import com.cjrequena.sample.persistence.entity.AreaEntity;
 import com.cjrequena.sample.persistence.entity.ZoneEntity;
+import com.cjrequena.sample.persistence.repository.AreaRepository;
+import com.cjrequena.sample.persistence.repository.GeoShapeRepository;
 import com.cjrequena.sample.persistence.repository.ZoneRepository;
 import com.cjrequena.sample.persistence.repository.cache.ZoneCacheRedisHashOpsRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +36,13 @@ class ZoneServiceTest {
 
   @Mock
   private ZoneRepository zoneRepository;
+
+  @Mock
+  private AreaRepository areaRepository;
+
+  @Mock
+  private GeoShapeRepository geoShapeRepository;
+
 
   @Mock
   private ZoneCacheRedisHashOpsRepository zoneCacheRedisHashOpsRepository;
@@ -72,6 +82,7 @@ class ZoneServiceTest {
     when(zoneMapper.toEntity(zoneDomain)).thenReturn(zoneEntity);
     when(zoneRepository.save(zoneEntity)).thenReturn(zoneEntity);
     when(zoneMapper.toDomain(zoneEntity)).thenReturn(zoneDomain);
+    when(areaRepository.findById(areaId)).thenReturn(Optional.of(new AreaEntity()));
 
     Zone result = zoneService.create(zoneDomain);
 
