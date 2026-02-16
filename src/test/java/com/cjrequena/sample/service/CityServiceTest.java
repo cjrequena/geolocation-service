@@ -14,13 +14,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -87,17 +84,6 @@ class CityServiceTest {
     assertThat(result).isPresent();
   }
 
-  @Test
-  @DisplayName("Should find cities by region ID")
-  void shouldFindByRegionId() {
-    List<CityEntity> entities = Arrays.asList(cityEntity);
-    when(cityRepository.findByRegionId(regionId)).thenReturn(entities);
-    when(cityMapper.toDomain(any(CityEntity.class))).thenReturn(cityDomain);
-
-    List<City> result = cityService.findByRegionId(regionId);
-
-    assertThat(result).hasSize(1);
-  }
 
   @Test
   @DisplayName("Should update city successfully")

@@ -16,9 +16,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -64,7 +61,7 @@ public class ZoneController {
     @ApiResponse(responseCode = "400", description = "Invalid request data"),
     @ApiResponse(responseCode = "404", description = "Parent area not found")
   })
-  public ResponseEntity<ZoneResponseDTO> createZone(
+  public ResponseEntity<ZoneResponseDTO> create(
     @Valid @RequestBody ZoneRequestDTO requestDTO) {
 
     log.info("Creating zone: {} in area: {}", requestDTO.getName(), requestDTO.getAreaId());
@@ -98,7 +95,7 @@ public class ZoneController {
       content = @Content(schema = @Schema(implementation = ZoneResponseDTO.class))),
     @ApiResponse(responseCode = "404", description = "Zone not found")
   })
-  public ResponseEntity<ZoneResponseDTO> getZoneById(
+  public ResponseEntity<ZoneResponseDTO> retrieveById(
     @Parameter(description = "Zone ID", required = true)
     @PathVariable UUID id) {
 
@@ -120,7 +117,7 @@ public class ZoneController {
   @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Zones retrieved successfully")
   })
-  public ResponseEntity<List<ZoneResponseDTO>> getAllZones() {
+  public ResponseEntity<List<ZoneResponseDTO>> retrieve() {
     log.debug("Getting all zones");
 
     List<ZoneResponseDTO> zones = zoneService.findAll().stream()
@@ -128,52 +125,6 @@ public class ZoneController {
       .collect(Collectors.toList());
 
     return ResponseEntity.ok(zones);
-  }
-
-  /**
-   * Get zones by area.
-   *
-   * @param areaId the area ID
-   * @return list of zones in the area
-   */
-  @GetMapping("/area/{areaId}")
-  @Operation(summary = "Get zones by area", description = "Retrieves all zones within a specific area")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Zones retrieved successfully")
-  })
-  public ResponseEntity<List<ZoneResponseDTO>> getZonesByArea(
-    @Parameter(description = "Area ID", required = true)
-    @PathVariable UUID areaId) {
-
-    log.debug("Getting zones by area: {}", areaId);
-
-    List<ZoneResponseDTO> zones = zoneService.findByAreaId(areaId).stream()
-      .map(zoneMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
-
-    return ResponseEntity.ok(zones);
-  }
-
-  /**
-   * Get zones with pagination.
-   *
-   * @param pageable pagination parameters
-   * @return page of zones
-   */
-  @GetMapping("/page")
-  @Operation(summary = "Get zones with pagination", description = "Retrieves zones with pagination support")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Zones retrieved successfully")
-  })
-  public ResponseEntity<Page<ZoneResponseDTO>> getZonesPage(
-    @PageableDefault(size = 20) Pageable pageable) {
-
-    log.debug("Getting zones page: {}", pageable);
-
-    Page<ZoneResponseDTO> page = zoneService.findByActive(true, pageable)
-      .map(zoneMapper::domainToResponseDTO);
-
-    return ResponseEntity.ok(page);
   }
 
   /**
@@ -224,7 +175,7 @@ public class ZoneController {
     @ApiResponse(responseCode = "204", description = "Zone deleted successfully"),
     @ApiResponse(responseCode = "404", description = "Zone not found")
   })
-  public ResponseEntity<Void> deleteZone(
+  public ResponseEntity<Void> delete(
     @Parameter(description = "Zone ID", required = true)
     @PathVariable UUID id) {
 
@@ -235,54 +186,6 @@ public class ZoneController {
     log.info("Zone deleted with ID: {}", id);
 
     return ResponseEntity.noContent().build();
-  }
-
-  /**
-   * Search zones by name.
-   *
-   * @param name the name substring to search for
-   * @return list of matching zones
-   */
-  @GetMapping("/search")
-  @Operation(summary = "Search zones by name", description = "Searches zones by name (case-insensitive partial match)")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Search completed successfully")
-  })
-  public ResponseEntity<List<ZoneResponseDTO>> searchZonesByName(
-    @Parameter(description = "Name substring to search for", required = true)
-    @RequestParam String name) {
-
-    log.debug("Searching zones by name: {}", name);
-
-    List<ZoneResponseDTO> zones = zoneService.findByNameContaining(name).stream()
-      .map(zoneMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
-
-    return ResponseEntity.ok(zones);
-  }
-
-  /**
-   * Get zones by postal code.
-   *
-   * @param postalCode the postal code
-   * @return list of zones with the postal code
-   */
-  @GetMapping("/postal-code/{postalCode}")
-  @Operation(summary = "Get zones by postal code", description = "Retrieves zones by postal code")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Zones retrieved successfully")
-  })
-  public ResponseEntity<List<ZoneResponseDTO>> getZonesByPostalCode(
-    @Parameter(description = "Postal code", required = true)
-    @PathVariable String postalCode) {
-
-    log.debug("Getting zones by postal code: {}", postalCode);
-
-    List<ZoneResponseDTO> zones = zoneService.findByPostalCode(postalCode).stream()
-      .map(zoneMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
-
-    return ResponseEntity.ok(zones);
   }
 
   /**
@@ -297,7 +200,7 @@ public class ZoneController {
     @ApiResponse(responseCode = "200", description = "Zone exists"),
     @ApiResponse(responseCode = "404", description = "Zone does not exist")
   })
-  public ResponseEntity<Void> checkZoneExists(
+  public ResponseEntity<Void> checkExists(
     @Parameter(description = "Zone ID", required = true)
     @PathVariable UUID id) {
 
@@ -318,7 +221,7 @@ public class ZoneController {
   @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Count retrieved successfully")
   })
-  public ResponseEntity<Long> getZoneCount() {
+  public ResponseEntity<Long> count() {
     log.debug("Getting zone count");
 
     long count = zoneService.count();

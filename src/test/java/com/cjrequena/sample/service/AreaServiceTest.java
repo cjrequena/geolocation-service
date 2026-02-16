@@ -14,13 +14,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -85,18 +82,6 @@ class AreaServiceTest {
     Optional<Area> result = areaService.findById(areaId);
 
     assertThat(result).isPresent();
-  }
-
-  @Test
-  @DisplayName("Should find areas by city ID")
-  void shouldFindByCityId() {
-    List<AreaEntity> entities = Arrays.asList(areaEntity);
-    when(areaRepository.findByCityId(cityId)).thenReturn(entities);
-    when(areaMapper.toDomain(any(AreaEntity.class))).thenReturn(areaDomain);
-
-    List<Area> result = areaService.findByCityId(cityId);
-
-    assertThat(result).hasSize(1);
   }
 
   @Test

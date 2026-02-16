@@ -16,9 +16,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,14 +54,17 @@ public class CityController {
    * @return the created city with 201 status
    */
   @PostMapping
-  @Operation(summary = "Create a new city", description = "Creates a new city within a region")
+  @Operation(
+    summary = "Create a new city",
+    description = "Creates a new city within a region"
+  )
   @ApiResponses(value = {
     @ApiResponse(responseCode = "201", description = "City created successfully",
       content = @Content(schema = @Schema(implementation = CityResponseDTO.class))),
     @ApiResponse(responseCode = "400", description = "Invalid request data"),
     @ApiResponse(responseCode = "404", description = "Parent region not found")
   })
-  public ResponseEntity<CityResponseDTO> createCity(@Valid @RequestBody CityRequestDTO requestDTO) {
+  public ResponseEntity<CityResponseDTO> create(@Valid @RequestBody CityRequestDTO requestDTO) {
 
     log.info("Creating city: {} in region: {}", requestDTO.getName(), requestDTO.getRegionId());
 
@@ -97,7 +97,7 @@ public class CityController {
       content = @Content(schema = @Schema(implementation = CityResponseDTO.class))),
     @ApiResponse(responseCode = "404", description = "City not found")
   })
-  public ResponseEntity<CityResponseDTO> getCityById(
+  public ResponseEntity<CityResponseDTO> retrieveById(
     @Parameter(description = "City ID", required = true)
     @PathVariable UUID id) {
 
@@ -119,7 +119,7 @@ public class CityController {
   @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Cities retrieved successfully")
   })
-  public ResponseEntity<List<CityResponseDTO>> getAllCities() {
+  public ResponseEntity<List<CityResponseDTO>> retrieve() {
     log.debug("Getting all cities");
 
     List<CityResponseDTO> cities = cityService.findAll().stream()
@@ -129,51 +129,7 @@ public class CityController {
     return ResponseEntity.ok(cities);
   }
 
-  /**
-   * Get cities by region.
-   *
-   * @param regionId the region ID
-   * @return list of cities in the region
-   */
-  @GetMapping("/region/{regionId}")
-  @Operation(summary = "Get cities by region", description = "Retrieves all cities within a specific region")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Cities retrieved successfully")
-  })
-  public ResponseEntity<List<CityResponseDTO>> getCitiesByRegion(
-    @Parameter(description = "Region ID", required = true)
-    @PathVariable UUID regionId) {
 
-    log.debug("Getting cities by region: {}", regionId);
-
-    List<CityResponseDTO> cities = cityService.findByRegionId(regionId).stream()
-      .map(cityMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
-
-    return ResponseEntity.ok(cities);
-  }
-
-  /**
-   * Get cities with pagination.
-   *
-   * @param pageable pagination parameters
-   * @return page of cities
-   */
-  @GetMapping("/page")
-  @Operation(summary = "Get cities with pagination", description = "Retrieves cities with pagination support")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Cities retrieved successfully")
-  })
-  public ResponseEntity<Page<CityResponseDTO>> getCitiesPage(
-    @PageableDefault(size = 20) Pageable pageable) {
-
-    log.debug("Getting cities page: {}", pageable);
-
-    Page<CityResponseDTO> page = cityService.findByActive(true, pageable)
-      .map(cityMapper::domainToResponseDTO);
-
-    return ResponseEntity.ok(page);
-  }
 
   /**
    * Update a city.
@@ -190,7 +146,7 @@ public class CityController {
     @ApiResponse(responseCode = "404", description = "City not found"),
     @ApiResponse(responseCode = "400", description = "Invalid request data")
   })
-  public ResponseEntity<CityResponseDTO> updateCity(
+  public ResponseEntity<CityResponseDTO> update(
     @Parameter(description = "City ID", required = true)
     @PathVariable UUID id,
     @Valid @RequestBody CityRequestDTO requestDTO) {
@@ -236,72 +192,7 @@ public class CityController {
   }
 
   /**
-   * Search cities by name.
-   *
-   * @param name the name substring to search for
-   * @return list of matching cities
-   */
-  @GetMapping("/search")
-  @Operation(summary = "Search cities by name", description = "Searches cities by name (case-insensitive partial match)")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Search completed successfully")
-  })
-  public ResponseEntity<List<CityResponseDTO>> searchCitiesByName(
-    @Parameter(description = "Name substring to search for", required = true)
-    @RequestParam String name) {
 
-    log.debug("Searching cities by name: {}", name);
-
-    List<CityResponseDTO> cities = cityService.findByNameContaining(name).stream()
-      .map(cityMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
-
-    return ResponseEntity.ok(cities);
-  }
-
-//  /**
-//   * Get cities by postal code.
-//   *
-//   * @param postalCode the postal code
-//   * @return list of cities with the postal code
-//   */
-//  @GetMapping("/postal-code/{postalCode}")
-//  @Operation(summary = "Get cities by postal code", description = "Retrieves cities by postal code")
-//  @ApiResponses(value = {
-//    @ApiResponse(responseCode = "200", description = "Cities retrieved successfully")
-//  })
-//  public ResponseEntity<List<CityResponseDTO>> getCitiesByPostalCode(
-//    @Parameter(description = "Postal code", required = true)
-//    @PathVariable String postalCode) {
-//
-//    log.debug("Getting cities by postal code: {}", postalCode);
-//
-//    List<CityResponseDTO> cities = cityService.findByPostalCode(postalCode).stream()
-//      .map(cityMapper::domainToResponseDTO)
-//      .collect(Collectors.toList());
-//
-//    return ResponseEntity.ok(cities);
-//  }
-//
-//  /**
-//   * Get capital cities.
-//   *
-//   * @return list of capital cities
-//   */
-//  @GetMapping("/capitals")
-//  @Operation(summary = "Get capital cities", description = "Retrieves all cities marked as capitals")
-//  @ApiResponses(value = {
-//    @ApiResponse(responseCode = "200", description = "Capital cities retrieved successfully")
-//  })
-//  public ResponseEntity<List<CityResponseDTO>> getCapitalCities() {
-//    log.debug("Getting capital cities");
-//
-//    List<CityResponseDTO> cities = cityService.findCapitalCities().stream()
-//      .map(cityMapper::domainToResponseDTO)
-//      .collect(Collectors.toList());
-//
-//    return ResponseEntity.ok(cities);
-//  }
 
   /**
    * Check if a city exists by ID.
@@ -315,7 +206,7 @@ public class CityController {
     @ApiResponse(responseCode = "200", description = "City exists"),
     @ApiResponse(responseCode = "404", description = "City does not exist")
   })
-  public ResponseEntity<Void> checkCityExists(
+  public ResponseEntity<Void> checkExists(
     @Parameter(description = "City ID", required = true)
     @PathVariable UUID id) {
 
@@ -336,7 +227,7 @@ public class CityController {
   @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Count retrieved successfully")
   })
-  public ResponseEntity<Long> getCityCount() {
+  public ResponseEntity<Long> count() {
     log.debug("Getting city count");
 
     long count = cityService.count();

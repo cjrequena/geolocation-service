@@ -16,9 +16,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,7 +60,7 @@ public class RegionController {
     @ApiResponse(responseCode = "400", description = "Invalid request data"),
     @ApiResponse(responseCode = "404", description = "Parent country not found")
   })
-  public ResponseEntity<RegionResponseDTO> createRegion(
+  public ResponseEntity<RegionResponseDTO> create(
     @Valid @RequestBody RegionRequestDTO requestDTO) {
 
     log.info("Creating region: {} in country: {}", requestDTO.getName(), requestDTO.getCountryId());
@@ -97,7 +94,7 @@ public class RegionController {
       content = @Content(schema = @Schema(implementation = RegionResponseDTO.class))),
     @ApiResponse(responseCode = "404", description = "Region not found")
   })
-  public ResponseEntity<RegionResponseDTO> getRegionById(
+  public ResponseEntity<RegionResponseDTO> retrieveById(
     @Parameter(description = "Region ID", required = true)
     @PathVariable UUID id) {
 
@@ -122,7 +119,7 @@ public class RegionController {
   @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Regions retrieved successfully")
   })
-  public ResponseEntity<List<RegionResponseDTO>> getAllRegions() {
+  public ResponseEntity<List<RegionResponseDTO>> retrieve() {
     log.debug("Getting all regions");
 
     List<RegionResponseDTO> regions = regionService.findAll().stream()
@@ -132,51 +129,6 @@ public class RegionController {
     return ResponseEntity.ok(regions);
   }
 
-  /**
-   * Get regions by country.
-   *
-   * @param countryId the country ID
-   * @return list of regions in the country
-   */
-  @GetMapping("/country/{countryId}")
-  @Operation(summary = "Get regions by country", description = "Retrieves all regions within a specific country")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Regions retrieved successfully")
-  })
-  public ResponseEntity<List<RegionResponseDTO>> getRegionsByCountry(
-    @Parameter(description = "Country ID", required = true)
-    @PathVariable UUID countryId) {
-
-    log.debug("Getting regions by country: {}", countryId);
-
-    List<RegionResponseDTO> regions = regionService.findByCountryId(countryId).stream()
-      .map(regionMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
-
-    return ResponseEntity.ok(regions);
-  }
-
-  /**
-   * Get regions with pagination.
-   *
-   * @param pageable pagination parameters
-   * @return page of regions
-   */
-  @GetMapping("/page")
-  @Operation(summary = "Get regions with pagination", description = "Retrieves regions with pagination support")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Regions retrieved successfully")
-  })
-  public ResponseEntity<Page<RegionResponseDTO>> getRegionsPage(
-    @PageableDefault(size = 20) Pageable pageable) {
-
-    log.debug("Getting regions page: {}", pageable);
-
-    Page<RegionResponseDTO> page = regionService.findByActive(true, pageable)
-      .map(regionMapper::domainToResponseDTO);
-
-    return ResponseEntity.ok(page);
-  }
 
   /**
    * Update a region.
@@ -193,7 +145,7 @@ public class RegionController {
     @ApiResponse(responseCode = "404", description = "Region not found"),
     @ApiResponse(responseCode = "400", description = "Invalid request data")
   })
-  public ResponseEntity<RegionResponseDTO> updateRegion(
+  public ResponseEntity<RegionResponseDTO> update(
     @Parameter(description = "Region ID", required = true)
     @PathVariable UUID id,
     @Valid @RequestBody RegionRequestDTO requestDTO
@@ -241,31 +193,6 @@ public class RegionController {
   }
 
   /**
-   * Search regions by name.
-   *
-   * @param name the name substring to search for
-   * @return list of matching regions
-   */
-  @GetMapping("/search")
-  @Operation(summary = "Search regions by name", description = "Searches regions by name (case-insensitive partial match)")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Search completed successfully")
-  })
-  public ResponseEntity<List<RegionResponseDTO>> searchRegionsByName(
-    @Parameter(description = "Name substring to search for", required = true)
-    @RequestParam String name) {
-
-    log.debug("Searching regions by name: {}", name);
-
-    List<RegionResponseDTO> regions = regionService.findByNameContaining(name).stream()
-      .map(regionMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
-
-    return ResponseEntity.ok(regions);
-  }
-
-
-  /**
    * Check if a region exists by ID.
    *
    * @param id the region ID
@@ -280,7 +207,7 @@ public class RegionController {
     @ApiResponse(responseCode = "200", description = "Region exists"),
     @ApiResponse(responseCode = "404", description = "Region does not exist")
   })
-  public ResponseEntity<Void> checkRegionExists(
+  public ResponseEntity<Void> checkExists(
     @Parameter(description = "Region ID", required = true)
     @PathVariable UUID id) {
 
@@ -301,7 +228,7 @@ public class RegionController {
   @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Count retrieved successfully")
   })
-  public ResponseEntity<Long> getRegionCount() {
+  public ResponseEntity<Long> count() {
     log.debug("Getting region count");
 
     long count = regionService.count();

@@ -16,7 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -130,63 +129,63 @@ class ZoneServiceIT {
     assertThat(result.get().getName()).isEqualTo("Downtown");
   }
 
-  @Test
-  @DisplayName("Should find zones by area ID")
-  void shouldFindByAreaId() {
-    zoneService.create(createZoneDomain("Downtown", areaId, ZoneType.RESIDENTIAL, true));
-    zoneService.create(createZoneDomain("Uptown", areaId, ZoneType.COMMERCIAL, true));
+//  @Test
+//  @DisplayName("Should find zones by area ID")
+//  void shouldFindByAreaId() {
+//    zoneService.create(createZoneDomain("Downtown", areaId, ZoneType.RESIDENTIAL, true));
+//    zoneService.create(createZoneDomain("Uptown", areaId, ZoneType.COMMERCIAL, true));
+//
+//    List<Zone> result = zoneService.findByAreaId(areaId);
+//
+//    assertThat(result).hasSize(2);
+//  }
 
-    List<Zone> result = zoneService.findByAreaId(areaId);
+//  @Test
+//  @DisplayName("Should find active zones by area ID")
+//  void shouldFindActiveByAreaId() {
+//    zoneService.create(createZoneDomain("Downtown", areaId, ZoneType.RESIDENTIAL, true));
+//    zoneService.create(createZoneDomain("Uptown", areaId, ZoneType.COMMERCIAL, false));
+//
+//    List<Zone> result = zoneService.findActiveByAreaId(areaId);
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getName()).isEqualTo("Downtown");
+//  }
 
-    assertThat(result).hasSize(2);
-  }
+//  @Test
+//  @DisplayName("Should find zones by zone type")
+//  void shouldFindByZoneType() {
+//    zoneService.create(createZoneDomain("Downtown", areaId, ZoneType.RESIDENTIAL, true));
+//    zoneService.create(createZoneDomain("Business Park", areaId, ZoneType.INDUSTRIAL, true));
+//
+//    List<Zone> result = zoneService.findByZoneType(ZoneType.RESIDENTIAL.getValue());
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getName()).isEqualTo("Downtown");
+//  }
 
-  @Test
-  @DisplayName("Should find active zones by area ID")
-  void shouldFindActiveByAreaId() {
-    zoneService.create(createZoneDomain("Downtown", areaId, ZoneType.RESIDENTIAL, true));
-    zoneService.create(createZoneDomain("Uptown", areaId, ZoneType.COMMERCIAL, false));
+//  @Test
+//  @DisplayName("Should find zones by postal code")
+//  void shouldFindByPostalCode() {
+//    Zone zone = createZoneDomain("Downtown", areaId, ZoneType.RESIDENTIAL, true);
+//    zone.setPostalCode("28001");
+//    zoneService.create(zone);
+//
+//    List<Zone> result = zoneService.findByPostalCode("28001");
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getName()).isEqualTo("Downtown");
+//  }
 
-    List<Zone> result = zoneService.findActiveByAreaId(areaId);
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getName()).isEqualTo("Downtown");
-  }
-
-  @Test
-  @DisplayName("Should find zones by zone type")
-  void shouldFindByZoneType() {
-    zoneService.create(createZoneDomain("Downtown", areaId, ZoneType.RESIDENTIAL, true));
-    zoneService.create(createZoneDomain("Business Park", areaId, ZoneType.INDUSTRIAL, true));
-
-    List<Zone> result = zoneService.findByZoneType(ZoneType.RESIDENTIAL.getValue());
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getName()).isEqualTo("Downtown");
-  }
-
-  @Test
-  @DisplayName("Should find zones by postal code")
-  void shouldFindByPostalCode() {
-    Zone zone = createZoneDomain("Downtown", areaId, ZoneType.RESIDENTIAL, true);
-    zone.setPostalCode("28001");
-    zoneService.create(zone);
-
-    List<Zone> result = zoneService.findByPostalCode("28001");
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getName()).isEqualTo("Downtown");
-  }
-
-  @Test
-  @DisplayName("Should find zone by area ID and name")
-  void shouldFindByAreaIdAndName() {
-    zoneService.create(createZoneDomain("Downtown", areaId, ZoneType.RESIDENTIAL, true));
-
-    Optional<Zone> result = zoneService.findByAreaIdAndName(areaId, "Downtown");
-
-    assertThat(result).isPresent();
-  }
+//  @Test
+//  @DisplayName("Should find zone by area ID and name")
+//  void shouldFindByAreaIdAndName() {
+//    zoneService.create(createZoneDomain("Downtown", areaId, ZoneType.RESIDENTIAL, true));
+//
+//    Optional<Zone> result = zoneService.findByAreaIdAndName(areaId, "Downtown");
+//
+//    assertThat(result).isPresent();
+//  }
 
   @Test
   @DisplayName("Should update zone successfully")
@@ -219,15 +218,15 @@ class ZoneServiceIT {
     assertThat(zoneService.findById(created.getId())).isEmpty();
   }
 
-  @Test
-  @DisplayName("Should check if zone exists by area ID and name")
-  void shouldCheckExistsByAreaIdAndName() {
-    zoneService.create(createZoneDomain("Downtown", areaId, ZoneType.RESIDENTIAL, true));
-
-    boolean result = zoneService.existsByAreaIdAndName(areaId, "Downtown");
-
-    assertThat(result).isTrue();
-  }
+//  @Test
+//  @DisplayName("Should check if zone exists by area ID and name")
+//  void shouldCheckExistsByAreaIdAndName() {
+//    zoneService.create(createZoneDomain("Downtown", areaId, ZoneType.RESIDENTIAL, true));
+//
+//    boolean result = zoneService.existsByAreaIdAndName(areaId, "Downtown");
+//
+//    assertThat(result).isTrue();
+//  }
 
   @Test
   @DisplayName("Should count all zones")

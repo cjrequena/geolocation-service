@@ -6,18 +6,19 @@ import com.cjrequena.sample.domain.model.Area;
 import com.cjrequena.sample.persistence.entity.AreaEntity;
 import com.cjrequena.sample.persistence.repository.AreaRepository;
 import com.cjrequena.sample.persistence.repository.cache.AreaCacheRedisHashOpsRepository;
+import com.cjrequena.sample.service.base.BaseService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -29,12 +30,40 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class AreaService {
+public class AreaService extends BaseService<AreaEntity, Area> {
 
   private final AreaRepository areaRepository;
   private final AreaCacheRedisHashOpsRepository areaCacheRedisHashOpsRepository;
   private final CacheConfigurationProperties cacheConfigurationProperties;
   private final AreaMapper areaMapper;
+
+  // ================================================================
+  // BaseService Implementation
+  // ================================================================
+
+  @Override
+  protected JpaRepository<AreaEntity, ?> getRepository() {
+    return areaRepository;
+  }
+
+  @Override
+  protected JpaSpecificationExecutor<AreaEntity> getSpecificationExecutor() {
+    return areaRepository;
+  }
+
+  @Override
+  protected Function<AreaEntity, Area> getEntityToDomainMapper() {
+    return areaMapper::toDomain;
+  }
+
+  @Override
+  protected Class<AreaEntity> getEntityClass() {
+    return AreaEntity.class;
+  }
+
+  // ================================================================
+  // Cache Initialization
+  // ================================================================
 
   @PostConstruct
   public void loadUpCache() {
@@ -137,6 +166,22 @@ public class AreaService {
     return areas;
   }
 
+  /**
+   * Finds all areas with optional RSQL filtering, sorting, and pagination.
+   *
+   * <p>This method does NOT use cache and always queries the database to ensure
+   * accurate filtering and sorting results.</p>
+   *
+   * @param filters RSQL filter expression (e.g., "active==true;postalCode==94102")
+   * @param offset the offset for pagination (0-based)
+   * @param limit the maximum number of results to return
+   * @param sort the sort expression (e.g., "name,asc" or "name,desc;createdAt,asc")
+   * @return list of areas matching the criteria
+   */
+  public List<Area> findAll(String filters, Integer offset, Integer limit, String sort) {
+    return super.findAllWithFiltersAndSort(filters, offset, limit, sort);
+  }
+
   @Transactional
   public Area update(UUID id, Area area) {
     log.debug("Updating area with ID: {}", id);
@@ -200,116 +245,6 @@ public class AreaService {
     }
 
     return areaRepository.existsById(id);
-  }
-
-  // ================================================================
-  // Read Operations
-  // ================================================================
-
-  public List<Area> findAllActive() {
-    log.debug("Finding all active areas");
-    return areaRepository.findAllByActiveTrue().stream()
-      .map(areaMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  public Page<Area> findByActive(Boolean active, Pageable pageable) {
-    log.debug("Finding areas by active status: {}", active);
-    return areaRepository.findByActive(active, pageable).map(areaMapper::toDomain);
-  }
-
-  public List<Area> findByCityId(UUID cityId) {
-    log.debug("Finding areas by city ID: {}", cityId);
-    return areaRepository.findByCityId(cityId).stream()
-      .map(areaMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  public List<Area> findActiveByCityId(UUID cityId) {
-    log.debug("Finding active areas by city ID: {}", cityId);
-    return areaRepository.findByCityIdAndActiveTrue(cityId).stream()
-      .map(areaMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  public Page<Area> findByCityId(UUID cityId, Pageable pageable) {
-    log.debug("Finding areas by city ID: {} with pagination", cityId);
-    return areaRepository.findByCityId(cityId, pageable).map(areaMapper::toDomain);
-  }
-
-  public List<Area> findByAreaType(String areaType) {
-    log.debug("Finding areas by type: {}", areaType);
-    return areaRepository.findByAreaType(areaType).stream()
-      .map(areaMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  public List<Area> findActiveByAreaType(String areaType) {
-    log.debug("Finding active areas by type: {}", areaType);
-    return areaRepository.findByAreaTypeAndActiveTrue(areaType).stream()
-      .map(areaMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  public List<Area> findByCityIdAndAreaType(UUID cityId, String areaType) {
-    log.debug("Finding areas by city ID: {} and type: {}", cityId, areaType);
-    return areaRepository.findByCityIdAndAreaType(cityId, areaType).stream()
-      .map(areaMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  public List<Area> findByPostalCode(String postalCode) {
-    log.debug("Finding areas by postal code: {}", postalCode);
-    return areaRepository.findByPostalCode(postalCode).stream()
-      .map(areaMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  public List<Area> findByCityIdAndPostalCode(UUID cityId, String postalCode) {
-    log.debug("Finding areas by city ID: {} and postal code: {}", cityId, postalCode);
-    return areaRepository.findByCityIdAndPostalCode(cityId, postalCode).stream()
-      .map(areaMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  public Optional<Area> findByCityIdAndName(UUID cityId, String name) {
-    log.debug("Finding area by city ID: {} and name: {}", cityId, name);
-    return areaRepository.findByCityIdAndName(cityId, name).map(areaMapper::toDomain);
-  }
-
-  public List<Area> findByNameContaining(String namePart) {
-    log.debug("Finding areas by name containing: {}", namePart);
-    return areaRepository.findByNameContainingIgnoreCase(namePart).stream()
-      .map(areaMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  public List<Area> findByCityIdAndPopulationGreaterThan(UUID cityId, Long minPopulation) {
-    log.debug("Finding areas in city {} with population > {}", cityId, minPopulation);
-    return areaRepository.findByCityIdAndPopulationGreaterThan(cityId, minPopulation).stream()
-      .map(areaMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  public Page<Area> findByCityIdOrderByPopulationDesc(UUID cityId, Pageable pageable) {
-    log.debug("Finding top areas in city {} by population", cityId);
-    return areaRepository.findByCityIdOrderByPopulationDesc(cityId, pageable)
-      .map(areaMapper::toDomain);
-  }
-
-  public List<Area> findByCreatedAtBetween(OffsetDateTime start, OffsetDateTime end) {
-    log.debug("Finding areas created between {} and {}", start, end);
-    return areaRepository.findByCreatedAtBetween(start, end).stream()
-      .map(areaMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  public boolean existsByCityIdAndName(UUID cityId, String name) {
-    return areaRepository.existsByCityIdAndName(cityId, name);
-  }
-
-  public boolean existsByPostalCode(String postalCode) {
-    return areaRepository.existsByPostalCode(postalCode);
   }
 
   public long count() {
@@ -464,4 +399,5 @@ public class AreaService {
       log.warn("Failed to evict areas from cache", e);
     }
   }
+
 }

@@ -16,9 +16,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -69,7 +66,7 @@ public class AreaController {
     @ApiResponse(responseCode = "400", description = "Invalid request data"),
     @ApiResponse(responseCode = "404", description = "Parent city not found")
   })
-  public ResponseEntity<AreaResponseDTO> createArea(@Valid @RequestBody AreaRequestDTO requestDTO) {
+  public ResponseEntity<AreaResponseDTO> create(@Valid @RequestBody AreaRequestDTO requestDTO) {
 
     log.info("Creating area: {} in city: {}", requestDTO.getName(), requestDTO.getCityId());
 
@@ -102,7 +99,7 @@ public class AreaController {
       content = @Content(schema = @Schema(implementation = AreaResponseDTO.class))),
     @ApiResponse(responseCode = "404", description = "Area not found")
   })
-  public ResponseEntity<AreaResponseDTO> getAreaById(
+  public ResponseEntity<AreaResponseDTO> retrieveById(
     @Parameter(description = "Area ID", required = true)
     @PathVariable UUID id) {
 
@@ -134,51 +131,6 @@ public class AreaController {
     return ResponseEntity.ok(areas);
   }
 
-  /**
-   * Get areas by city.
-   *
-   * @param cityId the city ID
-   * @return list of areas in the city
-   */
-  @GetMapping("/city/{cityId}")
-  @Operation(summary = "Get areas by city", description = "Retrieves all areas within a specific city")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Areas retrieved successfully")
-  })
-  public ResponseEntity<List<AreaResponseDTO>> getAreasByCity(
-    @Parameter(description = "City ID", required = true)
-    @PathVariable UUID cityId) {
-
-    log.debug("Getting areas by city: {}", cityId);
-
-    List<AreaResponseDTO> areas = areaService.findByCityId(cityId).stream()
-      .map(areaMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
-
-    return ResponseEntity.ok(areas);
-  }
-
-  /**
-   * Get areas with pagination.
-   *
-   * @param pageable pagination parameters
-   * @return page of areas
-   */
-  @GetMapping("/page")
-  @Operation(summary = "Get areas with pagination", description = "Retrieves areas with pagination support")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Areas retrieved successfully")
-  })
-  public ResponseEntity<Page<AreaResponseDTO>> getAreasPage(
-    @PageableDefault(size = 20) Pageable pageable) {
-
-    log.debug("Getting areas page: {}", pageable);
-
-    Page<AreaResponseDTO> page = areaService.findByActive(true, pageable)
-      .map(areaMapper::domainToResponseDTO);
-
-    return ResponseEntity.ok(page);
-  }
 
   /**
    * Update an area.
@@ -199,7 +151,7 @@ public class AreaController {
     @ApiResponse(responseCode = "404", description = "Area not found"),
     @ApiResponse(responseCode = "400", description = "Invalid request data")
   })
-  public ResponseEntity<AreaResponseDTO> updateArea(
+  public ResponseEntity<AreaResponseDTO> update(
     @Parameter(description = "Area ID", required = true)
     @PathVariable UUID id,
     @Valid @RequestBody AreaRequestDTO requestDTO
@@ -233,7 +185,7 @@ public class AreaController {
     @ApiResponse(responseCode = "204", description = "Area deleted successfully"),
     @ApiResponse(responseCode = "404", description = "Area not found")
   })
-  public ResponseEntity<Void> deleteArea(
+  public ResponseEntity<Void> delete(
     @Parameter(description = "Area ID", required = true)
     @PathVariable UUID id) {
 
@@ -244,54 +196,6 @@ public class AreaController {
     log.info("Area deleted with ID: {}", id);
 
     return ResponseEntity.noContent().build();
-  }
-
-  /**
-   * Search areas by name.
-   *
-   * @param name the name substring to search for
-   * @return list of matching areas
-   */
-  @GetMapping("/search")
-  @Operation(summary = "Search areas by name", description = "Searches areas by name (case-insensitive partial match)")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Search completed successfully")
-  })
-  public ResponseEntity<List<AreaResponseDTO>> searchAreasByName(
-    @Parameter(description = "Name substring to search for", required = true)
-    @RequestParam String name) {
-
-    log.debug("Searching areas by name: {}", name);
-
-    List<AreaResponseDTO> areas = areaService.findByNameContaining(name).stream()
-      .map(areaMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
-
-    return ResponseEntity.ok(areas);
-  }
-
-  /**
-   * Get areas by postal code.
-   *
-   * @param postalCode the postal code
-   * @return list of areas with the postal code
-   */
-  @GetMapping("/postal-code/{postalCode}")
-  @Operation(summary = "Get areas by postal code", description = "Retrieves areas by postal code")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Areas retrieved successfully")
-  })
-  public ResponseEntity<List<AreaResponseDTO>> getAreasByPostalCode(
-    @Parameter(description = "Postal code", required = true)
-    @PathVariable String postalCode) {
-
-    log.debug("Getting areas by postal code: {}", postalCode);
-
-    List<AreaResponseDTO> areas = areaService.findByPostalCode(postalCode).stream()
-      .map(areaMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
-
-    return ResponseEntity.ok(areas);
   }
 
   /**
@@ -306,7 +210,7 @@ public class AreaController {
     @ApiResponse(responseCode = "200", description = "Area exists"),
     @ApiResponse(responseCode = "404", description = "Area does not exist")
   })
-  public ResponseEntity<Void> checkAreaExists(
+  public ResponseEntity<Void> checkExists(
     @Parameter(description = "Area ID", required = true)
     @PathVariable UUID id) {
 
@@ -327,7 +231,7 @@ public class AreaController {
   @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Count retrieved successfully")
   })
-  public ResponseEntity<Long> getAreaCount() {
+  public ResponseEntity<Long> count() {
     log.debug("Getting area count");
 
     long count = areaService.count();

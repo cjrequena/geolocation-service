@@ -4,7 +4,9 @@ import com.cjrequena.sample.persistence.entity.AreaEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -19,7 +21,7 @@ import java.util.UUID;
  * <p>Area is a subdivision of a City.</p>
  */
 @Repository
-public interface AreaRepository extends JpaRepository<AreaEntity, UUID> {
+public interface AreaRepository extends JpaRepository<AreaEntity, UUID>, JpaSpecificationExecutor<AreaEntity>, QuerydslPredicateExecutor<AreaEntity> {
 
   // ================================================================
   // Active / Inactive filtering

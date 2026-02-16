@@ -6,18 +6,19 @@ import com.cjrequena.sample.domain.model.Region;
 import com.cjrequena.sample.persistence.entity.RegionEntity;
 import com.cjrequena.sample.persistence.repository.RegionRepository;
 import com.cjrequena.sample.persistence.repository.cache.RegionCacheRedisHashOpsRepository;
+import com.cjrequena.sample.service.base.BaseService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -32,13 +33,41 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class RegionService {
+public class RegionService extends BaseService<RegionEntity, Region> {
 
   private final RegionRepository regionRepository;
   private final RegionCacheRedisHashOpsRepository regionCacheRedisHashOpsRepository;
   private final CacheConfigurationProperties cacheConfigurationProperties;
   private final RegionMapper regionMapper;
 
+  // ================================================================
+  // BaseService Implementation
+  // ================================================================
+
+  @Override
+  protected JpaRepository<RegionEntity, ?> getRepository() {
+    return null;
+  }
+
+  @Override
+  protected JpaSpecificationExecutor<RegionEntity> getSpecificationExecutor() {
+    return null;
+  }
+
+  @Override
+  protected Function<RegionEntity, Region> getEntityToDomainMapper() {
+    return null;
+  }
+
+  @Override
+  protected Class<RegionEntity> getEntityClass() {
+    return null;
+  }
+
+  // ================================================================
+  // Cache Initialization
+  // ================================================================
+  
   @PostConstruct
   public void loadUpCache() {
     if(cacheConfigurationProperties.isFullLoadEnabled()) {
@@ -140,6 +169,23 @@ public class RegionService {
     return regions;
   }
 
+  /**
+   * Finds all areas with optional RSQL filtering, sorting, and pagination.
+   *
+   * <p>This method does NOT use cache and always queries the database to ensure
+   * accurate filtering and sorting results.</p>
+   *
+   * @param filters RSQL filter expression (e.g., "active==true;postalCode==94102")
+   * @param offset the offset for pagination (0-based)
+   * @param limit the maximum number of results to return
+   * @param sort the sort expression (e.g., "name,asc" or "name,desc;createdAt,asc")
+   * @return list of areas matching the criteria
+   */
+  public List<Region> findAll(String filters, Integer offset, Integer limit, String sort) {
+    return super.findAllWithFiltersAndSort(filters, offset, limit, sort);
+  }
+
+
   @Transactional
   public Region update(UUID id, Region region) {
     log.debug("Updating region with ID: {}", id);
@@ -206,201 +252,6 @@ public class RegionService {
   }
 
   // ================================================================
-  // Read Operations
-  // ================================================================
-
-  /**
-   * Finds all active regions.
-   *
-   * @return list of active regions
-   */
-  public List<Region> findAllActive() {
-    log.debug("Finding all active regions");
-    
-    return regionRepository.findAllByActiveTrue().stream()
-      .map(regionMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  /**
-   * Finds regions by active status with pagination.
-   *
-   * @param active the active status
-   * @param pageable pagination information
-   * @return page of regions
-   */
-  public Page<Region> findByActive(Boolean active, Pageable pageable) {
-    log.debug("Finding regions by active status: {} with pagination", active);
-    
-    return regionRepository.findByActive(active, pageable)
-      .map(regionMapper::toDomain);
-  }
-
-  /**
-   * Finds all regions belonging to a specific country.
-   *
-   * @param countryId the country ID
-   * @return list of regions in the country
-   */
-  public List<Region> findByCountryId(UUID countryId) {
-    log.debug("Finding regions by country ID: {}", countryId);
-    
-    return regionRepository.findByCountryId(countryId).stream()
-      .map(regionMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  /**
-   * Finds active regions belonging to a specific country.
-   *
-   * @param countryId the country ID
-   * @return list of active regions in the country
-   */
-  public List<Region> findActiveByCountryId(UUID countryId) {
-    log.debug("Finding active regions by country ID: {}", countryId);
-    
-    return regionRepository.findByCountryIdAndActiveTrue(countryId).stream()
-      .map(regionMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  /**
-   * Finds regions in a country with pagination.
-   *
-   * @param countryId the country ID
-   * @param pageable pagination information
-   * @return page of regions
-   */
-  public Page<Region> findByCountryId(UUID countryId, Pageable pageable) {
-    log.debug("Finding regions by country ID: {} with pagination", countryId);
-    
-    return regionRepository.findByCountryId(countryId, pageable)
-      .map(regionMapper::toDomain);
-  }
-
-  /**
-   * Finds a region by country ID and name.
-   *
-   * @param countryId the country ID
-   * @param name the region name
-   * @return Optional containing the region if found
-   */
-  public Optional<Region> findByCountryIdAndName(UUID countryId, String name) {
-    log.debug("Finding region by country ID: {} and name: {}", countryId, name);
-    
-    return regionRepository.findByCountryIdAndName(countryId, name)
-      .map(regionMapper::toDomain);
-  }
-
-  /**
-   * Finds regions by region type.
-   *
-   * @param regionType the region type (e.g., "STATE", "PROVINCE")
-   * @return list of regions
-   */
-  public List<Region> findByRegionType(String regionType) {
-    log.debug("Finding regions by type: {}", regionType);
-    
-    return regionRepository.findByRegionType(regionType).stream()
-      .map(regionMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  /**
-   * Finds active regions by region type.
-   *
-   * @param regionType the region type
-   * @return list of active regions
-   */
-  public List<Region> findActiveByRegionType(String regionType) {
-    log.debug("Finding active regions by type: {}", regionType);
-    
-    return regionRepository.findByRegionTypeAndActiveTrue(regionType).stream()
-      .map(regionMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  /**
-   * Finds regions by name containing substring (case-insensitive).
-   *
-   * @param namePart the substring to search for
-   * @return list of matching regions
-   */
-  public List<Region> findByNameContaining(String namePart) {
-    log.debug("Finding regions by name containing: {}", namePart);
-    
-    return regionRepository.findByNameContainingIgnoreCase(namePart).stream()
-      .map(regionMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  /**
-   * Finds regions in a country with population greater than threshold.
-   *
-   * @param countryId the country ID
-   * @param minPopulation the minimum population
-   * @return list of regions
-   */
-  public List<Region> findByCountryIdAndPopulationGreaterThan(UUID countryId, Long minPopulation) {
-    log.debug("Finding regions in country {} with population > {}", countryId, minPopulation);
-    
-    return regionRepository.findByCountryIdAndPopulationGreaterThan(countryId, minPopulation).stream()
-      .map(regionMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  /**
-   * Finds top regions in a country ordered by population descending.
-   *
-   * @param countryId the country ID
-   * @param pageable pagination information
-   * @return page of regions ordered by population
-   */
-  public Page<Region> findByCountryIdOrderByPopulationDesc(UUID countryId, Pageable pageable) {
-    log.debug("Finding top regions in country {} by population", countryId);
-    
-    return regionRepository.findByCountryIdOrderByPopulationDesc(countryId, pageable)
-      .map(regionMapper::toDomain);
-  }
-
-  /**
-   * Finds regions created within a time range.
-   *
-   * @param start start date/time
-   * @param end end date/time
-   * @return list of regions
-   */
-  public List<Region> findByCreatedAtBetween(OffsetDateTime start, OffsetDateTime end) {
-    log.debug("Finding regions created between {} and {}", start, end);
-    
-    return regionRepository.findByCreatedAtBetween(start, end).stream()
-      .map(regionMapper::toDomain)
-      .collect(Collectors.toList());
-  }
-
-  /**
-   * Checks if a region exists by country ID and name.
-   *
-   * @param countryId the country ID
-   * @param name the region name
-   * @return true if exists, false otherwise
-   */
-  public boolean existsByCountryIdAndName(UUID countryId, String name) {
-    return regionRepository.existsByCountryIdAndName(countryId, name);
-  }
-
-  /**
-   * Checks if an active region exists by country ID and name.
-   *
-   * @param countryId the country ID
-   * @param name the region name
-   * @return true if exists, false otherwise
-   */
-  public boolean existsActiveByCountryIdAndName(UUID countryId, String name) {
-    return regionRepository.existsByCountryIdAndNameAndActiveTrue(countryId, name);
-  }
-
-  // ================================================================
   // Count Operations
   // ================================================================
 
@@ -412,4 +263,5 @@ public class RegionService {
   public long count() {
     return regionRepository.count();
   }
+
 }

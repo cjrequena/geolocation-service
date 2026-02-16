@@ -4,7 +4,9 @@ import com.cjrequena.sample.persistence.entity.RegionEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -19,7 +21,7 @@ import java.util.UUID;
  * <p>Region is a subdivision of a {@link com.cjrequena.sample.persistence.entity.CountryEntity}.</p>
  */
 @Repository
-public interface RegionRepository extends JpaRepository<RegionEntity, UUID> {
+public interface RegionRepository extends JpaRepository<RegionEntity, UUID>, JpaSpecificationExecutor<RegionEntity>, QuerydslPredicateExecutor<RegionEntity> {
 
   // ================================================================
   // Active / Inactive filtering

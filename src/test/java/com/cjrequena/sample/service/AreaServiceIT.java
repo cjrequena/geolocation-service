@@ -8,7 +8,6 @@ import com.cjrequena.sample.domain.model.enums.AreaType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
 import com.cjrequena.sample.domain.model.vo.MetadataVO;
-import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import com.cjrequena.sample.persistence.repository.AreaRepository;
 import com.cjrequena.sample.persistence.repository.CityRepository;
 import com.cjrequena.sample.persistence.repository.CountryRepository;
@@ -18,8 +17,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.OffsetDateTime;
@@ -142,193 +139,193 @@ class AreaServiceIT {
     assertThat(result).hasSizeGreaterThan(0);
   }
 
-  @Test
-  @DisplayName("Should find all active areas")
-  void shouldFindAllActive() {
-    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
-    areaService.create(createAreaDomain("Gràcia", cityId, AreaType.DISTRICT, false));
+//  @Test
+//  @DisplayName("Should find all active areas")
+//  void shouldFindAllActive() {
+//    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
+//    areaService.create(createAreaDomain("Gràcia", cityId, AreaType.DISTRICT, false));
+//
+//    List<Area> result = areaService.findAllActive();
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getName()).isEqualTo("Example");
+//  }
 
-    List<Area> result = areaService.findAllActive();
+//  @Test
+//  @DisplayName("Should find areas by active status with pagination")
+//  void shouldFindByActiveWithPagination() {
+//    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
+//    areaService.create(createAreaDomain("Gràcia", cityId, AreaType.DISTRICT, true));
+//
+//    Page<Area> result = areaService.findByActive(true, PageRequest.of(0, 10));
+//
+//    assertThat(result.getContent()).hasSize(2);
+//  }
 
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getName()).isEqualTo("Example");
-  }
+//  @Test
+//  @DisplayName("Should find areas by city ID")
+//  void shouldFindByCityId() {
+//    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
+//    areaService.create(createAreaDomain("Gràcia", cityId, AreaType.DISTRICT, true));
+//
+//    List<Area> result = areaService.findByCityId(cityId);
+//
+//    assertThat(result).hasSize(2);
+//  }
 
-  @Test
-  @DisplayName("Should find areas by active status with pagination")
-  void shouldFindByActiveWithPagination() {
-    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
-    areaService.create(createAreaDomain("Gràcia", cityId, AreaType.DISTRICT, true));
+//  @Test
+//  @DisplayName("Should find active areas by city ID")
+//  void shouldFindActiveByCityId() {
+//    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
+//    areaService.create(createAreaDomain("Gràcia", cityId, AreaType.DISTRICT, false));
+//
+//    List<Area> result = areaService.findActiveByCityId(cityId);
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getName()).isEqualTo("Example");
+//  }
 
-    Page<Area> result = areaService.findByActive(true, PageRequest.of(0, 10));
+//  @Test
+//  @DisplayName("Should find areas by city ID with pagination")
+//  void shouldFindByCityIdWithPagination() {
+//    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
+//    areaService.create(createAreaDomain("Gràcia", cityId, AreaType.DISTRICT, true));
+//
+//    Page<Area> result = areaService.findByCityId(cityId, PageRequest.of(0, 10));
+//
+//    assertThat(result.getContent()).hasSize(2);
+//  }
 
-    assertThat(result.getContent()).hasSize(2);
-  }
+//  @Test
+//  @DisplayName("Should find areas by area type")
+//  void shouldFindByAreaType() {
+//    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
+//    areaService.create(createAreaDomain("Gràcia", cityId, AreaType.NEIGHBORHOOD, true));
+//
+//    List<Area> result = areaService.findByAreaType(AreaType.DISTRICT.getValue());
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getName()).isEqualTo("Example");
+//  }
 
-  @Test
-  @DisplayName("Should find areas by city ID")
-  void shouldFindByCityId() {
-    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
-    areaService.create(createAreaDomain("Gràcia", cityId, AreaType.DISTRICT, true));
+//  @Test
+//  @DisplayName("Should find active areas by area type")
+//  void shouldFindActiveByAreaType() {
+//    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
+//    areaService.create(createAreaDomain("Gràcia", cityId, AreaType.DISTRICT, false));
+//
+//    List<Area> result = areaService.findActiveByAreaType(AreaType.DISTRICT.getValue());
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getName()).isEqualTo("Example");
+//  }
 
-    List<Area> result = areaService.findByCityId(cityId);
+//  @Test
+//  @DisplayName("Should find areas by city ID and area type")
+//  void shouldFindByCityIdAndAreaType() {
+//    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
+//    areaService.create(createAreaDomain("Gràcia", cityId, AreaType.NEIGHBORHOOD, true));
+//
+//    List<Area> result = areaService.findByCityIdAndAreaType(cityId, AreaType.DISTRICT.getValue());
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getName()).isEqualTo("Example");
+//  }
 
-    assertThat(result).hasSize(2);
-  }
+//  @Test
+//  @DisplayName("Should find areas by postal code")
+//  void shouldFindByPostalCode() {
+//    Area area = createAreaDomain("Example", cityId, AreaType.DISTRICT, true);
+//    area.setPostalCode("08001");
+//    areaService.create(area);
+//
+//    List<Area> result = areaService.findByPostalCode("08001");
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getName()).isEqualTo("Example");
+//  }
 
-  @Test
-  @DisplayName("Should find active areas by city ID")
-  void shouldFindActiveByCityId() {
-    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
-    areaService.create(createAreaDomain("Gràcia", cityId, AreaType.DISTRICT, false));
+//  @Test
+//  @DisplayName("Should find areas by city ID and postal code")
+//  void shouldFindByCityIdAndPostalCode() {
+//    Area area = createAreaDomain("Example", cityId, AreaType.DISTRICT, true);
+//    area.setPostalCode("08001");
+//    areaService.create(area);
+//
+//    List<Area> result = areaService.findByCityIdAndPostalCode(cityId, "08001");
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getName()).isEqualTo("Example");
+//  }
 
-    List<Area> result = areaService.findActiveByCityId(cityId);
+//  @Test
+//  @DisplayName("Should find area by city ID and name")
+//  void shouldFindByCityIdAndName() {
+//    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
+//
+//    Optional<Area> result = areaService.findByCityIdAndName(cityId, "Example");
+//
+//    assertThat(result).isPresent();
+//    assertThat(result.get().getName()).isEqualTo("Example");
+//  }
 
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getName()).isEqualTo("Example");
-  }
+//  @Test
+//  @DisplayName("Should find areas by name containing")
+//  void shouldFindByNameContaining() {
+//    areaService.create(createAreaDomain("Example Esquerra", cityId, AreaType.DISTRICT, true));
+//    areaService.create(createAreaDomain("Example Dreta", cityId, AreaType.DISTRICT, true));
+//
+//    List<Area> result = areaService.findByNameContaining("Example");
+//
+//    assertThat(result).hasSize(2);
+//  }
 
-  @Test
-  @DisplayName("Should find areas by city ID with pagination")
-  void shouldFindByCityIdWithPagination() {
-    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
-    areaService.create(createAreaDomain("Gràcia", cityId, AreaType.DISTRICT, true));
+//  @Test
+//  @DisplayName("Should find areas by city ID and population greater than")
+//  void shouldFindByCityIdAndPopulationGreaterThan() {
+//    Area smallArea = createAreaDomain("Small Area", cityId, AreaType.DISTRICT, true);
+//    smallArea.setPopulation(PopulationVO.builder().value(50000L).build());
+//    areaService.create(smallArea);
+//
+//    Area largeArea = createAreaDomain("Large Area", cityId, AreaType.DISTRICT, true);
+//    largeArea.setPopulation(PopulationVO.builder().value(150000L).build());
+//    areaService.create(largeArea);
+//
+//    List<Area> result = areaService.findByCityIdAndPopulationGreaterThan(cityId, 100000L);
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getName()).isEqualTo("Large Area");
+//  }
 
-    Page<Area> result = areaService.findByCityId(cityId, PageRequest.of(0, 10));
+//  @Test
+//  @DisplayName("Should find areas by city ID ordered by population desc")
+//  void shouldFindByCityIdOrderByPopulationDesc() {
+//    Area smallArea = createAreaDomain("Small Area", cityId, AreaType.DISTRICT, true);
+//    smallArea.setPopulation(PopulationVO.builder().value(50000L).build());
+//    areaService.create(smallArea);
+//
+//    Area largeArea = createAreaDomain("Large Area", cityId, AreaType.DISTRICT, true);
+//    largeArea.setPopulation(PopulationVO.builder().value(150000L).build());
+//    areaService.create(largeArea);
+//
+//    Page<Area> result = areaService.findByCityIdOrderByPopulationDesc(cityId, PageRequest.of(0, 10));
+//
+//    assertThat(result.getContent()).hasSize(2);
+//    assertThat(result.getContent().get(0).getName()).isEqualTo("Large Area");
+//  }
 
-    assertThat(result.getContent()).hasSize(2);
-  }
-
-  @Test
-  @DisplayName("Should find areas by area type")
-  void shouldFindByAreaType() {
-    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
-    areaService.create(createAreaDomain("Gràcia", cityId, AreaType.NEIGHBORHOOD, true));
-
-    List<Area> result = areaService.findByAreaType(AreaType.DISTRICT.getValue());
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getName()).isEqualTo("Example");
-  }
-
-  @Test
-  @DisplayName("Should find active areas by area type")
-  void shouldFindActiveByAreaType() {
-    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
-    areaService.create(createAreaDomain("Gràcia", cityId, AreaType.DISTRICT, false));
-
-    List<Area> result = areaService.findActiveByAreaType(AreaType.DISTRICT.getValue());
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getName()).isEqualTo("Example");
-  }
-
-  @Test
-  @DisplayName("Should find areas by city ID and area type")
-  void shouldFindByCityIdAndAreaType() {
-    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
-    areaService.create(createAreaDomain("Gràcia", cityId, AreaType.NEIGHBORHOOD, true));
-
-    List<Area> result = areaService.findByCityIdAndAreaType(cityId, AreaType.DISTRICT.getValue());
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getName()).isEqualTo("Example");
-  }
-
-  @Test
-  @DisplayName("Should find areas by postal code")
-  void shouldFindByPostalCode() {
-    Area area = createAreaDomain("Example", cityId, AreaType.DISTRICT, true);
-    area.setPostalCode("08001");
-    areaService.create(area);
-
-    List<Area> result = areaService.findByPostalCode("08001");
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getName()).isEqualTo("Example");
-  }
-
-  @Test
-  @DisplayName("Should find areas by city ID and postal code")
-  void shouldFindByCityIdAndPostalCode() {
-    Area area = createAreaDomain("Example", cityId, AreaType.DISTRICT, true);
-    area.setPostalCode("08001");
-    areaService.create(area);
-
-    List<Area> result = areaService.findByCityIdAndPostalCode(cityId, "08001");
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getName()).isEqualTo("Example");
-  }
-
-  @Test
-  @DisplayName("Should find area by city ID and name")
-  void shouldFindByCityIdAndName() {
-    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
-
-    Optional<Area> result = areaService.findByCityIdAndName(cityId, "Example");
-
-    assertThat(result).isPresent();
-    assertThat(result.get().getName()).isEqualTo("Example");
-  }
-
-  @Test
-  @DisplayName("Should find areas by name containing")
-  void shouldFindByNameContaining() {
-    areaService.create(createAreaDomain("Example Esquerra", cityId, AreaType.DISTRICT, true));
-    areaService.create(createAreaDomain("Example Dreta", cityId, AreaType.DISTRICT, true));
-
-    List<Area> result = areaService.findByNameContaining("Example");
-
-    assertThat(result).hasSize(2);
-  }
-
-  @Test
-  @DisplayName("Should find areas by city ID and population greater than")
-  void shouldFindByCityIdAndPopulationGreaterThan() {
-    Area smallArea = createAreaDomain("Small Area", cityId, AreaType.DISTRICT, true);
-    smallArea.setPopulation(PopulationVO.builder().value(50000L).build());
-    areaService.create(smallArea);
-
-    Area largeArea = createAreaDomain("Large Area", cityId, AreaType.DISTRICT, true);
-    largeArea.setPopulation(PopulationVO.builder().value(150000L).build());
-    areaService.create(largeArea);
-
-    List<Area> result = areaService.findByCityIdAndPopulationGreaterThan(cityId, 100000L);
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getName()).isEqualTo("Large Area");
-  }
-
-  @Test
-  @DisplayName("Should find areas by city ID ordered by population desc")
-  void shouldFindByCityIdOrderByPopulationDesc() {
-    Area smallArea = createAreaDomain("Small Area", cityId, AreaType.DISTRICT, true);
-    smallArea.setPopulation(PopulationVO.builder().value(50000L).build());
-    areaService.create(smallArea);
-
-    Area largeArea = createAreaDomain("Large Area", cityId, AreaType.DISTRICT, true);
-    largeArea.setPopulation(PopulationVO.builder().value(150000L).build());
-    areaService.create(largeArea);
-
-    Page<Area> result = areaService.findByCityIdOrderByPopulationDesc(cityId, PageRequest.of(0, 10));
-
-    assertThat(result.getContent()).hasSize(2);
-    assertThat(result.getContent().get(0).getName()).isEqualTo("Large Area");
-  }
-
-  @Test
-  @DisplayName("Should find areas created between dates")
-  void shouldFindByCreatedAtBetween() {
-    OffsetDateTime start = OffsetDateTime.now().minusDays(1);
-    OffsetDateTime end = OffsetDateTime.now().plusDays(1);
-
-    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
-
-    List<Area> result = areaService.findByCreatedAtBetween(start, end);
-
-    assertThat(result).hasSize(1);
-  }
+//  @Test
+//  @DisplayName("Should find areas created between dates")
+//  void shouldFindByCreatedAtBetween() {
+//    OffsetDateTime start = OffsetDateTime.now().minusDays(1);
+//    OffsetDateTime end = OffsetDateTime.now().plusDays(1);
+//
+//    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
+//
+//    List<Area> result = areaService.findByCreatedAtBetween(start, end);
+//
+//    assertThat(result).hasSize(1);
+//  }
 
   // ================================================================
   // Update Operations
@@ -400,27 +397,27 @@ class AreaServiceIT {
     assertThat(result).isFalse();
   }
 
-  @Test
-  @DisplayName("Should check if area exists by city ID and name")
-  void shouldCheckExistsByCityIdAndName() {
-    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
+//  @Test
+//  @DisplayName("Should check if area exists by city ID and name")
+//  void shouldCheckExistsByCityIdAndName() {
+//    areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
+//
+//    boolean result = areaService.existsByCityIdAndName(cityId, "Example");
+//
+//    assertThat(result).isTrue();
+//  }
 
-    boolean result = areaService.existsByCityIdAndName(cityId, "Example");
-
-    assertThat(result).isTrue();
-  }
-
-  @Test
-  @DisplayName("Should check if area exists by postal code")
-  void shouldCheckExistsByPostalCode() {
-    Area area = createAreaDomain("Example", cityId, AreaType.DISTRICT, true);
-    area.setPostalCode("08001");
-    areaService.create(area);
-
-    boolean result = areaService.existsByPostalCode("08001");
-
-    assertThat(result).isTrue();
-  }
+//  @Test
+//  @DisplayName("Should check if area exists by postal code")
+//  void shouldCheckExistsByPostalCode() {
+//    Area area = createAreaDomain("Example", cityId, AreaType.DISTRICT, true);
+//    area.setPostalCode("08001");
+//    areaService.create(area);
+//
+//    boolean result = areaService.existsByPostalCode("08001");
+//
+//    assertThat(result).isTrue();
+//  }
 
   // ================================================================
   // Count Operations

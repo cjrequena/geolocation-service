@@ -6,7 +6,6 @@ import com.cjrequena.sample.domain.model.enums.RegionType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
 import com.cjrequena.sample.domain.model.vo.MetadataVO;
-import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import com.cjrequena.sample.persistence.repository.CountryRepository;
 import com.cjrequena.sample.persistence.repository.RegionRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -86,67 +84,67 @@ class RegionServiceIT {
     assertThat(result.get().getName()).isEqualTo("Catalonia");
   }
 
-  @Test
-  @DisplayName("Should find regions by country ID")
-  void shouldFindByCountryId() {
-    regionService.create(createRegionDomain("Catalonia", countryId, RegionType.AUTONOMOUS_COMMUNITY, true));
-    regionService.create(createRegionDomain("Andalusia", countryId, RegionType.AUTONOMOUS_COMMUNITY, true));
+//  @Test
+//  @DisplayName("Should find regions by country ID")
+//  void shouldFindByCountryId() {
+//    regionService.create(createRegionDomain("Catalonia", countryId, RegionType.AUTONOMOUS_COMMUNITY, true));
+//    regionService.create(createRegionDomain("Andalusia", countryId, RegionType.AUTONOMOUS_COMMUNITY, true));
+//
+//    List<Region> result = regionService.findByCountryId(countryId);
+//
+//    assertThat(result).hasSize(2);
+//  }
 
-    List<Region> result = regionService.findByCountryId(countryId);
+//  @Test
+//  @DisplayName("Should find active regions by country ID")
+//  void shouldFindActiveByCountryId() {
+//    regionService.create(createRegionDomain("Catalonia", countryId, RegionType.AUTONOMOUS_COMMUNITY, true));
+//    regionService.create(createRegionDomain("Andalusia", countryId, RegionType.AUTONOMOUS_COMMUNITY, false));
+//
+//    List<Region> result = regionService.findActiveByCountryId(countryId);
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getName()).isEqualTo("Catalonia");
+//  }
 
-    assertThat(result).hasSize(2);
-  }
+//  @Test
+//  @DisplayName("Should find regions by region type")
+//  void shouldFindByRegionType() {
+//    regionService.create(createRegionDomain("Catalonia", countryId, RegionType.AUTONOMOUS_COMMUNITY, true));
+//    regionService.create(createRegionDomain("Madrid", countryId, RegionType.PROVINCE, true));
+//
+//    List<Region> result = regionService.findByRegionType(RegionType.AUTONOMOUS_COMMUNITY.getValue());
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getName()).isEqualTo("Catalonia");
+//  }
 
-  @Test
-  @DisplayName("Should find active regions by country ID")
-  void shouldFindActiveByCountryId() {
-    regionService.create(createRegionDomain("Catalonia", countryId, RegionType.AUTONOMOUS_COMMUNITY, true));
-    regionService.create(createRegionDomain("Andalusia", countryId, RegionType.AUTONOMOUS_COMMUNITY, false));
+//  @Test
+//  @DisplayName("Should find region by country ID and name")
+//  void shouldFindByCountryIdAndName() {
+//    regionService.create(createRegionDomain("Catalonia", countryId, RegionType.AUTONOMOUS_COMMUNITY, true));
+//
+//    Optional<Region> result = regionService.findByCountryIdAndName(countryId, "Catalonia");
+//
+//    assertThat(result).isPresent();
+//  }
 
-    List<Region> result = regionService.findActiveByCountryId(countryId);
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getName()).isEqualTo("Catalonia");
-  }
-
-  @Test
-  @DisplayName("Should find regions by region type")
-  void shouldFindByRegionType() {
-    regionService.create(createRegionDomain("Catalonia", countryId, RegionType.AUTONOMOUS_COMMUNITY, true));
-    regionService.create(createRegionDomain("Madrid", countryId, RegionType.PROVINCE, true));
-
-    List<Region> result = regionService.findByRegionType(RegionType.AUTONOMOUS_COMMUNITY.getValue());
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getName()).isEqualTo("Catalonia");
-  }
-
-  @Test
-  @DisplayName("Should find region by country ID and name")
-  void shouldFindByCountryIdAndName() {
-    regionService.create(createRegionDomain("Catalonia", countryId, RegionType.AUTONOMOUS_COMMUNITY, true));
-
-    Optional<Region> result = regionService.findByCountryIdAndName(countryId, "Catalonia");
-
-    assertThat(result).isPresent();
-  }
-
-  @Test
-  @DisplayName("Should find regions by population greater than")
-  void shouldFindByPopulationGreaterThan() {
-    Region catalonia = createRegionDomain("Catalonia", countryId, RegionType.AUTONOMOUS_COMMUNITY, true);
-    catalonia.setPopulation(PopulationVO.of(7_500_000L));
-    regionService.create(catalonia);
-
-    Region madrid = createRegionDomain("Madrid", countryId, RegionType.AUTONOMOUS_COMMUNITY, true);
-    madrid.setPopulation(PopulationVO.of(6_500_000L));
-    regionService.create(madrid);
-
-    List<Region> result = regionService.findByCountryIdAndPopulationGreaterThan(countryId, 7_000_000L);
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getName()).isEqualTo("Catalonia");
-  }
+//  @Test
+//  @DisplayName("Should find regions by population greater than")
+//  void shouldFindByPopulationGreaterThan() {
+//    Region catalonia = createRegionDomain("Catalonia", countryId, RegionType.AUTONOMOUS_COMMUNITY, true);
+//    catalonia.setPopulation(PopulationVO.of(7_500_000L));
+//    regionService.create(catalonia);
+//
+//    Region madrid = createRegionDomain("Madrid", countryId, RegionType.AUTONOMOUS_COMMUNITY, true);
+//    madrid.setPopulation(PopulationVO.of(6_500_000L));
+//    regionService.create(madrid);
+//
+//    List<Region> result = regionService.findByCountryIdAndPopulationGreaterThan(countryId, 7_000_000L);
+//
+//    assertThat(result).hasSize(1);
+//    assertThat(result.get(0).getName()).isEqualTo("Catalonia");
+//  }
 
   @Test
   @DisplayName("Should update region successfully")
@@ -179,15 +177,15 @@ class RegionServiceIT {
     assertThat(regionService.findById(created.getId())).isEmpty();
   }
 
-  @Test
-  @DisplayName("Should check if region exists by country ID and name")
-  void shouldCheckExistsByCountryIdAndName() {
-    regionService.create(createRegionDomain("Catalonia", countryId, RegionType.AUTONOMOUS_COMMUNITY, true));
-
-    boolean result = regionService.existsByCountryIdAndName(countryId, "Catalonia");
-
-    assertThat(result).isTrue();
-  }
+//  @Test
+//  @DisplayName("Should check if region exists by country ID and name")
+//  void shouldCheckExistsByCountryIdAndName() {
+//    regionService.create(createRegionDomain("Catalonia", countryId, RegionType.AUTONOMOUS_COMMUNITY, true));
+//
+//    boolean result = regionService.existsByCountryIdAndName(countryId, "Catalonia");
+//
+//    assertThat(result).isTrue();
+//  }
 
   @Test
   @DisplayName("Should count all regions")
