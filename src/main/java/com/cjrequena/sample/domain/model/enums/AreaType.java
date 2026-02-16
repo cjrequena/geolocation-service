@@ -1,14 +1,14 @@
 package com.cjrequena.sample.domain.model.enums;
 
+import lombok.Getter;
+
 import java.util.Arrays;
 
+@Getter
 public enum AreaType {
 
   DISTRICT("DISTRICT"),
-  BOROUGH("BOROUGH"),
   NEIGHBORHOOD("NEIGHBORHOOD"),
-  WARD("WARD"),
-  ZONE("ZONE"),
   SECTOR("SECTOR"),
   PARISH("PARISH"),
   SUBURB("SUBURB"),
@@ -19,10 +19,6 @@ public enum AreaType {
 
   AreaType(String value) {
     this.value = value;
-  }
-
-  public String getValue() {
-    return value;
   }
 
   /**

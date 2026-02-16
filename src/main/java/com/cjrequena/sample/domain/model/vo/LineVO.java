@@ -1,7 +1,9 @@
 package com.cjrequena.sample.domain.model.vo;
 
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.extern.jackson.Jacksonized;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -15,6 +17,8 @@ import java.util.stream.Collectors;
  * Also known as LineString or Polyline in GIS terminology.
  */
 @Getter
+@Builder
+@Jacksonized
 @EqualsAndHashCode
 public class LineVO implements Serializable {
     private static final long serialVersionUID = 1L;

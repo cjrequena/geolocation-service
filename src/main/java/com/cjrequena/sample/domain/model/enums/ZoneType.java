@@ -1,7 +1,10 @@
 package com.cjrequena.sample.domain.model.enums;
 
+import lombok.Getter;
+
 import java.util.Arrays;
 
+@Getter
 public enum ZoneType {
 
   BLOCK("BLOCK"),
@@ -10,8 +13,6 @@ public enum ZoneType {
   CELL("CELL"),
   PARCEL("PARCEL"),
   LOT("LOT"),
-  SUBZONE("SUBZONE"),
-  MICRODISTRICT("MICRODISTRICT"),
   RESIDENTIAL("RESIDENTIAL"),
   COMMERCIAL("COMMERCIAL"),
   INDUSTRIAL("INDUSTRIAL"),
@@ -21,10 +22,6 @@ public enum ZoneType {
 
   ZoneType(String value) {
     this.value = value;
-  }
-
-  public String getValue() {
-    return value;
   }
 
   /**

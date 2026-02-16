@@ -3,6 +3,7 @@ package com.cjrequena.sample.domain.model;
 import com.cjrequena.sample.domain.model.enums.LocationType;
 import com.cjrequena.sample.domain.model.vo.*;
 import lombok.*;
+import lombok.extern.jackson.Jacksonized;
 
 import java.util.UUID;
 
@@ -15,6 +16,7 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
+@Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
 public class Location extends Domain {

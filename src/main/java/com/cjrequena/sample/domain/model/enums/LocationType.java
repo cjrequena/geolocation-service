@@ -1,7 +1,10 @@
 package com.cjrequena.sample.domain.model.enums;
 
+import lombok.Getter;
+
 import java.util.Arrays;
 
+@Getter
 public enum LocationType {
 
   HOTEL("HOTEL"),
@@ -15,10 +18,6 @@ public enum LocationType {
 
   LocationType(String value) {
     this.value = value;
-  }
-
-  public String getValue() {
-    return value;
   }
 
   /**

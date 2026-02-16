@@ -3,6 +3,7 @@ package com.cjrequena.sample.domain.model.vo;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.extern.jackson.Jacksonized;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -13,6 +14,8 @@ import java.math.RoundingMode;
  * Altitude value object.
  */
 @Getter
+@Builder
+@Jacksonized
 @EqualsAndHashCode
 public class AltitudeVO implements Serializable {
   @Serial

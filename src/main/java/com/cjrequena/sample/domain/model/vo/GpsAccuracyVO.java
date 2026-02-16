@@ -1,7 +1,9 @@
 package com.cjrequena.sample.domain.model.vo;
 
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.extern.jackson.Jacksonized;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -11,6 +13,8 @@ import java.math.RoundingMode;
  * Accuracy value object (GPS accuracy in meters).
  */
 @Getter
+@Builder
+@Jacksonized
 @EqualsAndHashCode
 public class GpsAccuracyVO implements Serializable {
     private static final long serialVersionUID = 1L;
