@@ -1,15 +1,19 @@
 package com.cjrequena.sample.service;
 
 import com.cjrequena.sample.configuration.CacheConfigurationProperties;
+import com.cjrequena.sample.domain.exception.LocationNotFoundException;
+import com.cjrequena.sample.domain.exception.ZoneNotFoundException;
 import com.cjrequena.sample.domain.mapper.LocationMapper;
 import com.cjrequena.sample.domain.model.Location;
 import com.cjrequena.sample.persistence.entity.LocationEntity;
 import com.cjrequena.sample.persistence.repository.LocationRepository;
+import com.cjrequena.sample.persistence.repository.ZoneRepository;
 import com.cjrequena.sample.persistence.repository.cache.LocationCacheRedisHashOpsRepository;
 import com.cjrequena.sample.service.base.BaseService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -34,11 +38,12 @@ import java.util.stream.Collectors;
  */
 @Log4j2
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Transactional(readOnly = true)
 public class LocationService extends BaseService<LocationEntity, Location> {
 
   private final LocationRepository locationRepository;
+  private final ZoneRepository zoneRepository;
   private final LocationCacheRedisHashOpsRepository locationCacheRedisHashOpsRepository;
   private final CacheConfigurationProperties cacheConfigurationProperties;
   private final LocationMapper locationMapper;
@@ -87,6 +92,12 @@ public class LocationService extends BaseService<LocationEntity, Location> {
   public Location create(Location location) {
     log.debug("Creating location: {}", location.getName());
 
+    if (location.getZoneId() != null) {
+      zoneRepository
+        .findById(location.getZoneId())
+        .orElseThrow(() -> new ZoneNotFoundException("Zone not found with ID: %s".formatted(location.getZoneId())));
+    }
+
     LocationEntity entity = locationMapper.toEntity(location);
     LocationEntity savedEntity = locationRepository.save(entity);
     Location createdLocation = locationMapper.toDomain(savedEntity);
@@ -123,19 +134,23 @@ public class LocationService extends BaseService<LocationEntity, Location> {
     }
 
     // Cache miss or disabled - query database
-    Optional<Location> location = locationRepository.findById(id).map(locationMapper::toDomain);
+    Location location = locationRepository
+      .findById(id)
+      .map(locationMapper::toDomain)
+      .orElseThrow(() -> new LocationNotFoundException("Location not found with id: %s".formatted(id)));
+
 
     // Update cache on successful database hit
-    if (cacheConfigurationProperties.isCacheEnabled() && location.isPresent()) {
+    if (cacheConfigurationProperties.isCacheEnabled()) {
       try {
-        locationCacheRedisHashOpsRepository.save(location.get());
+        locationCacheRedisHashOpsRepository.save(location);
         log.debug("Location cached after database query: {}", id);
       } catch (Exception e) {
         log.warn("Failed to cache location after database query: {}", id, e);
       }
     }
 
-    return location;
+    return Optional.of(location);
   }
 
   /**
@@ -162,7 +177,9 @@ public class LocationService extends BaseService<LocationEntity, Location> {
     }
 
     // Cache miss or disabled - query database
-    List<Location> locations = locationRepository.findAll().stream()
+    List<Location> locations = locationRepository
+      .findAll()
+      .stream()
       .map(locationMapper::toDomain)
       .collect(Collectors.toList());
 
@@ -200,7 +217,13 @@ public class LocationService extends BaseService<LocationEntity, Location> {
     log.debug("Updating location with ID: {}", id);
     LocationEntity existingEntity = locationRepository
       .findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Location not found with ID: " + id));
+      .orElseThrow(() -> new LocationNotFoundException("Location not found with ID: " + id));
+
+    if (location.getZoneId() != null) {
+      zoneRepository
+        .findById(location.getZoneId())
+        .orElseThrow(() -> new ZoneNotFoundException("Zone not found with ID: %s".formatted(location.getZoneId())));
+    }
 
     LocationEntity updatedEntity = locationMapper.toEntity(location);
     updatedEntity.setId(existingEntity.getId());
@@ -227,7 +250,7 @@ public class LocationService extends BaseService<LocationEntity, Location> {
   public void deleteById(UUID id) {
     log.debug("Deleting location with ID: {}", id);
     if (!locationRepository.existsById(id)) {
-      throw new IllegalArgumentException("Location not found with ID: " + id);
+      throw new LocationNotFoundException("Location not found with ID: " + id);
     }
 
     locationRepository.deleteById(id);
@@ -292,7 +315,9 @@ public class LocationService extends BaseService<LocationEntity, Location> {
   public List<Location> findWithinRadius(String wkt, double radiusMeters) {
     log.debug("Finding locations within {} metres of {}", radiusMeters, wkt);
 
-    return locationRepository.findWithinRadius(wkt, radiusMeters).stream()
+    return locationRepository
+      .findWithinRadius(wkt, radiusMeters)
+      .stream()
       .map(locationMapper::toDomain)
       .collect(Collectors.toList());
   }
@@ -307,7 +332,9 @@ public class LocationService extends BaseService<LocationEntity, Location> {
   public List<Location> findActiveWithinRadius(String wkt, double radiusMeters) {
     log.debug("Finding active locations within {} metres of {}", radiusMeters, wkt);
 
-    return locationRepository.findActiveWithinRadius(wkt, radiusMeters).stream()
+    return locationRepository
+      .findActiveWithinRadius(wkt, radiusMeters)
+      .stream()
       .map(locationMapper::toDomain)
       .collect(Collectors.toList());
   }
@@ -322,7 +349,9 @@ public class LocationService extends BaseService<LocationEntity, Location> {
   public List<Location> findWithinRadiusOrderedByDistance(String wkt, double radiusMeters) {
     log.debug("Finding locations within {} metres of {}, ordered by distance", radiusMeters, wkt);
 
-    return locationRepository.findWithinRadiusOrderedByDistance(wkt, radiusMeters).stream()
+    return locationRepository
+      .findWithinRadiusOrderedByDistance(wkt, radiusMeters)
+      .stream()
       .map(locationMapper::toDomain)
       .collect(Collectors.toList());
   }
@@ -338,7 +367,8 @@ public class LocationService extends BaseService<LocationEntity, Location> {
   public Page<Location> findNearestLocations(String wkt, double maxRadius, Pageable pageable) {
     log.debug("Finding nearest locations to {} within {} metres", wkt, maxRadius);
 
-    return locationRepository.findNearestLocations(wkt, maxRadius, pageable)
+    return locationRepository
+      .findNearestLocations(wkt, maxRadius, pageable)
       .map(locationMapper::toDomain);
   }
 
@@ -366,7 +396,9 @@ public class LocationService extends BaseService<LocationEntity, Location> {
   public List<Location> findWithinPolygon(String wkt) {
     log.debug("Finding locations within polygon: {}", wkt);
 
-    return locationRepository.findWithinPolygon(wkt).stream()
+    return locationRepository
+      .findWithinPolygon(wkt)
+      .stream()
       .map(locationMapper::toDomain)
       .collect(Collectors.toList());
   }
@@ -380,7 +412,9 @@ public class LocationService extends BaseService<LocationEntity, Location> {
   public List<Location> findActiveWithinPolygon(String wkt) {
     log.debug("Finding active locations within polygon: {}", wkt);
 
-    return locationRepository.findActiveWithinPolygon(wkt).stream()
+    return locationRepository
+      .findActiveWithinPolygon(wkt)
+      .stream()
       .map(locationMapper::toDomain)
       .collect(Collectors.toList());
   }
@@ -401,9 +435,9 @@ public class LocationService extends BaseService<LocationEntity, Location> {
     log.debug("Finding locations in zone {} within {} metres of {}", zoneId, radiusMeters, wkt);
 
     return locationRepository
-      .findByZoneIdAndWithinRadius(zoneId, wkt, radiusMeters).stream()
+      .findByZoneIdAndWithinRadius(zoneId, wkt, radiusMeters)
+      .stream()
       .map(locationMapper::toDomain)
       .collect(Collectors.toList());
   }
-
 }

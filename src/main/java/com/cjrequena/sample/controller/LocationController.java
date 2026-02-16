@@ -2,13 +2,12 @@ package com.cjrequena.sample.controller;
 
 import com.cjrequena.sample.controller.dto.LocationRequestDTO;
 import com.cjrequena.sample.controller.dto.LocationResponseDTO;
+import com.cjrequena.sample.controller.exception.BadRequestException;
+import com.cjrequena.sample.controller.exception.NotFoundException;
+import com.cjrequena.sample.domain.exception.LocationNotFoundException;
+import com.cjrequena.sample.domain.exception.ZoneNotFoundException;
 import com.cjrequena.sample.domain.mapper.LocationMapper;
 import com.cjrequena.sample.domain.model.Location;
-import com.cjrequena.sample.domain.model.enums.LocationType;
-import com.cjrequena.sample.domain.model.vo.AltitudeVO;
-import com.cjrequena.sample.domain.model.vo.GpsAccuracyVO;
-import com.cjrequena.sample.domain.model.vo.MetadataVO;
-import com.cjrequena.sample.domain.model.vo.PointVO;
 import com.cjrequena.sample.service.LocationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -77,14 +76,18 @@ public class LocationController {
   })
   public ResponseEntity<LocationResponseDTO> create(@Valid @RequestBody LocationRequestDTO requestDTO) {
 
-    log.info("Creating location: {} at ({}, {})",
-      requestDTO.getName(), requestDTO.getLatitude(), requestDTO.getLongitude());
+    log.info("Creating location: {} at ({}, {})", requestDTO.getName(), requestDTO.getLatitude(), requestDTO.getLongitude());
 
     // Convert DTO to domain model
     Location location = this.locationMapper.requestDTOtoDomain(requestDTO);
 
     // Create via service
-    Location created = locationService.create(location);
+    Location created = null;
+    try {
+      created = locationService.create(location);
+    } catch (ZoneNotFoundException ex) {
+      throw new BadRequestException("Invalid zoneId: %s :: The zone does not exists".formatted(requestDTO.getZoneId()), ex);
+    }
 
     // Convert to response DTO
     LocationResponseDTO responseDTO = locationMapper.domainToResponseDTO(created);
@@ -103,26 +106,36 @@ public class LocationController {
    * @return the location if found, 404 otherwise
    */
   @GetMapping("/{id}")
-  @Operation(summary = "Get location by ID", description = "Retrieves a location by its unique identifier")
-  @ApiResponses(value = {
-    @ApiResponse(
-      responseCode = "200",
-      description = "Location found",
-      content = @Content(schema = @Schema(implementation = LocationResponseDTO.class))),
-    @ApiResponse(responseCode = "404", description = "Location not found")
-  })
+  @Operation(
+    summary = "Get location by ID",
+    description = "Retrieves a location by its unique identifier"
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        description = "Location found",
+        content = @Content(schema = @Schema(implementation = LocationResponseDTO.class))
+      ),
+      @ApiResponse(responseCode = "404", description = "Location not found")
+    }
+  )
   public ResponseEntity<LocationResponseDTO> retrieveById(
     @Parameter(description = "Location ID", required = true)
     @PathVariable UUID id
   ) {
 
-    log.debug("Getting location by ID: {}", id);
+    try {
+      log.debug("Getting location by ID: {}", id);
 
-    return locationService
-      .findById(id)
-      .map(locationMapper::domainToResponseDTO)
-      .map(ResponseEntity::ok)
-      .orElse(ResponseEntity.notFound().build());
+      return locationService
+        .findById(id)
+        .map(locationMapper::domainToResponseDTO)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+    } catch (LocationNotFoundException ex) {
+      throw new NotFoundException("Location with ID %s was not found".formatted(id), ex);
+    }
   }
 
   /**
@@ -194,12 +207,12 @@ public class LocationController {
         .collect(Collectors.toList());
 
       return ResponseEntity.ok(locations);
-    } catch (IllegalArgumentException e) {
-      log.error("Invalid request parameters: {}", e.getMessage());
-      return ResponseEntity.badRequest().build();
-    } catch (Exception e) {
-      log.error("Error retrieving locations: {}", e.getMessage(), e);
-      return ResponseEntity.badRequest().build();
+    } catch (IllegalArgumentException ex) {
+      log.error("Invalid request parameters: {}", ex.getMessage());
+      throw new BadRequestException();
+    } catch (Exception ex) {
+      log.error("Error retrieving locations: {}", ex.getMessage(), ex);
+      throw new BadRequestException();
     }
   }
 
@@ -230,22 +243,15 @@ public class LocationController {
     log.info("Updating location with ID: {}", id);
 
     // Convert DTO to domain model
-    Location location = Location.create(
-      id,
-      requestDTO.getZoneId() != null ? UUID.fromString(requestDTO.getZoneId()) : null,
-      requestDTO.getName(),
-      requestDTO.getLocationType() != null ? requestDTO.getLocationType() : LocationType.GENERIC,
-      PointVO.of(requestDTO.getLatitude(), requestDTO.getLongitude()),
-      requestDTO.getAltitudeMeters() != null ? AltitudeVO.of(requestDTO.getAltitudeMeters()) : null,
-      requestDTO.getAccuracyMeters() != null ? GpsAccuracyVO.of(requestDTO.getAccuracyMeters()) : null,
-      requestDTO.getAddress(),
-      requestDTO.getPostalCode(),
-      requestDTO.getActive() != null ? requestDTO.getActive() : Boolean.TRUE,
-      requestDTO.getMetadata() != null ? MetadataVO.of(requestDTO.getMetadata()) : MetadataVO.empty()
-    );
+    Location location = this.locationMapper.requestDTOtoDomain(requestDTO);
 
     // Update via service
-    Location updated = locationService.update(id, location);
+    Location updated = null;
+    try {
+      updated = locationService.update(id, location);
+    } catch (LocationNotFoundException ex) {
+      throw new NotFoundException("Location with ID %s was not found".formatted(id), ex);
+    }
 
     // Convert to response DTO
     LocationResponseDTO responseDTO = locationMapper.domainToResponseDTO(updated);

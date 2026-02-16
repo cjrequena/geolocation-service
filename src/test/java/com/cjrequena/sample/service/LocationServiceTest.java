@@ -1,10 +1,14 @@
 package com.cjrequena.sample.service;
 
 import com.cjrequena.sample.configuration.CacheConfigurationProperties;
+import com.cjrequena.sample.domain.exception.LocationNotFoundException;
+import com.cjrequena.sample.domain.exception.ZoneNotFoundException;
 import com.cjrequena.sample.domain.mapper.LocationMapper;
 import com.cjrequena.sample.domain.model.Location;
 import com.cjrequena.sample.persistence.entity.LocationEntity;
+import com.cjrequena.sample.persistence.entity.ZoneEntity;
 import com.cjrequena.sample.persistence.repository.LocationRepository;
+import com.cjrequena.sample.persistence.repository.ZoneRepository;
 import com.cjrequena.sample.persistence.repository.cache.LocationCacheRedisHashOpsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,8 +26,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link LocationService}.
@@ -36,6 +39,9 @@ class LocationServiceTest {
 
   @Mock
   private LocationRepository locationRepository;
+
+  @Mock
+  private ZoneRepository zoneRepository;
 
   @Mock
   private LocationCacheRedisHashOpsRepository locationCacheRedisHashOpsRepository;
@@ -75,12 +81,29 @@ class LocationServiceTest {
     when(locationMapper.toEntity(locationDomain)).thenReturn(locationEntity);
     when(locationRepository.save(locationEntity)).thenReturn(locationEntity);
     when(locationMapper.toDomain(locationEntity)).thenReturn(locationDomain);
+    when(zoneRepository.findById(zoneId)).thenReturn(Optional.of(new ZoneEntity()));
 
     Location result = locationService.create(locationDomain);
 
     assertThat(result).isNotNull();
     verify(locationRepository).save(locationEntity);
   }
+
+  @Test
+  @DisplayName("Should fail creating location if zone does not exist")
+  void shouldFailCreatingLocationIfZoneDoesNotExist() {
+
+    when(zoneRepository.findById(zoneId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> locationService
+      .create(locationDomain))
+      .isInstanceOf(ZoneNotFoundException.class)
+      .hasMessage("Zone not found with ID: " + zoneId);
+
+    verify(zoneRepository).findById(zoneId);
+    verify(locationRepository, never()).save(any());
+  }
+
 
   @Test
   @DisplayName("Should find location by ID")
@@ -93,17 +116,17 @@ class LocationServiceTest {
     assertThat(result).isPresent();
   }
 
-//  @Test
-//  @DisplayName("Should find locations by zone ID")
-//  void shouldFindByZoneId() {
-//    List<LocationEntity> entities = Arrays.asList(locationEntity);
-//    when(locationRepository.findByZoneId(zoneId)).thenReturn(entities);
-//    when(locationMapper.toDomain(any(LocationEntity.class))).thenReturn(locationDomain);
-//
-//    List<Location> result = locationService.findByZoneId(zoneId);
-//
-//    assertThat(result).hasSize(1);
-//  }
+  //  @Test
+  //  @DisplayName("Should find locations by zone ID")
+  //  void shouldFindByZoneId() {
+  //    List<LocationEntity> entities = Arrays.asList(locationEntity);
+  //    when(locationRepository.findByZoneId(zoneId)).thenReturn(entities);
+  //    when(locationMapper.toDomain(any(LocationEntity.class))).thenReturn(locationDomain);
+  //
+  //    List<Location> result = locationService.findByZoneId(zoneId);
+  //
+  //    assertThat(result).hasSize(1);
+  //  }
 
   @Test
   @DisplayName("Should find locations within radius")
@@ -131,42 +154,42 @@ class LocationServiceTest {
     assertThat(result).hasSize(1);
   }
 
-//  @Test
-//  @DisplayName("Should find locations by postal code")
-//  void shouldFindByPostalCode() {
-//    List<LocationEntity> entities = Arrays.asList(locationEntity);
-//    when(locationRepository.findByPostalCode("28001")).thenReturn(entities);
-//    when(locationMapper.toDomain(any(LocationEntity.class))).thenReturn(locationDomain);
-//
-//    List<Location> result = locationService.findByPostalCode("28001");
-//
-//    assertThat(result).hasSize(1);
-//  }
-//
-//  @Test
-//  @DisplayName("Should find locations by address containing")
-//  void shouldFindByAddressContaining() {
-//    List<LocationEntity> entities = Arrays.asList(locationEntity);
-//    when(locationRepository.findByAddressContainingIgnoreCase("Main")).thenReturn(entities);
-//    when(locationMapper.toDomain(any(LocationEntity.class))).thenReturn(locationDomain);
-//
-//    List<Location> result = locationService.findByAddressContaining("Main");
-//
-//    assertThat(result).hasSize(1);
-//  }
-//
-//  @Test
-//  @DisplayName("Should find locations by altitude greater than")
-//  void shouldFindByAltitudeGreaterThan() {
-//    BigDecimal minAltitude = new BigDecimal("100.0");
-//    List<LocationEntity> entities = Arrays.asList(locationEntity);
-//    when(locationRepository.findByAltitudeGreaterThan(minAltitude)).thenReturn(entities);
-//    when(locationMapper.toDomain(any(LocationEntity.class))).thenReturn(locationDomain);
-//
-//    List<Location> result = locationService.findByAltitudeGreaterThan(minAltitude);
-//
-//    assertThat(result).hasSize(1);
-//  }
+  //  @Test
+  //  @DisplayName("Should find locations by postal code")
+  //  void shouldFindByPostalCode() {
+  //    List<LocationEntity> entities = Arrays.asList(locationEntity);
+  //    when(locationRepository.findByPostalCode("28001")).thenReturn(entities);
+  //    when(locationMapper.toDomain(any(LocationEntity.class))).thenReturn(locationDomain);
+  //
+  //    List<Location> result = locationService.findByPostalCode("28001");
+  //
+  //    assertThat(result).hasSize(1);
+  //  }
+  //
+  //  @Test
+  //  @DisplayName("Should find locations by address containing")
+  //  void shouldFindByAddressContaining() {
+  //    List<LocationEntity> entities = Arrays.asList(locationEntity);
+  //    when(locationRepository.findByAddressContainingIgnoreCase("Main")).thenReturn(entities);
+  //    when(locationMapper.toDomain(any(LocationEntity.class))).thenReturn(locationDomain);
+  //
+  //    List<Location> result = locationService.findByAddressContaining("Main");
+  //
+  //    assertThat(result).hasSize(1);
+  //  }
+  //
+  //  @Test
+  //  @DisplayName("Should find locations by altitude greater than")
+  //  void shouldFindByAltitudeGreaterThan() {
+  //    BigDecimal minAltitude = new BigDecimal("100.0");
+  //    List<LocationEntity> entities = Arrays.asList(locationEntity);
+  //    when(locationRepository.findByAltitudeGreaterThan(minAltitude)).thenReturn(entities);
+  //    when(locationMapper.toDomain(any(LocationEntity.class))).thenReturn(locationDomain);
+  //
+  //    List<Location> result = locationService.findByAltitudeGreaterThan(minAltitude);
+  //
+  //    assertThat(result).hasSize(1);
+  //  }
 
   @Test
   @DisplayName("Should update location successfully")
@@ -175,6 +198,7 @@ class LocationServiceTest {
     when(locationMapper.toEntity(locationDomain)).thenReturn(locationEntity);
     when(locationRepository.save(locationEntity)).thenReturn(locationEntity);
     when(locationMapper.toDomain(locationEntity)).thenReturn(locationDomain);
+    when(zoneRepository.findById(zoneId)).thenReturn(Optional.of(new ZoneEntity()));
 
     Location result = locationService.update(locationId, locationDomain);
 
@@ -183,12 +207,26 @@ class LocationServiceTest {
   }
 
   @Test
+  @DisplayName("Should throw exception when updating with non-existent zone")
+  void shouldThrowExceptionWhenUpdatingWithNonExistentZone() {
+    when(zoneRepository.findById(zoneId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> locationService
+      .create(locationDomain))
+      .isInstanceOf(ZoneNotFoundException.class)
+      .hasMessage("Zone not found with ID: %s".formatted(zoneId));
+
+    verify(zoneRepository).findById(zoneId);
+    verify(locationRepository, never()).save(any());
+  }
+
+  @Test
   @DisplayName("Should throw exception when updating non-existent location")
   void shouldThrowExceptionWhenUpdatingNonExistent() {
     when(locationRepository.findById(locationId)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> locationService.update(locationId, locationDomain))
-      .isInstanceOf(IllegalArgumentException.class)
+      .isInstanceOf(LocationNotFoundException.class)
       .hasMessageContaining("Location not found");
   }
 

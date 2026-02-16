@@ -16,4 +16,8 @@ public class BadRequestException extends ControllerRuntimeException {
   public BadRequestException(String message) {
     super(HttpStatus.BAD_REQUEST, message);
   }
+
+  public BadRequestException(String message, Throwable throwable) {
+    super(HttpStatus.BAD_REQUEST, message, throwable);
+  }
 }

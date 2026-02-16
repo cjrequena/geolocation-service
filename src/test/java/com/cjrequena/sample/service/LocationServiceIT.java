@@ -1,5 +1,6 @@
 package com.cjrequena.sample.service;
 
+import com.cjrequena.sample.domain.exception.LocationNotFoundException;
 import com.cjrequena.sample.domain.model.Location;
 import com.cjrequena.sample.domain.model.Zone;
 import com.cjrequena.sample.domain.model.enums.LocationType;
@@ -187,7 +188,7 @@ class LocationServiceIT {
     Location location = createLocationDomain("123 Main St", 40.4168, -3.7038, true);
 
     assertThatThrownBy(() -> locationService.update(UUID.randomUUID(), location))
-      .isInstanceOf(IllegalArgumentException.class)
+      .isInstanceOf(LocationNotFoundException.class)
       .hasMessageContaining("Location not found");
   }
 
@@ -198,7 +199,10 @@ class LocationServiceIT {
 
     locationService.deleteById(created.getId());
 
-    assertThat(locationService.findById(created.getId())).isEmpty();
+    assertThatThrownBy(() -> locationService.findById(created.getId()))
+      .isInstanceOf(LocationNotFoundException.class)
+      .hasMessageContaining("Location not found");
+
   }
 
   @Test
