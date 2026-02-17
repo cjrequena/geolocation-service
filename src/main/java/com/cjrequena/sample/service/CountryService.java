@@ -1,6 +1,7 @@
 package com.cjrequena.sample.service;
 
 import com.cjrequena.sample.configuration.CacheConfigurationProperties;
+import com.cjrequena.sample.domain.exception.CountryNotFoundException;
 import com.cjrequena.sample.domain.exception.UniqueConstraintException;
 import com.cjrequena.sample.domain.mapper.CountryMapper;
 import com.cjrequena.sample.domain.model.Country;
@@ -228,7 +229,7 @@ public class CountryService extends BaseService<CountryEntity, Country> {
 
     CountryEntity existingEntity = countryRepository
       .findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Country not found with ID: " + id));
+      .orElseThrow(() -> new CountryNotFoundException("Country not found with ID: " + id));
 
     try {
       CountryEntity updatedEntity = countryMapper.toEntity(country);

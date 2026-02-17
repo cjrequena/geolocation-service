@@ -1,5 +1,6 @@
 package com.cjrequena.sample.service;
 
+import com.cjrequena.sample.domain.exception.CountryNotFoundException;
 import com.cjrequena.sample.domain.model.Country;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
@@ -198,7 +199,7 @@ class CountryServiceIT {
     Country country = createCountryDomain("Spain", "ES", "ESP", true);
 
     assertThatThrownBy(() -> countryService.update(UUID.randomUUID(), country))
-      .isInstanceOf(IllegalArgumentException.class)
+      .isInstanceOf(CountryNotFoundException.class)
       .hasMessageContaining("Country not found");
   }
 

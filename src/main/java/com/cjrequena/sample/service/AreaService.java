@@ -1,10 +1,7 @@
 package com.cjrequena.sample.service;
 
 import com.cjrequena.sample.configuration.CacheConfigurationProperties;
-import com.cjrequena.sample.domain.exception.AreaNotFoundException;
-import com.cjrequena.sample.domain.exception.CityRequiredException;
-import com.cjrequena.sample.domain.exception.GeoShapeNotFoundException;
-import com.cjrequena.sample.domain.exception.UniqueConstraintException;
+import com.cjrequena.sample.domain.exception.*;
 import com.cjrequena.sample.domain.mapper.AreaMapper;
 import com.cjrequena.sample.domain.model.Area;
 import com.cjrequena.sample.persistence.entity.AreaEntity;
@@ -94,7 +91,7 @@ public class AreaService extends BaseService<AreaEntity, Area> {
     if (area.getCityId() != null) {
       cityRepository
         .findById(area.getCityId())
-        .orElseThrow(() -> new AreaNotFoundException("City not found with ID: %s".formatted(area.getCityId())));
+        .orElseThrow(() -> new CityNotFoundException("City not found with ID: %s".formatted(area.getCityId())));
     } else {
       throw new CityRequiredException("City ID is required for creating a zone");
     }

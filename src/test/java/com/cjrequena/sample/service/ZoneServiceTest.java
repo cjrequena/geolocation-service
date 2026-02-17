@@ -1,6 +1,7 @@
 package com.cjrequena.sample.service;
 
 import com.cjrequena.sample.configuration.CacheConfigurationProperties;
+import com.cjrequena.sample.domain.exception.ZoneNotFoundException;
 import com.cjrequena.sample.domain.mapper.ZoneMapper;
 import com.cjrequena.sample.domain.model.Zone;
 import com.cjrequena.sample.persistence.entity.AreaEntity;
@@ -157,7 +158,7 @@ class ZoneServiceTest {
     when(zoneRepository.findById(zoneId)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> zoneService.update(zoneId, zoneDomain))
-      .isInstanceOf(IllegalArgumentException.class)
+      .isInstanceOf(ZoneNotFoundException.class)
       .hasMessageContaining("Zone not found");
   }
 

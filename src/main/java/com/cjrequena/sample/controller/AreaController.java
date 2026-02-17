@@ -2,11 +2,10 @@ package com.cjrequena.sample.controller;
 
 import com.cjrequena.sample.controller.dto.AreaRequestDTO;
 import com.cjrequena.sample.controller.dto.AreaResponseDTO;
+import com.cjrequena.sample.controller.exception.BadRequestException;
 import com.cjrequena.sample.controller.exception.ConflictException;
 import com.cjrequena.sample.controller.exception.NotFoundException;
-import com.cjrequena.sample.domain.exception.AreaNotFoundException;
-import com.cjrequena.sample.domain.exception.UniqueConstraintException;
-import com.cjrequena.sample.domain.exception.ZoneNotFoundException;
+import com.cjrequena.sample.domain.exception.*;
 import com.cjrequena.sample.domain.mapper.AreaMapper;
 import com.cjrequena.sample.domain.model.Area;
 import com.cjrequena.sample.service.AreaService;
@@ -92,6 +91,12 @@ public class AreaController {
         .created(URI.create(ENDPOINT + created.getId()))
         .header("Accept-Version", ACCEPT_VERSION)
         .body(responseDTO);
+    } catch (CityNotFoundException ex) {
+      throw new NotFoundException("City with ID %s was not found".formatted(requestDTO.getCityId()), ex);
+    } catch (GeoShapeNotFoundException ex) {
+      throw new NotFoundException("GeoShape with ID %s was not found".formatted(requestDTO.getGeoShapeId()), ex);
+    } catch (CityRequiredException ex) {
+      throw new BadRequestException(ex.getMessage());
     } catch (UniqueConstraintException ex) {
       throw new ConflictException(ex.getMessage());
     }
@@ -191,6 +196,8 @@ public class AreaController {
       return ResponseEntity.ok(responseDTO);
     } catch (AreaNotFoundException ex) {
       throw new NotFoundException("Area with ID %s was not found".formatted(id), ex);
+    } catch (GeoShapeNotFoundException ex) {
+      throw new NotFoundException("GeoShape with ID %s was not found".formatted(requestDTO.getGeoShapeId()), ex);
     } catch (UniqueConstraintException ex) {
       throw new ConflictException(ex.getMessage());
     }

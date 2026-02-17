@@ -205,7 +205,7 @@ class ZoneServiceIT {
     Zone zone = createZoneDomain("Downtown", areaId, ZoneType.RESIDENTIAL, true);
 
     assertThatThrownBy(() -> zoneService.update(UUID.randomUUID(), zone))
-      .isInstanceOf(IllegalArgumentException.class)
+      .isInstanceOf(ZoneNotFoundException.class)
       .hasMessageContaining("Zone not found");
   }
 

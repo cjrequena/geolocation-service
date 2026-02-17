@@ -1,6 +1,7 @@
 package com.cjrequena.sample.service;
 
 import com.cjrequena.sample.configuration.CacheConfigurationProperties;
+import com.cjrequena.sample.domain.exception.CountryNotFoundException;
 import com.cjrequena.sample.domain.mapper.CountryMapper;
 import com.cjrequena.sample.domain.model.Country;
 import com.cjrequena.sample.persistence.entity.CountryEntity;
@@ -255,7 +256,7 @@ class CountryServiceTest {
     when(countryRepository.findById(countryId)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> countryService.update(countryId, countryDomain))
-      .isInstanceOf(IllegalArgumentException.class)
+      .isInstanceOf(CountryNotFoundException.class)
       .hasMessageContaining("Country not found");
   }
 

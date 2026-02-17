@@ -223,12 +223,12 @@ public class ZoneService extends BaseService<ZoneEntity, Zone> {
     if (zone.getGeoShapeId() != null) {
       geoShapeRepository
         .findById(zone.getGeoShapeId())
-        .orElseThrow(() -> new AreaNotFoundException("GeoShape not found with ID: %s".formatted(zone.getGeoShapeId())));
+        .orElseThrow(() -> new GeoShapeNotFoundException("GeoShape not found with ID: %s".formatted(zone.getGeoShapeId())));
     }
 
     ZoneEntity existingEntity = zoneRepository
       .findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Zone not found with ID: %s ".formatted(id)));
+      .orElseThrow(() -> new ZoneNotFoundException("Zone not found with ID: %s ".formatted(id)));
 
     try {
       ZoneEntity updatedEntity = zoneMapper.toEntity(zone);

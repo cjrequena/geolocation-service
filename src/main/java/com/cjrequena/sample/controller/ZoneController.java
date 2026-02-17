@@ -2,10 +2,10 @@ package com.cjrequena.sample.controller;
 
 import com.cjrequena.sample.controller.dto.ZoneRequestDTO;
 import com.cjrequena.sample.controller.dto.ZoneResponseDTO;
+import com.cjrequena.sample.controller.exception.BadRequestException;
 import com.cjrequena.sample.controller.exception.ConflictException;
 import com.cjrequena.sample.controller.exception.NotFoundException;
-import com.cjrequena.sample.domain.exception.UniqueConstraintException;
-import com.cjrequena.sample.domain.exception.ZoneNotFoundException;
+import com.cjrequena.sample.domain.exception.*;
 import com.cjrequena.sample.domain.mapper.ZoneMapper;
 import com.cjrequena.sample.domain.model.Zone;
 import com.cjrequena.sample.service.ZoneService;
@@ -87,6 +87,12 @@ public class ZoneController {
         .created(URI.create(ENDPOINT + created.getId()))
         .header("Accept-Version", ACCEPT_VERSION)
         .body(responseDTO);
+    } catch (AreaNotFoundException ex) {
+      throw new NotFoundException("Area with ID %s was not found".formatted(requestDTO.getAreaId()), ex);
+    } catch (GeoShapeNotFoundException ex) {
+      throw new NotFoundException("GeoShape with ID %s was not found".formatted(requestDTO.getGeoShapeId()), ex);
+    } catch (AreaRequiredException ex) {
+      throw new BadRequestException(ex.getMessage());
     } catch (UniqueConstraintException ex) {
       throw new ConflictException(ex.getMessage());
     }
@@ -183,6 +189,8 @@ public class ZoneController {
       return ResponseEntity.ok(responseDTO);
     } catch (ZoneNotFoundException ex) {
       throw new NotFoundException("Zone with ID %s was not found".formatted(id), ex);
+    } catch (GeoShapeNotFoundException ex) {
+      throw new NotFoundException("GeoShape with ID %s was not found".formatted(requestDTO.getGeoShapeId()), ex);
     } catch (UniqueConstraintException ex) {
       throw new ConflictException(ex.getMessage());
     }

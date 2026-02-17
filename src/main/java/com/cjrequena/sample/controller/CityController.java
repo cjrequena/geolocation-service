@@ -2,6 +2,8 @@ package com.cjrequena.sample.controller;
 
 import com.cjrequena.sample.controller.dto.CityRequestDTO;
 import com.cjrequena.sample.controller.dto.CityResponseDTO;
+import com.cjrequena.sample.controller.exception.ConflictException;
+import com.cjrequena.sample.domain.exception.UniqueConstraintException;
 import com.cjrequena.sample.domain.mapper.CityMapper;
 import com.cjrequena.sample.domain.model.City;
 import com.cjrequena.sample.service.CityService;
@@ -65,24 +67,27 @@ public class CityController {
     @ApiResponse(responseCode = "404", description = "Parent region not found")
   })
   public ResponseEntity<CityResponseDTO> create(@Valid @RequestBody CityRequestDTO requestDTO) {
+    try {
+      log.info("Creating city: {} in region: {}", requestDTO.getName(), requestDTO.getRegionId());
 
-    log.info("Creating city: {} in region: {}", requestDTO.getName(), requestDTO.getRegionId());
+      // Convert DTO to domain model
+      City city = this.cityMapper.requestDTOtoDomain(requestDTO);
 
-    // Convert DTO to domain model
-    City city = this.cityMapper.requestDTOtoDomain(requestDTO);
+      // Create via service
+      City created = cityService.create(city);
 
-    // Create via service
-    City created = cityService.create(city);
+      // Convert to response DTO
+      CityResponseDTO responseDTO = cityMapper.domainToResponseDTO(created);
 
-    // Convert to response DTO
-    CityResponseDTO responseDTO = cityMapper.domainToResponseDTO(created);
+      log.info("City created with ID: {}", created.getId());
 
-    log.info("City created with ID: {}", created.getId());
-
-    return ResponseEntity
-      .created(URI.create(ENDPOINT + created.getId()))
-      .header("Accept-Version", VND_SAMPLE_SERVICE_V1)
-      .body(responseDTO);
+      return ResponseEntity
+        .created(URI.create(ENDPOINT + created.getId()))
+        .header("Accept-Version", VND_SAMPLE_SERVICE_V1)
+        .body(responseDTO);
+    } catch (UniqueConstraintException ex) {
+      throw new ConflictException(ex.getMessage());
+    }
   }
 
   /**
