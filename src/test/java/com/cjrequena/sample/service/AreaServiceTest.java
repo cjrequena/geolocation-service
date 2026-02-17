@@ -4,7 +4,10 @@ import com.cjrequena.sample.configuration.CacheConfigurationProperties;
 import com.cjrequena.sample.domain.mapper.AreaMapper;
 import com.cjrequena.sample.domain.model.Area;
 import com.cjrequena.sample.persistence.entity.AreaEntity;
+import com.cjrequena.sample.persistence.entity.CityEntity;
 import com.cjrequena.sample.persistence.repository.AreaRepository;
+import com.cjrequena.sample.persistence.repository.CityRepository;
+import com.cjrequena.sample.persistence.repository.GeoShapeRepository;
 import com.cjrequena.sample.persistence.repository.cache.AreaCacheRedisHashOpsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,6 +30,12 @@ class AreaServiceTest {
 
   @Mock
   private AreaRepository areaRepository;
+
+  @Mock
+  private CityRepository cityRepository;
+
+  @Mock
+  private  GeoShapeRepository geoShapeRepository;
 
   @Mock
   private AreaCacheRedisHashOpsRepository areaCacheRedisHashOpsRepository;
@@ -64,13 +73,15 @@ class AreaServiceTest {
   @DisplayName("Should create area successfully")
   void shouldCreateArea() {
     when(areaMapper.toEntity(areaDomain)).thenReturn(areaEntity);
-    when(areaRepository.save(areaEntity)).thenReturn(areaEntity);
+    when(areaRepository.saveAndFlush(areaEntity)).thenReturn(areaEntity);
     when(areaMapper.toDomain(areaEntity)).thenReturn(areaDomain);
+    when(cityRepository.findById(cityId)).thenReturn(Optional.of(new CityEntity()));
+
 
     Area result = areaService.create(areaDomain);
 
     assertThat(result).isNotNull();
-    verify(areaRepository).save(areaEntity);
+    verify(areaRepository).saveAndFlush(areaEntity);
   }
 
   @Test
@@ -89,13 +100,13 @@ class AreaServiceTest {
   void shouldUpdateArea() {
     when(areaRepository.findById(areaId)).thenReturn(Optional.of(areaEntity));
     when(areaMapper.toEntity(areaDomain)).thenReturn(areaEntity);
-    when(areaRepository.save(areaEntity)).thenReturn(areaEntity);
+    when(areaRepository.saveAndFlush(areaEntity)).thenReturn(areaEntity);
     when(areaMapper.toDomain(areaEntity)).thenReturn(areaDomain);
 
     Area result = areaService.update(areaId, areaDomain);
 
     assertThat(result).isNotNull();
-    verify(areaRepository).save(areaEntity);
+    verify(areaRepository).saveAndFlush(areaEntity);
   }
 
   @Test

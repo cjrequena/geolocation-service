@@ -1,6 +1,7 @@
 package com.cjrequena.sample.service;
 
 import com.cjrequena.sample.configuration.CacheConfigurationProperties;
+import com.cjrequena.sample.domain.exception.UniqueConstraintException;
 import com.cjrequena.sample.domain.mapper.CountryMapper;
 import com.cjrequena.sample.domain.model.Country;
 import com.cjrequena.sample.persistence.entity.CountryEntity;
@@ -10,6 +11,7 @@ import com.cjrequena.sample.service.base.BaseService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
@@ -23,7 +25,7 @@ import java.util.stream.Collectors;
 
 /**
  * Service layer for Country aggregate operations.
- * 
+ *
  * <p>Handles business logic and orchestrates between domain model and persistence layer.
  * Uses CountryMapper to convert between domain aggregates and entities.</p>
  *
@@ -70,7 +72,7 @@ public class CountryService extends BaseService<CountryEntity, Country> {
 
   @PostConstruct
   public void loadUpCache() {
-    if(cacheConfigurationProperties.isFullLoadEnabled()) {
+    if (cacheConfigurationProperties.isFullLoadEnabled()) {
       List<Country> coutries = this.countryMapper.toDomainList(countryRepository.findAll());
       this.countryCacheRedisHashOpsRepository.load(coutries);
     }
@@ -89,22 +91,31 @@ public class CountryService extends BaseService<CountryEntity, Country> {
   @Transactional
   public Country create(Country country) {
     log.debug("Creating country: {}", country.getName());
-    CountryEntity entity = countryMapper.toEntity(country);
-    CountryEntity savedEntity = countryRepository.save(entity);
-    Country createdCountry = countryMapper.toDomain(savedEntity);
 
-    // Update cache
-    if (cacheConfigurationProperties.isCacheEnabled()) {
-      try {
-        countryCacheRedisHashOpsRepository.save(createdCountry);
-        log.debug("Country cached with ID: {}", createdCountry.getId());
-      } catch (Exception e) {
-        log.warn("Failed to cache country on create: {}", createdCountry.getId(), e);
+    try {
+      CountryEntity entity = countryMapper.toEntity(country);
+      CountryEntity savedEntity = countryRepository.saveAndFlush(entity);
+
+      Country createdCountry = countryMapper.toDomain(savedEntity);
+
+      // Cache update (best effort)
+      if (cacheConfigurationProperties.isCacheEnabled()) {
+        try {
+          countryCacheRedisHashOpsRepository.save(createdCountry);
+          log.debug("Country cached with ID: {}", createdCountry.getId());
+        } catch (Exception e) {
+          log.warn("Failed to cache country on create: {}", createdCountry.getId(), e);
+        }
       }
-    }
 
-    log.info("Country created with ID: {}", savedEntity.getId());
-    return createdCountry;
+      log.info("Country created with ID: {}", savedEntity.getId());
+      return createdCountry;
+
+    } catch (DataIntegrityViolationException ex) {
+      final String message = String.format("Unique constraint violation while creating country: %s", country.getName());
+      log.warn(message);
+      throw new UniqueConstraintException(message, ex);
+    }
   }
 
   /**
@@ -148,7 +159,7 @@ public class CountryService extends BaseService<CountryEntity, Country> {
 
   /**
    * Finds all countries without any filtering or pagination.
-   * 
+   *
    * <p>This method tries cache first, then falls back to database if cache is disabled or empty.</p>
    *
    * @return list of all countries
@@ -214,29 +225,36 @@ public class CountryService extends BaseService<CountryEntity, Country> {
   @Transactional
   public Country update(UUID id, Country country) {
     log.debug("Updating country with ID: {}", id);
+
     CountryEntity existingEntity = countryRepository
       .findById(id)
       .orElseThrow(() -> new IllegalArgumentException("Country not found with ID: " + id));
 
-    CountryEntity updatedEntity = countryMapper.toEntity(country);
-    updatedEntity.setId(existingEntity.getId());
-    updatedEntity.setCreatedAt(existingEntity.getCreatedAt());
+    try {
+      CountryEntity updatedEntity = countryMapper.toEntity(country);
+      updatedEntity.setId(existingEntity.getId());
+      updatedEntity.setCreatedAt(existingEntity.getCreatedAt());
 
-    CountryEntity savedEntity = countryRepository.save(updatedEntity);
-    Country updatedCountry = countryMapper.toDomain(savedEntity);
+      CountryEntity savedEntity = countryRepository.saveAndFlush(updatedEntity);
+      Country updatedCountry = countryMapper.toDomain(savedEntity);
 
-    // Update cache
-    if (cacheConfigurationProperties.isCacheEnabled()) {
-      try {
-        countryCacheRedisHashOpsRepository.save(updatedCountry);
-        log.debug("Country cache updated with ID: {}", updatedCountry.getId());
-      } catch (Exception e) {
-        log.warn("Failed to update cache for country: {}", updatedCountry.getId(), e);
+      // Update cache
+      if (cacheConfigurationProperties.isCacheEnabled()) {
+        try {
+          countryCacheRedisHashOpsRepository.save(updatedCountry);
+          log.debug("Country cache updated with ID: {}", updatedCountry.getId());
+        } catch (Exception e) {
+          log.warn("Failed to update cache for country: {}", updatedCountry.getId(), e);
+        }
       }
-    }
 
-    log.info("Country updated with ID: {}", savedEntity.getId());
-    return updatedCountry;
+      log.info("Country updated with ID: {}", savedEntity.getId());
+      return updatedCountry;
+    } catch (DataIntegrityViolationException ex) {
+      final String message = String.format("Unique constraint violation while creating country: %s", country.getName());
+      log.warn(message);
+      throw new UniqueConstraintException(message, ex);
+    }
   }
 
   /**
@@ -287,8 +305,6 @@ public class CountryService extends BaseService<CountryEntity, Country> {
 
     return countryRepository.existsById(id);
   }
-
-
 
   /**
    * Checks if a country exists by name.

@@ -1,10 +1,7 @@
 package com.cjrequena.sample.service;
 
 import com.cjrequena.sample.configuration.CacheConfigurationProperties;
-import com.cjrequena.sample.domain.exception.AreaNotFoundException;
-import com.cjrequena.sample.domain.exception.AreaRequiredException;
-import com.cjrequena.sample.domain.exception.GeoShapeNotFoundException;
-import com.cjrequena.sample.domain.exception.ZoneNotFoundException;
+import com.cjrequena.sample.domain.exception.*;
 import com.cjrequena.sample.domain.mapper.ZoneMapper;
 import com.cjrequena.sample.domain.model.Zone;
 import com.cjrequena.sample.persistence.entity.ZoneEntity;
@@ -16,6 +13,7 @@ import com.cjrequena.sample.service.base.BaseService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
@@ -79,7 +77,7 @@ public class ZoneService extends BaseService<ZoneEntity, Zone> {
 
   @PostConstruct
   public void loadUpCache() {
-    if(cacheConfigurationProperties.isFullLoadEnabled()) {
+    if (cacheConfigurationProperties.isFullLoadEnabled()) {
       List<Zone> zones = this.zoneMapper.toDomainList(zoneRepository.findAll());
       this.zoneCacheRedisHashOpsRepository.load(zones);
       this.zoneCacheRedisHashOpsRepository.retrieve();
@@ -98,32 +96,38 @@ public class ZoneService extends BaseService<ZoneEntity, Zone> {
       areaRepository
         .findById(zone.getAreaId())
         .orElseThrow(() -> new AreaNotFoundException("Area not found with ID: %s".formatted(zone.getAreaId())));
-    }else {
+    } else {
       throw new AreaRequiredException("Area ID is required for creating a zone");
     }
 
-    if(zone.getGeoShapeId()!=null) {
-      geoShapeRepository
-        .findById(zone.getGeoShapeId())
-        .orElseThrow(() -> new GeoShapeNotFoundException("GeoShape not found with ID: %s".formatted(zone.getGeoShapeId())));
-    }
-
-    ZoneEntity entity = zoneMapper.toEntity(zone);
-    ZoneEntity savedEntity = zoneRepository.save(entity);
-    Zone createdZone = zoneMapper.toDomain(savedEntity);
-
-    // Update cache
-    if (cacheConfigurationProperties.isCacheEnabled()) {
-      try {
-        zoneCacheRedisHashOpsRepository.save(createdZone);
-        log.debug("Zone cached with ID: {}", createdZone.getId());
-      } catch (Exception e) {
-        log.warn("Failed to cache zone on create: {}", createdZone.getId(), e);
+    try {
+      if (zone.getGeoShapeId() != null) {
+        geoShapeRepository
+          .findById(zone.getGeoShapeId())
+          .orElseThrow(() -> new GeoShapeNotFoundException("GeoShape not found with ID: %s".formatted(zone.getGeoShapeId())));
       }
-    }
 
-    log.info("Zone created with ID: {}", savedEntity.getId());
-    return createdZone;
+      ZoneEntity entity = zoneMapper.toEntity(zone);
+      ZoneEntity savedEntity = zoneRepository.save(entity);
+      Zone createdZone = zoneMapper.toDomain(savedEntity);
+
+      // Update cache
+      if (cacheConfigurationProperties.isCacheEnabled()) {
+        try {
+          zoneCacheRedisHashOpsRepository.save(createdZone);
+          log.debug("Zone cached with ID: {}", createdZone.getId());
+        } catch (Exception e) {
+          log.warn("Failed to cache zone on create: {}", createdZone.getId(), e);
+        }
+      }
+
+      log.info("Zone created with ID: {}", savedEntity.getId());
+      return createdZone;
+    } catch (DataIntegrityViolationException ex) {
+      final String message = String.format("Unique constraint violation while creating zone: %s", zone.getName());
+      log.warn(message);
+      throw new UniqueConstraintException(message, ex);
+    }
   }
 
   public Optional<Zone> findById(UUID id) {
@@ -148,7 +152,6 @@ public class ZoneService extends BaseService<ZoneEntity, Zone> {
       .findById(id)
       .map(zoneMapper::toDomain)
       .orElseThrow(() -> new ZoneNotFoundException("Zone not found with ID: %s".formatted(id)));
-
 
     // Update cache on successful database hit
     if (cacheConfigurationProperties.isCacheEnabled()) {
@@ -213,12 +216,11 @@ public class ZoneService extends BaseService<ZoneEntity, Zone> {
     return super.findAllWithFiltersAndSort(filters, offset, limit, sort);
   }
 
-
   @Transactional
   public Zone update(UUID id, Zone zone) {
     log.debug("Updating zone with ID: {}", id);
 
-    if(zone.getGeoShapeId()!=null) {
+    if (zone.getGeoShapeId() != null) {
       geoShapeRepository
         .findById(zone.getGeoShapeId())
         .orElseThrow(() -> new AreaNotFoundException("GeoShape not found with ID: %s".formatted(zone.getGeoShapeId())));
@@ -228,25 +230,31 @@ public class ZoneService extends BaseService<ZoneEntity, Zone> {
       .findById(id)
       .orElseThrow(() -> new IllegalArgumentException("Zone not found with ID: %s ".formatted(id)));
 
-    ZoneEntity updatedEntity = zoneMapper.toEntity(zone);
-    updatedEntity.setId(existingEntity.getId());
-    updatedEntity.setCreatedAt(existingEntity.getCreatedAt());
+    try {
+      ZoneEntity updatedEntity = zoneMapper.toEntity(zone);
+      updatedEntity.setId(existingEntity.getId());
+      updatedEntity.setCreatedAt(existingEntity.getCreatedAt());
 
-    ZoneEntity savedEntity = zoneRepository.save(updatedEntity);
-    Zone updatedZone = zoneMapper.toDomain(savedEntity);
+      ZoneEntity savedEntity = zoneRepository.saveAndFlush(updatedEntity);
+      Zone updatedZone = zoneMapper.toDomain(savedEntity);
 
-    // Update cache
-    if (cacheConfigurationProperties.isCacheEnabled()) {
-      try {
-        zoneCacheRedisHashOpsRepository.save(updatedZone);
-        log.debug("Zone cache updated with ID: {}", updatedZone.getId());
-      } catch (Exception e) {
-        log.warn("Failed to update cache for zone: {}", updatedZone.getId(), e);
+      // Update cache
+      if (cacheConfigurationProperties.isCacheEnabled()) {
+        try {
+          zoneCacheRedisHashOpsRepository.save(updatedZone);
+          log.debug("Zone cache updated with ID: {}", updatedZone.getId());
+        } catch (Exception e) {
+          log.warn("Failed to update cache for zone: {}", updatedZone.getId(), e);
+        }
       }
-    }
 
-    log.info("Zone updated with ID: {}", savedEntity.getId());
-    return updatedZone;
+      log.info("Zone updated with ID: {}", savedEntity.getId());
+      return updatedZone;
+    } catch (DataIntegrityViolationException ex) {
+      final String message = String.format("Unique constraint violation while creating zone: %s", zone.getName());
+      log.warn(message);
+      throw new UniqueConstraintException(message, ex);
+    }
   }
 
   @Transactional

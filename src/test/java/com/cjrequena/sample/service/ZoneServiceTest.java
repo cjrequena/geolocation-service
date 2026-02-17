@@ -142,13 +142,13 @@ class ZoneServiceTest {
   void shouldUpdateZone() {
     when(zoneRepository.findById(zoneId)).thenReturn(Optional.of(zoneEntity));
     when(zoneMapper.toEntity(zoneDomain)).thenReturn(zoneEntity);
-    when(zoneRepository.save(zoneEntity)).thenReturn(zoneEntity);
+    when(zoneRepository.saveAndFlush(zoneEntity)).thenReturn(zoneEntity);
     when(zoneMapper.toDomain(zoneEntity)).thenReturn(zoneDomain);
 
     Zone result = zoneService.update(zoneId, zoneDomain);
 
     assertThat(result).isNotNull();
-    verify(zoneRepository).save(zoneEntity);
+    verify(zoneRepository).saveAndFlush(zoneEntity);
   }
 
   @Test

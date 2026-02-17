@@ -75,14 +75,14 @@ class CountryServiceTest {
   @DisplayName("Should create country successfully")
   void shouldCreateCountry() {
     when(countryMapper.toEntity(countryDomain)).thenReturn(countryEntity);
-    when(countryRepository.save(countryEntity)).thenReturn(countryEntity);
+    when(countryRepository.saveAndFlush(countryEntity)).thenReturn(countryEntity);
     when(countryMapper.toDomain(countryEntity)).thenReturn(countryDomain);
 
     Country result = countryService.create(countryDomain);
 
     assertThat(result).isNotNull();
     assertThat(result.getId()).isEqualTo(countryId);
-    verify(countryRepository).save(countryEntity);
+    verify(countryRepository).saveAndFlush(countryEntity);
   }
 
   // ================================================================
@@ -240,13 +240,13 @@ class CountryServiceTest {
   void shouldUpdateCountry() {
     when(countryRepository.findById(countryId)).thenReturn(Optional.of(countryEntity));
     when(countryMapper.toEntity(countryDomain)).thenReturn(countryEntity);
-    when(countryRepository.save(countryEntity)).thenReturn(countryEntity);
+    when(countryRepository.saveAndFlush(countryEntity)).thenReturn(countryEntity);
     when(countryMapper.toDomain(countryEntity)).thenReturn(countryDomain);
 
     Country result = countryService.update(countryId, countryDomain);
 
     assertThat(result).isNotNull();
-    verify(countryRepository).save(countryEntity);
+    verify(countryRepository).saveAndFlush(countryEntity);
   }
 
   @Test

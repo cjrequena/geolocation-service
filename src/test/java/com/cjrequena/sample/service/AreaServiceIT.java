@@ -1,17 +1,16 @@
 package com.cjrequena.sample.service;
 
+import com.cjrequena.sample.domain.exception.AreaNotFoundException;
 import com.cjrequena.sample.domain.model.Area;
 import com.cjrequena.sample.domain.model.City;
 import com.cjrequena.sample.domain.model.Country;
 import com.cjrequena.sample.domain.model.Region;
 import com.cjrequena.sample.domain.model.enums.AreaType;
+import com.cjrequena.sample.domain.model.enums.RegionType;
 import com.cjrequena.sample.domain.model.vo.AuditInfoVO;
 import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
 import com.cjrequena.sample.domain.model.vo.MetadataVO;
-import com.cjrequena.sample.persistence.repository.AreaRepository;
-import com.cjrequena.sample.persistence.repository.CityRepository;
-import com.cjrequena.sample.persistence.repository.CountryRepository;
-import com.cjrequena.sample.persistence.repository.RegionRepository;
+import com.cjrequena.sample.persistence.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,7 +38,22 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class AreaServiceIT {
 
   @Autowired
+  private ZoneService zoneService;
+
+  @Autowired
   private AreaService areaService;
+
+  @Autowired
+  private CityService cityService;
+
+  @Autowired
+  private RegionService regionService;
+
+  @Autowired
+  private CountryService countryService;
+
+  @Autowired
+  private ZoneRepository zoneRepository;
 
   @Autowired
   private AreaRepository areaRepository;
@@ -53,37 +67,40 @@ class AreaServiceIT {
   @Autowired
   private CountryRepository countryRepository;
 
-  @Autowired
-  private CountryService countryService;
-
-  @Autowired
-  private RegionService regionService;
-
-  @Autowired
-  private CityService cityService;
-
   private UUID countryId;
   private UUID regionId;
   private UUID cityId;
 
   @BeforeEach
   void setUp() {
-    // Clear repositories in correct order (children first)
+    // Clear database in correct order (children first)
+    zoneRepository.deleteAll();
     areaRepository.deleteAll();
     cityRepository.deleteAll();
     regionRepository.deleteAll();
     countryRepository.deleteAll();
 
-    // Create hierarchy: Country -> Region -> City
-    Country country = createCountryDomain("Spain", "ES", "ESP", true);
+    // Create full hierarchy: Country → Region → City → Area
+    Country country = new Country();
+    country.setName("Spain");
+    country.setIsoCode(IsoCodeVO.of("ES", "ESP", "724"));
+    country.setActive(true);
+    country.setAuditInfo(AuditInfoVO.of(OffsetDateTime.now(), OffsetDateTime.now()));
     Country createdCountry = countryService.create(country);
-    countryId = createdCountry.getId();
 
-    Region region = createRegionDomain("Catalonia", countryId, true);
+    Region region = new Region();
+    region.setName("Madrid");
+    region.setCountryId(createdCountry.getId());
+    region.setType(RegionType.AUTONOMOUS_COMMUNITY);
+    region.setActive(true);
+    region.setAuditInfo(AuditInfoVO.of(OffsetDateTime.now(), OffsetDateTime.now()));
     Region createdRegion = regionService.create(region);
-    regionId = createdRegion.getId();
 
-    City city = createCityDomain("Barcelona", regionId, true);
+    City city = new City();
+    city.setName("Madrid City");
+    city.setRegionId(createdRegion.getId());
+    city.setActive(true);
+    city.setAuditInfo(AuditInfoVO.of(OffsetDateTime.now(), OffsetDateTime.now()));
     City createdCity = cityService.create(city);
     cityId = createdCity.getId();
   }
@@ -121,11 +138,11 @@ class AreaServiceIT {
   }
 
   @Test
-  @DisplayName("Should return empty when area not found by ID")
-  void shouldReturnEmptyWhenNotFoundById() {
-    Optional<Area> result = areaService.findById(UUID.randomUUID());
-
-    assertThat(result).isEmpty();
+  @DisplayName("Should throw exception when area not found by ID")
+  void shouldThrowExceptionWhenNotFoundById() {
+    assertThatThrownBy(() -> areaService.findById(UUID.randomUUID()))
+      .isInstanceOf(AreaNotFoundException.class)
+      .hasMessageContaining("Area not found");
   }
 
   @Test
@@ -348,7 +365,7 @@ class AreaServiceIT {
     Area area = createAreaDomain("Example", cityId, AreaType.DISTRICT, true);
 
     assertThatThrownBy(() -> areaService.update(UUID.randomUUID(), area))
-      .isInstanceOf(IllegalArgumentException.class)
+      .isInstanceOf(AreaNotFoundException.class)
       .hasMessageContaining("Area not found");
   }
 
@@ -363,15 +380,16 @@ class AreaServiceIT {
 
     areaService.deleteById(created.getId());
 
-    Optional<Area> result = areaService.findById(created.getId());
-    assertThat(result).isEmpty();
+    assertThatThrownBy(() -> areaService.findById(UUID.randomUUID()))
+      .isInstanceOf(AreaNotFoundException.class)
+      .hasMessageContaining("Area not found");
   }
 
   @Test
   @DisplayName("Should throw exception when deleting non-existent area")
   void shouldThrowExceptionWhenDeletingNonExistent() {
     assertThatThrownBy(() -> areaService.deleteById(UUID.randomUUID()))
-      .isInstanceOf(IllegalArgumentException.class)
+      .isInstanceOf(AreaNotFoundException.class)
       .hasMessageContaining("Area not found");
   }
 

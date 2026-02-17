@@ -2,6 +2,10 @@ package com.cjrequena.sample.controller;
 
 import com.cjrequena.sample.controller.dto.ZoneRequestDTO;
 import com.cjrequena.sample.controller.dto.ZoneResponseDTO;
+import com.cjrequena.sample.controller.exception.ConflictException;
+import com.cjrequena.sample.controller.exception.NotFoundException;
+import com.cjrequena.sample.domain.exception.UniqueConstraintException;
+import com.cjrequena.sample.domain.exception.ZoneNotFoundException;
 import com.cjrequena.sample.domain.mapper.ZoneMapper;
 import com.cjrequena.sample.domain.model.Zone;
 import com.cjrequena.sample.service.ZoneService;
@@ -55,31 +59,37 @@ public class ZoneController {
    */
   @PostMapping
   @Operation(summary = "Create a new zone", description = "Creates a new zone within an area")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "201", description = "Zone created successfully",
-      content = @Content(schema = @Schema(implementation = ZoneResponseDTO.class))),
-    @ApiResponse(responseCode = "400", description = "Invalid request data"),
-    @ApiResponse(responseCode = "404", description = "Parent area not found")
-  })
-  public ResponseEntity<ZoneResponseDTO> create(
-    @Valid @RequestBody ZoneRequestDTO requestDTO) {
+  @ApiResponses(
+    value = {
+      @ApiResponse(responseCode = "201", description = "Zone created successfully",
+        content = @Content(schema = @Schema(implementation = ZoneResponseDTO.class))
+      ),
+      @ApiResponse(responseCode = "400", description = "Invalid request data"),
+      @ApiResponse(responseCode = "404", description = "Parent area not found")
+    }
+  )
+  public ResponseEntity<ZoneResponseDTO> create(@Valid @RequestBody ZoneRequestDTO requestDTO) {
+    try {
+      log.info("Creating zone: {} in area: {}", requestDTO.getName(), requestDTO.getAreaId());
 
-    log.info("Creating zone: {} in area: {}", requestDTO.getName(), requestDTO.getAreaId());
+      // Convert DTO to domain model
+      Zone zone = this.zoneMapper.requestDTOtoDomain(requestDTO);
 
-    // Convert DTO to domain model
-    Zone zone = this.zoneMapper.requestDTOtoDomain(requestDTO);
+      // Create via service
+      Zone created = zoneService.create(zone);
 
-    // Create via service
-    Zone created = zoneService.create(zone);
+      // Convert to response DTO
+      ZoneResponseDTO responseDTO = zoneMapper.domainToResponseDTO(created);
 
-    // Convert to response DTO
-    ZoneResponseDTO responseDTO = zoneMapper.domainToResponseDTO(created);
+      log.info("Zone created with ID: {}", created.getId());
 
-    log.info("Zone created with ID: {}", created.getId());
-
-    return ResponseEntity
-      .created(URI.create("/api/v1/zones/" + created.getId()))
-      .body(responseDTO);
+      return ResponseEntity
+        .created(URI.create(ENDPOINT + created.getId()))
+        .header("Accept-Version", ACCEPT_VERSION)
+        .body(responseDTO);
+    } catch (UniqueConstraintException ex) {
+      throw new ConflictException(ex.getMessage());
+    }
   }
 
   /**
@@ -90,21 +100,29 @@ public class ZoneController {
    */
   @GetMapping("/{id}")
   @Operation(summary = "Get zone by ID", description = "Retrieves a zone by its unique identifier")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Zone found",
-      content = @Content(schema = @Schema(implementation = ZoneResponseDTO.class))),
-    @ApiResponse(responseCode = "404", description = "Zone not found")
-  })
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        description = "Zone found",
+        content = @Content(schema = @Schema(implementation = ZoneResponseDTO.class))),
+      @ApiResponse(responseCode = "404", description = "Zone not found")
+    }
+  )
   public ResponseEntity<ZoneResponseDTO> retrieveById(
     @Parameter(description = "Zone ID", required = true)
     @PathVariable UUID id) {
+    try {
+      log.debug("Getting zone by ID: {}", id);
 
-    log.debug("Getting zone by ID: {}", id);
-
-    return zoneService.findById(id)
-      .map(zoneMapper::domainToResponseDTO)
-      .map(ResponseEntity::ok)
-      .orElse(ResponseEntity.notFound().build());
+      return zoneService
+        .findById(id)
+        .map(zoneMapper::domainToResponseDTO)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+    } catch (ZoneNotFoundException ex) {
+      throw new NotFoundException("Zone with ID %s was not found".formatted(id), ex);
+    }
   }
 
   /**
@@ -120,7 +138,9 @@ public class ZoneController {
   public ResponseEntity<List<ZoneResponseDTO>> retrieve() {
     log.debug("Getting all zones");
 
-    List<ZoneResponseDTO> zones = zoneService.findAll().stream()
+    List<ZoneResponseDTO> zones = zoneService
+      .findAll()
+      .stream()
       .map(zoneMapper::domainToResponseDTO)
       .collect(Collectors.toList());
 
@@ -142,25 +162,30 @@ public class ZoneController {
     @ApiResponse(responseCode = "404", description = "Zone not found"),
     @ApiResponse(responseCode = "400", description = "Invalid request data")
   })
-  public ResponseEntity<ZoneResponseDTO> updateZone(
+  public ResponseEntity<ZoneResponseDTO> update(
     @Parameter(description = "Zone ID", required = true)
     @PathVariable UUID id,
     @Valid @RequestBody ZoneRequestDTO requestDTO) {
+    try {
+      log.info("Updating zone with ID: {}", id);
 
-    log.info("Updating zone with ID: {}", id);
+      // Convert DTO to domain model
+      Zone zone = this.zoneMapper.requestDTOtoDomain(requestDTO);
 
-    // Convert DTO to domain model
-    Zone zone = this.zoneMapper.requestDTOtoDomain(requestDTO);
+      // Update via service
+      Zone updated = zoneService.update(id, zone);
 
-    // Update via service
-    Zone updated = zoneService.update(id, zone);
+      // Convert to response DTO
+      ZoneResponseDTO responseDTO = zoneMapper.domainToResponseDTO(updated);
 
-    // Convert to response DTO
-    ZoneResponseDTO responseDTO = zoneMapper.domainToResponseDTO(updated);
+      log.info("Zone updated with ID: {}", id);
 
-    log.info("Zone updated with ID: {}", id);
-
-    return ResponseEntity.ok(responseDTO);
+      return ResponseEntity.ok(responseDTO);
+    } catch (ZoneNotFoundException ex) {
+      throw new NotFoundException("Zone with ID %s was not found".formatted(id), ex);
+    } catch (UniqueConstraintException ex) {
+      throw new ConflictException(ex.getMessage());
+    }
   }
 
   /**
@@ -178,14 +203,17 @@ public class ZoneController {
   public ResponseEntity<Void> delete(
     @Parameter(description = "Zone ID", required = true)
     @PathVariable UUID id) {
+    try {
+      log.info("Deleting zone with ID: {}", id);
 
-    log.info("Deleting zone with ID: {}", id);
+      zoneService.deleteById(id);
 
-    zoneService.deleteById(id);
+      log.info("Zone deleted with ID: {}", id);
 
-    log.info("Zone deleted with ID: {}", id);
-
-    return ResponseEntity.noContent().build();
+      return ResponseEntity.noContent().build();
+    } catch (ZoneNotFoundException ex) {
+      throw new NotFoundException("Zone with ID %s was not found".formatted(id), ex);
+    }
   }
 
   /**
@@ -206,7 +234,8 @@ public class ZoneController {
 
     log.debug("Checking if zone exists: {}", id);
 
-    return zoneService.existsById(id)
+    return zoneService
+      .existsById(id)
       ? ResponseEntity.ok().build()
       : ResponseEntity.notFound().build();
   }

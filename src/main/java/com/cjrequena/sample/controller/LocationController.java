@@ -124,10 +124,9 @@ public class LocationController {
     @Parameter(description = "Location ID", required = true)
     @PathVariable UUID id
   ) {
+    log.debug("Getting location by ID: {}", id);
 
     try {
-      log.debug("Getting location by ID: {}", id);
-
       return locationService
         .findById(id)
         .map(locationMapper::domainToResponseDTO)

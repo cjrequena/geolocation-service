@@ -2,11 +2,12 @@ package com.cjrequena.sample.controller;
 
 import com.cjrequena.sample.controller.dto.CountryRequestDTO;
 import com.cjrequena.sample.controller.dto.CountryResponseDTO;
+import com.cjrequena.sample.controller.exception.ConflictException;
+import com.cjrequena.sample.controller.exception.NotFoundException;
+import com.cjrequena.sample.domain.exception.CountryNotFoundException;
+import com.cjrequena.sample.domain.exception.UniqueConstraintException;
 import com.cjrequena.sample.domain.mapper.CountryMapper;
 import com.cjrequena.sample.domain.model.Country;
-import com.cjrequena.sample.domain.model.vo.IsoCodeVO;
-import com.cjrequena.sample.domain.model.vo.MetadataVO;
-import com.cjrequena.sample.domain.model.vo.PopulationVO;
 import com.cjrequena.sample.service.CountryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -76,23 +77,27 @@ public class CountryController {
     })
   public ResponseEntity<CountryResponseDTO> create(@Valid @RequestBody CountryRequestDTO requestDTO) {
 
-    log.info("Creating country: {}", requestDTO.getName());
+    try {
+      log.info("Creating country: {}", requestDTO.getName());
 
-    // Convert DTO to domain model
-    Country country = this.countryMapper.requestDTOtoDomain(requestDTO);
+      // Convert DTO to domain model
+      Country country = this.countryMapper.requestDTOtoDomain(requestDTO);
 
-    // Create via service
-    Country created = countryService.create(country);
+      // Create via service
+      Country created = countryService.create(country);
 
-    // Convert to response DTO
-    CountryResponseDTO responseDTO = countryMapper.domainToResponseDTO(created);
+      // Convert to response DTO
+      CountryResponseDTO responseDTO = countryMapper.domainToResponseDTO(created);
 
-    log.info("Country created with ID: {}", created.getId());
+      log.info("Country created with ID: {}", created.getId());
 
-    return ResponseEntity
-      .created(URI.create(ENDPOINT + created.getId()))
-      .header("API-Version", VND_SAMPLE_SERVICE_V1)
-      .body(responseDTO);
+      return ResponseEntity
+        .created(URI.create(ENDPOINT + created.getId()))
+        .header("Accept-Version", VND_SAMPLE_SERVICE_V1)
+        .body(responseDTO);
+    } catch (UniqueConstraintException ex) {
+      throw new ConflictException(ex.getMessage());
+    }
   }
 
   /**
@@ -120,12 +125,17 @@ public class CountryController {
     @Parameter(description = "Country ID", required = true)
     @PathVariable UUID id) {
 
-    log.debug("Getting country by ID: {}", id);
+    try {
+      log.debug("Getting country by ID: {}", id);
 
-    return countryService.findById(id)
-      .map(countryMapper::domainToResponseDTO)
-      .map(ResponseEntity::ok)
-      .orElse(ResponseEntity.notFound().build());
+      return countryService
+        .findById(id)
+        .map(countryMapper::domainToResponseDTO)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+    } catch (CountryNotFoundException ex) {
+      throw new NotFoundException("Country with ID %s was not found".formatted(id), ex);
+    }
   }
 
   /**
@@ -236,28 +246,24 @@ public class CountryController {
 
     log.info("Updating country with ID: {}", id);
 
-    // Convert DTO to domain model
-    Country country = Country.create(
-      id,
-      requestDTO.getName(),
-      IsoCodeVO.of(requestDTO.getIsoCodeAlpha2(), requestDTO.getIsoCodeAlpha3(), requestDTO.getIsoCodeNumeric()),
-      requestDTO.getPhoneCode(),
-      requestDTO.getCurrencyCode(),
-      requestDTO.getCapital(),
-      requestDTO.getPopulation() != null ? PopulationVO.of(requestDTO.getPopulation()) : null,
-      requestDTO.getActive() != null ? requestDTO.getActive() : Boolean.TRUE,
-      requestDTO.getMetadata() != null ? MetadataVO.of(requestDTO.getMetadata()) : MetadataVO.empty()
-    );
+    try {
+      // Convert DTO to domain model
+      Country country = this.countryMapper.requestDTOtoDomain(requestDTO);
 
-    // Update via service
-    Country updated = countryService.update(id, country);
+      // Update via service
+      Country updated = countryService.update(id, country);
 
-    // Convert to response DTO
-    CountryResponseDTO responseDTO = countryMapper.domainToResponseDTO(updated);
+      // Convert to response DTO
+      CountryResponseDTO responseDTO = countryMapper.domainToResponseDTO(updated);
 
-    log.info("Country updated with ID: {}", id);
+      log.info("Country updated with ID: {}", id);
 
-    return ResponseEntity.ok(responseDTO);
+      return ResponseEntity.ok(responseDTO);
+    } catch (CountryNotFoundException ex) {
+      throw new NotFoundException("Country with ID %s was not found".formatted(id), ex);
+    } catch (UniqueConstraintException ex) {
+      throw new ConflictException(ex.getMessage());
+    }
   }
 
   /**
@@ -276,13 +282,17 @@ public class CountryController {
     @Parameter(description = "Country ID", required = true)
     @PathVariable UUID id) {
 
-    log.info("Deleting country with ID: {}", id);
+    try {
+      log.info("Deleting country with ID: {}", id);
 
-    countryService.deleteById(id);
+      countryService.deleteById(id);
 
-    log.info("Country deleted with ID: {}", id);
+      log.info("Country deleted with ID: {}", id);
 
-    return ResponseEntity.noContent().build();
+      return ResponseEntity.noContent().build();
+    } catch (CountryNotFoundException ex) {
+      throw new NotFoundException("Country with ID %s was not found".formatted(id), ex);
+    }
   }
 
   /**
@@ -303,7 +313,8 @@ public class CountryController {
 
     log.debug("Checking if country exists: {}", id);
 
-    return countryService.existsById(id)
+    return countryService
+      .existsById(id)
       ? ResponseEntity.ok().build()
       : ResponseEntity.notFound().build();
   }

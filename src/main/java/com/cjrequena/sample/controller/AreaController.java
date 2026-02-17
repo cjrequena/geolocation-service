@@ -2,6 +2,11 @@ package com.cjrequena.sample.controller;
 
 import com.cjrequena.sample.controller.dto.AreaRequestDTO;
 import com.cjrequena.sample.controller.dto.AreaResponseDTO;
+import com.cjrequena.sample.controller.exception.ConflictException;
+import com.cjrequena.sample.controller.exception.NotFoundException;
+import com.cjrequena.sample.domain.exception.AreaNotFoundException;
+import com.cjrequena.sample.domain.exception.UniqueConstraintException;
+import com.cjrequena.sample.domain.exception.ZoneNotFoundException;
 import com.cjrequena.sample.domain.mapper.AreaMapper;
 import com.cjrequena.sample.domain.model.Area;
 import com.cjrequena.sample.service.AreaService;
@@ -58,32 +63,38 @@ public class AreaController {
     summary = "Create a new area",
     description = "Creates a new area within a city"
   )
-  @ApiResponses(value = {
-    @ApiResponse(
-      responseCode = "201", description = "Area created successfully",
-      content = @Content(schema = @Schema(implementation = AreaResponseDTO.class))
-    ),
-    @ApiResponse(responseCode = "400", description = "Invalid request data"),
-    @ApiResponse(responseCode = "404", description = "Parent city not found")
-  })
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "201", description = "Area created successfully",
+        content = @Content(schema = @Schema(implementation = AreaResponseDTO.class))
+      ),
+      @ApiResponse(responseCode = "400", description = "Invalid request data"),
+      @ApiResponse(responseCode = "404", description = "Parent city not found")
+    }
+  )
   public ResponseEntity<AreaResponseDTO> create(@Valid @RequestBody AreaRequestDTO requestDTO) {
+    try {
+      log.info("Creating area: {} in city: {}", requestDTO.getName(), requestDTO.getCityId());
 
-    log.info("Creating area: {} in city: {}", requestDTO.getName(), requestDTO.getCityId());
+      // Convert DTO to domain model
+      Area area = this.areaMapper.requestDTOtoDomain(requestDTO);
 
-    // Convert DTO to domain model
-    Area area = this.areaMapper.requestDTOtoDomain(requestDTO);
+      // Create via service
+      Area created = areaService.create(area);
 
-    // Create via service
-    Area created = areaService.create(area);
+      // Convert to response DTO
+      AreaResponseDTO responseDTO = areaMapper.domainToResponseDTO(created);
 
-    // Convert to response DTO
-    AreaResponseDTO responseDTO = areaMapper.domainToResponseDTO(created);
+      log.info("Area created with ID: {}", created.getId());
 
-    log.info("Area created with ID: {}", created.getId());
-
-    return ResponseEntity
-      .created(URI.create("/api/v1/areas/" + created.getId()))
-      .body(responseDTO);
+      return ResponseEntity
+        .created(URI.create(ENDPOINT + created.getId()))
+        .header("Accept-Version", ACCEPT_VERSION)
+        .body(responseDTO);
+    } catch (UniqueConstraintException ex) {
+      throw new ConflictException(ex.getMessage());
+    }
   }
 
   /**
@@ -94,21 +105,29 @@ public class AreaController {
    */
   @GetMapping("/{id}")
   @Operation(summary = "Get area by ID", description = "Retrieves an area by its unique identifier")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Area found",
-      content = @Content(schema = @Schema(implementation = AreaResponseDTO.class))),
-    @ApiResponse(responseCode = "404", description = "Area not found")
-  })
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        description = "Area found",
+        content = @Content(schema = @Schema(implementation = AreaResponseDTO.class))),
+      @ApiResponse(responseCode = "404", description = "Area not found")
+    }
+  )
   public ResponseEntity<AreaResponseDTO> retrieveById(
     @Parameter(description = "Area ID", required = true)
     @PathVariable UUID id) {
+    try {
+      log.debug("Getting area by ID: {}", id);
 
-    log.debug("Getting area by ID: {}", id);
-
-    return areaService.findById(id)
-      .map(areaMapper::domainToResponseDTO)
-      .map(ResponseEntity::ok)
-      .orElse(ResponseEntity.notFound().build());
+      return areaService
+        .findById(id)
+        .map(areaMapper::domainToResponseDTO)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+    } catch (AreaNotFoundException ex) {
+      throw new NotFoundException("Area with ID %s was not found".formatted(id), ex);
+    }
   }
 
   /**
@@ -121,7 +140,7 @@ public class AreaController {
   @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Areas retrieved successfully")
   })
-  public ResponseEntity<List<AreaResponseDTO>> getAllAreas() {
+  public ResponseEntity<List<AreaResponseDTO>> retrieve() {
     log.debug("Getting all areas");
 
     List<AreaResponseDTO> areas = areaService.findAll().stream()
@@ -130,7 +149,6 @@ public class AreaController {
 
     return ResponseEntity.ok(areas);
   }
-
 
   /**
    * Update an area.
@@ -156,21 +174,26 @@ public class AreaController {
     @PathVariable UUID id,
     @Valid @RequestBody AreaRequestDTO requestDTO
   ) {
+    try {
+      log.info("Updating area with ID: {}", id);
 
-    log.info("Updating area with ID: {}", id);
+      // Convert DTO to domain model
+      Area area = this.areaMapper.requestDTOtoDomain(requestDTO);
 
-    // Convert DTO to domain model
-    Area area = this.areaMapper.requestDTOtoDomain(requestDTO);
+      // Update via service
+      Area updated = areaService.update(id, area);
 
-    // Update via service
-    Area updated = areaService.update(id, area);
+      // Convert to response DTO
+      AreaResponseDTO responseDTO = areaMapper.domainToResponseDTO(updated);
 
-    // Convert to response DTO
-    AreaResponseDTO responseDTO = areaMapper.domainToResponseDTO(updated);
+      log.info("Area updated with ID: {}", id);
 
-    log.info("Area updated with ID: {}", id);
-
-    return ResponseEntity.ok(responseDTO);
+      return ResponseEntity.ok(responseDTO);
+    } catch (AreaNotFoundException ex) {
+      throw new NotFoundException("Area with ID %s was not found".formatted(id), ex);
+    } catch (UniqueConstraintException ex) {
+      throw new ConflictException(ex.getMessage());
+    }
   }
 
   /**
@@ -188,14 +211,17 @@ public class AreaController {
   public ResponseEntity<Void> delete(
     @Parameter(description = "Area ID", required = true)
     @PathVariable UUID id) {
+    try {
+      log.info("Deleting area with ID: {}", id);
 
-    log.info("Deleting area with ID: {}", id);
+      areaService.deleteById(id);
 
-    areaService.deleteById(id);
+      log.info("Area deleted with ID: {}", id);
 
-    log.info("Area deleted with ID: {}", id);
-
-    return ResponseEntity.noContent().build();
+      return ResponseEntity.noContent().build();
+    } catch (ZoneNotFoundException ex) {
+      throw new NotFoundException("Area with ID %s was not found".formatted(id), ex);
+    }
   }
 
   /**
