@@ -222,7 +222,7 @@ public class AreaService extends BaseService<AreaEntity, Area> {
     log.debug("Updating area with ID: {}", id);
 
     if (area.getGeoShapeId() != null) {
-      cityRepository
+      geoGeoShapeRepository
         .findById(area.getGeoShapeId())
         .orElseThrow(() -> new GeoShapeNotFoundException("GeoShape not found with ID: %s".formatted(area.getGeoShapeId())));
     }

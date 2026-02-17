@@ -4,7 +4,9 @@ import com.cjrequena.sample.configuration.CacheConfigurationProperties;
 import com.cjrequena.sample.domain.mapper.CityMapper;
 import com.cjrequena.sample.domain.model.City;
 import com.cjrequena.sample.persistence.entity.CityEntity;
+import com.cjrequena.sample.persistence.entity.RegionEntity;
 import com.cjrequena.sample.persistence.repository.CityRepository;
+import com.cjrequena.sample.persistence.repository.RegionRepository;
 import com.cjrequena.sample.persistence.repository.cache.CityCacheRedisHashOpsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,6 +29,9 @@ class CityServiceTest {
 
   @Mock
   private CityRepository cityRepository;
+
+  @Mock
+  private RegionRepository regionRepository;
 
   @Mock
   private CityCacheRedisHashOpsRepository cityCacheRedisHashOpsRepository;
@@ -64,13 +69,14 @@ class CityServiceTest {
   @DisplayName("Should create city successfully")
   void shouldCreateCity() {
     when(cityMapper.toEntity(cityDomain)).thenReturn(cityEntity);
-    when(cityRepository.save(cityEntity)).thenReturn(cityEntity);
+    when(cityRepository.saveAndFlush(cityEntity)).thenReturn(cityEntity);
     when(cityMapper.toDomain(cityEntity)).thenReturn(cityDomain);
+    when(regionRepository.findById(regionId)).thenReturn(Optional.of(new RegionEntity()));
 
     City result = cityService.create(cityDomain);
 
     assertThat(result).isNotNull();
-    verify(cityRepository).save(cityEntity);
+    verify(cityRepository).saveAndFlush(cityEntity);
   }
 
   @Test
