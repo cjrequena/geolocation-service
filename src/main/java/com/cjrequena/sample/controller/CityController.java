@@ -80,7 +80,8 @@ public class CityController {
     log.info("City created with ID: {}", created.getId());
 
     return ResponseEntity
-      .created(URI.create("/api/v1/cities/" + created.getId()))
+      .created(URI.create(ENDPOINT + created.getId()))
+      .header("Accept-Version", VND_SAMPLE_SERVICE_V1)
       .body(responseDTO);
   }
 
