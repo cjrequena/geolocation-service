@@ -11,6 +11,7 @@ import com.cjrequena.sample.domain.exception.ZoneNotFoundException;
 import com.cjrequena.sample.domain.mapper.LocationMapper;
 import com.cjrequena.sample.domain.model.Location;
 import com.cjrequena.sample.service.LocationService;
+import io.github.perplexhub.rsql.UnknownPropertyException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -207,11 +208,11 @@ public class LocationController {
 
       return ResponseEntity.ok(locations);
     } catch (IllegalArgumentException ex) {
-      log.error("Invalid request parameters: {}", ex.getMessage());
-      throw new BadRequestException();
-    } catch (Exception ex) {
-      log.error("Error retrieving locations: {}", ex.getMessage(), ex);
-      throw new BadRequestException();
+      log.warn("Invalid request parameters: {}", ex.getMessage());
+      throw new BadRequestException(ex.getMessage());
+    } catch (UnknownPropertyException ex) {
+      log.warn("Unknown property: {}", ex.getMessage(), ex);
+      throw new BadRequestException(ex.getMessage());
     }
   }
 

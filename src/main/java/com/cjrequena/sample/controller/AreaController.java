@@ -9,6 +9,7 @@ import com.cjrequena.sample.domain.exception.*;
 import com.cjrequena.sample.domain.mapper.AreaMapper;
 import com.cjrequena.sample.domain.model.Area;
 import com.cjrequena.sample.service.AreaService;
+import io.github.perplexhub.rsql.UnknownPropertyException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -133,25 +134,82 @@ public class AreaController {
   }
 
   /**
-   * Get all areas.
+   * Get all areas with optional filtering, sorting, and pagination.
    *
-   * @return list of all areas
+   * @param filters RSQL filter expression (e.g., "active==true;postalCode==94102")
+   * @param offset the offset for pagination (0-based)
+   * @param limit the maximum number of results to return
+   * @param sort the sort expression (e.g., "id,asc" or "name,desc;createdAt,asc")
+   * @return list of areas matching the criteria
    */
   @GetMapping
-  @Operation(summary = "Get all areas", description = "Retrieves all areas")
+  @Operation(
+    summary = "Get all areas with filtering, sorting, and pagination",
+    description = "Retrieves areas with optional RSQL filters, sorting, and pagination support"
+  )
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Areas retrieved successfully")
+    @ApiResponse(responseCode = "200", description = "Areas retrieved successfully"),
+    @ApiResponse(responseCode = "400", description = "Invalid filter or sort expression")
   })
-  public ResponseEntity<List<AreaResponseDTO>> retrieve() {
-    log.debug("Getting all areas");
+  public ResponseEntity<List<AreaResponseDTO>> retrieve(
+    @Parameter(
+      name = "filters",
+      description = "RSQL filter expression (e.g., 'active==true', 'postalCode==94102', 'name=like=\"Bridge\"')",
+      example = "active==true;postalCode==94102"
+    )
+    @RequestParam(value = "filters", required = false) String filters,
 
-    List<AreaResponseDTO> areas = areaService.findAll().stream()
-      .map(areaMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
+    @Parameter(
+      name = "offset",
+      description = "Offset for pagination (0-based)",
+      example = "0"
+    )
+    @RequestParam(value = "offset", required = false) Integer offset,
 
-    return ResponseEntity.ok(areas);
+    @Parameter(
+      name = "limit",
+      description = "Maximum number of results to return",
+      example = "20"
+    )
+    @RequestParam(value = "limit", required = false) Integer limit,
+
+    @Parameter(
+      name = "sort",
+      description = "Sort expression (e.g., 'id,asc', 'name,desc', 'postalCode,asc;name,desc')",
+      example = "name,asc"
+    )
+    @RequestParam(value = "sort", required = false) String sort
+  ) {
+    log.debug("Getting areas with filters: {}, offset: {}, limit: {}, sort: {}",
+      filters, offset, limit, sort);
+
+    try {
+      // If no filters, offset, limit, or sort provided, use the cached findAll()
+      if (filters == null && offset == null && limit == null && sort == null) {
+        List<AreaResponseDTO> areas = areaService
+          .findAll()
+          .stream()
+          .map(areaMapper::domainToResponseDTO)
+          .collect(Collectors.toList());
+        return ResponseEntity.ok(areas);
+      }
+
+      // Otherwise, use the search method with filters/sorting/pagination
+      List<AreaResponseDTO> areas = areaService
+        .findAll(filters, offset, limit, sort)
+        .stream()
+        .map(areaMapper::domainToResponseDTO)
+        .collect(Collectors.toList());
+
+      return ResponseEntity.ok(areas);
+    } catch (IllegalArgumentException ex) {
+      log.warn("Invalid request parameters: {}", ex.getMessage());
+      throw new BadRequestException(ex.getMessage());
+    } catch (UnknownPropertyException ex) {
+      log.warn("Unknown property: {}", ex.getMessage(), ex);
+      throw new BadRequestException(ex.getMessage());
+    }
   }
-
   /**
    * Update an area.
    *

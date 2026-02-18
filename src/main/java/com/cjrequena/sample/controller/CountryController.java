@@ -2,6 +2,7 @@ package com.cjrequena.sample.controller;
 
 import com.cjrequena.sample.controller.dto.CountryRequestDTO;
 import com.cjrequena.sample.controller.dto.CountryResponseDTO;
+import com.cjrequena.sample.controller.exception.BadRequestException;
 import com.cjrequena.sample.controller.exception.ConflictException;
 import com.cjrequena.sample.controller.exception.NotFoundException;
 import com.cjrequena.sample.domain.exception.CountryNotFoundException;
@@ -9,6 +10,7 @@ import com.cjrequena.sample.domain.exception.UniqueConstraintException;
 import com.cjrequena.sample.domain.mapper.CountryMapper;
 import com.cjrequena.sample.domain.model.Country;
 import com.cjrequena.sample.service.CountryService;
+import io.github.perplexhub.rsql.UnknownPropertyException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -202,12 +204,12 @@ public class CountryController {
         .collect(Collectors.toList());
 
       return ResponseEntity.ok(countries);
-    } catch (IllegalArgumentException e) {
-      log.error("Invalid request parameters: {}", e.getMessage());
-      return ResponseEntity.badRequest().build();
-    } catch (Exception e) {
-      log.error("Error retrieving countries: {}", e.getMessage(), e);
-      return ResponseEntity.badRequest().build();
+    } catch (IllegalArgumentException ex) {
+      log.warn("Invalid request parameters: {}", ex.getMessage());
+      throw new BadRequestException(ex.getMessage());
+    } catch (UnknownPropertyException ex) {
+      log.warn("Unknown property: {}", ex.getMessage(), ex);
+      throw new BadRequestException(ex.getMessage());
     }
   }
 

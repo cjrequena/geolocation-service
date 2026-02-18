@@ -9,6 +9,7 @@ import com.cjrequena.sample.domain.exception.*;
 import com.cjrequena.sample.domain.mapper.RegionMapper;
 import com.cjrequena.sample.domain.model.Region;
 import com.cjrequena.sample.service.RegionService;
+import io.github.perplexhub.rsql.UnknownPropertyException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -130,26 +131,81 @@ public class RegionController {
   }
 
   /**
-   * Get all regions.
+   * Get all regions with optional filtering, sorting, and pagination.
    *
-   * @return list of all regions
+   * @param filters RSQL filter expression (e.g., "active==true;postalCode==94102")
+   * @param offset the offset for pagination (0-based)
+   * @param limit the maximum number of results to return
+   * @param sort the sort expression (e.g., "id,asc" or "name,desc;createdAt,asc")
+   * @return list of regions matching the criteria
    */
   @GetMapping
   @Operation(
-    summary = "Get all regions",
-    description = "Retrieves all regions"
+    summary = "Get all regions with filtering, sorting, and pagination",
+    description = "Retrieves regions with optional RSQL filters, sorting, and pagination support"
   )
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Regions retrieved successfully")
+    @ApiResponse(responseCode = "200", description = "Regions retrieved successfully"),
+    @ApiResponse(responseCode = "400", description = "Invalid filter or sort expression")
   })
-  public ResponseEntity<List<RegionResponseDTO>> retrieve() {
-    log.debug("Getting all regions");
+  public ResponseEntity<List<RegionResponseDTO>> retrieve(
+    @Parameter(
+      name = "filters",
+      description = "RSQL filter expression (e.g., 'active==true', 'postalCode==94102', 'name=like=\"Bridge\"')",
+      example = "active==true;postalCode==94102"
+    )
+    @RequestParam(value = "filters", required = false) String filters,
 
-    List<RegionResponseDTO> regions = regionService.findAll().stream()
-      .map(regionMapper::domainToResponseDTO)
-      .collect(Collectors.toList());
+    @Parameter(
+      name = "offset",
+      description = "Offset for pagination (0-based)",
+      example = "0"
+    )
+    @RequestParam(value = "offset", required = false) Integer offset,
 
-    return ResponseEntity.ok(regions);
+    @Parameter(
+      name = "limit",
+      description = "Maximum number of results to return",
+      example = "20"
+    )
+    @RequestParam(value = "limit", required = false) Integer limit,
+
+    @Parameter(
+      name = "sort",
+      description = "Sort expression (e.g., 'id,asc', 'name,desc', 'postalCode,asc;name,desc')",
+      example = "name,asc"
+    )
+    @RequestParam(value = "sort", required = false) String sort
+  ) {
+    log.debug("Getting regions with filters: {}, offset: {}, limit: {}, sort: {}",
+      filters, offset, limit, sort);
+
+    try {
+      // If no filters, offset, limit, or sort provided, use the cached findAll()
+      if (filters == null && offset == null && limit == null && sort == null) {
+        List<RegionResponseDTO> regions = regionService
+          .findAll()
+          .stream()
+          .map(regionMapper::domainToResponseDTO)
+          .collect(Collectors.toList());
+        return ResponseEntity.ok(regions);
+      }
+
+      // Otherwise, use the search method with filters/sorting/pagination
+      List<RegionResponseDTO> regions = regionService
+        .findAll(filters, offset, limit, sort)
+        .stream()
+        .map(regionMapper::domainToResponseDTO)
+        .collect(Collectors.toList());
+
+      return ResponseEntity.ok(regions);
+    } catch (IllegalArgumentException ex) {
+      log.warn("Invalid request parameters: {}", ex.getMessage());
+      throw new BadRequestException(ex.getMessage());
+    } catch (UnknownPropertyException ex) {
+      log.warn("Unknown property: {}", ex.getMessage(), ex);
+      throw new BadRequestException(ex.getMessage());
+    }
   }
 
   /**

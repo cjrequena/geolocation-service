@@ -2,11 +2,13 @@ package com.cjrequena.sample.controller;
 
 import com.cjrequena.sample.controller.dto.GeoShapeRequestDTO;
 import com.cjrequena.sample.controller.dto.GeoShapeResponseDTO;
+import com.cjrequena.sample.controller.exception.BadRequestException;
 import com.cjrequena.sample.domain.mapper.GeoShapeMapper;
 import com.cjrequena.sample.domain.model.GeoShape;
 import com.cjrequena.sample.domain.model.enums.GeometryType;
 import com.cjrequena.sample.service.GeoShapeService;
 import com.cjrequena.sample.shared.common.util.WKTParserUtil;
+import io.github.perplexhub.rsql.UnknownPropertyException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -195,12 +197,12 @@ public class GeoShapeController {
         .collect(Collectors.toList());
 
       return ResponseEntity.ok(geoShapes);
-    } catch (IllegalArgumentException e) {
-      log.error("Invalid request parameters: {}", e.getMessage());
-      return ResponseEntity.badRequest().build();
-    } catch (Exception e) {
-      log.error("Error retrieving geoShapes: {}", e.getMessage(), e);
-      return ResponseEntity.badRequest().build();
+    } catch (IllegalArgumentException ex) {
+      log.warn("Invalid request parameters: {}", ex.getMessage());
+      throw new BadRequestException(ex.getMessage());
+    } catch (UnknownPropertyException ex) {
+      log.warn("Unknown property: {}", ex.getMessage(), ex);
+      throw new BadRequestException(ex.getMessage());
     }
   }
 
