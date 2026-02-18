@@ -73,7 +73,7 @@ public class CountryController {
         content = @Content(schema = @Schema(implementation = CountryResponseDTO.class))
       ),
       @ApiResponse(responseCode = "400", description = "Invalid request data"),
-      @ApiResponse(responseCode = "409", description = "Country with same ISO code already exists")
+      @ApiResponse(responseCode = "409", description = "Unique constraint violation")
     })
   public ResponseEntity<CountryResponseDTO> create(@Valid @RequestBody CountryRequestDTO requestDTO) {
 
@@ -124,15 +124,10 @@ public class CountryController {
   public ResponseEntity<CountryResponseDTO> retrieveById(
     @Parameter(description = "Country ID", required = true)
     @PathVariable UUID id) {
-
     try {
       log.debug("Getting country by ID: {}", id);
-
-      return countryService
-        .findById(id)
-        .map(countryMapper::domainToResponseDTO)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
+      Country country = countryService.findById(id);
+      return ResponseEntity.ok(this.countryMapper.domainToResponseDTO(country));
     } catch (CountryNotFoundException ex) {
       throw new NotFoundException("Country with ID %s was not found".formatted(id), ex);
     }
@@ -236,7 +231,8 @@ public class CountryController {
         content = @Content(schema = @Schema(implementation = CountryResponseDTO.class))
       ),
       @ApiResponse(responseCode = "404", description = "Country not found"),
-      @ApiResponse(responseCode = "400", description = "Invalid request data")
+      @ApiResponse(responseCode = "400", description = "Invalid request data"),
+      @ApiResponse(responseCode = "409", description = "Unique constraint violation")
     }
   )
   public ResponseEntity<CountryResponseDTO> update(
@@ -281,14 +277,10 @@ public class CountryController {
   public ResponseEntity<Void> delete(
     @Parameter(description = "Country ID", required = true)
     @PathVariable UUID id) {
-
     try {
       log.info("Deleting country with ID: {}", id);
-
       countryService.deleteById(id);
-
       log.info("Country deleted with ID: {}", id);
-
       return ResponseEntity.noContent().build();
     } catch (CountryNotFoundException ex) {
       throw new NotFoundException("Country with ID %s was not found".formatted(id), ex);

@@ -96,7 +96,6 @@ public class CountryService extends BaseService<CountryEntity, Country> {
     try {
       CountryEntity entity = countryMapper.toEntity(country);
       CountryEntity savedEntity = countryRepository.saveAndFlush(entity);
-
       Country createdCountry = countryMapper.toDomain(savedEntity);
 
       // Cache update (best effort)
@@ -125,7 +124,7 @@ public class CountryService extends BaseService<CountryEntity, Country> {
    * @param id the country ID
    * @return Optional containing the country if found
    */
-  public Optional<Country> findById(UUID id) {
+  public Country findById(UUID id) {
     log.debug("Finding country by ID: {}", id);
 
     // Try cache first (cache-aside pattern)
@@ -134,7 +133,7 @@ public class CountryService extends BaseService<CountryEntity, Country> {
         Optional<Country> cachedCountry = this.countryCacheRedisHashOpsRepository.retrieveById(id);
         if (cachedCountry.isPresent()) {
           log.debug("Country found in cache: {}", id);
-          return cachedCountry;
+          return cachedCountry.get();
         }
         log.debug("Country not found in cache, querying database: {}", id);
       } catch (Exception e) {
@@ -143,12 +142,15 @@ public class CountryService extends BaseService<CountryEntity, Country> {
     }
 
     // Cache miss or disabled - query database
-    Optional<Country> country = countryRepository.findById(id).map(countryMapper::toDomain);
+   Country country = countryRepository
+     .findById(id)
+     .map(countryMapper::toDomain)
+     .orElseThrow(()-> new CountryNotFoundException("Country not found with ID: %s".formatted(id)));
 
     // Update cache on successful database hit
-    if (cacheConfigurationProperties.isCacheEnabled() && country.isPresent()) {
+    if (cacheConfigurationProperties.isCacheEnabled()) {
       try {
-        countryCacheRedisHashOpsRepository.save(country.get());
+        countryCacheRedisHashOpsRepository.save(country);
         log.debug("Country cached after database query: {}", id);
       } catch (Exception e) {
         log.warn("Failed to cache country after database query: {}", id, e);
@@ -252,7 +254,7 @@ public class CountryService extends BaseService<CountryEntity, Country> {
       log.info("Country updated with ID: {}", savedEntity.getId());
       return updatedCountry;
     } catch (DataIntegrityViolationException ex) {
-      final String message = String.format("Unique constraint violation while creating country: %s", country.getName());
+      final String message = String.format("Unique constraint violation while updating country: %s", country.getName());
       log.warn(message);
       throw new UniqueConstraintException(message, ex);
     }
@@ -267,7 +269,7 @@ public class CountryService extends BaseService<CountryEntity, Country> {
   public void deleteById(UUID id) {
     log.debug("Deleting country with ID: {}", id);
     if (!countryRepository.existsById(id)) {
-      throw new IllegalArgumentException("Country not found with ID: " + id);
+      throw new CountryNotFoundException("Country not found with ID: " + id);
     }
 
     countryRepository.deleteById(id);

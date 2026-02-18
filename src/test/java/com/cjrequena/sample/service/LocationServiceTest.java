@@ -79,14 +79,14 @@ class LocationServiceTest {
   @DisplayName("Should create location successfully")
   void shouldCreateLocation() {
     when(locationMapper.toEntity(locationDomain)).thenReturn(locationEntity);
-    when(locationRepository.save(locationEntity)).thenReturn(locationEntity);
+    when(locationRepository.saveAndFlush(locationEntity)).thenReturn(locationEntity);
     when(locationMapper.toDomain(locationEntity)).thenReturn(locationDomain);
     when(zoneRepository.findById(zoneId)).thenReturn(Optional.of(new ZoneEntity()));
 
     Location result = locationService.create(locationDomain);
 
     assertThat(result).isNotNull();
-    verify(locationRepository).save(locationEntity);
+    verify(locationRepository).saveAndFlush(locationEntity);
   }
 
   @Test
@@ -111,9 +111,9 @@ class LocationServiceTest {
     when(locationRepository.findById(locationId)).thenReturn(Optional.of(locationEntity));
     when(locationMapper.toDomain(locationEntity)).thenReturn(locationDomain);
 
-    Optional<Location> result = locationService.findById(locationId);
+    Location result = locationService.findById(locationId);
 
-    assertThat(result).isPresent();
+    assertThat(result).isNotNull();
   }
 
   //  @Test
@@ -196,14 +196,14 @@ class LocationServiceTest {
   void shouldUpdateLocation() {
     when(locationRepository.findById(locationId)).thenReturn(Optional.of(locationEntity));
     when(locationMapper.toEntity(locationDomain)).thenReturn(locationEntity);
-    when(locationRepository.save(locationEntity)).thenReturn(locationEntity);
+    when(locationRepository.saveAndFlush(locationEntity)).thenReturn(locationEntity);
     when(locationMapper.toDomain(locationEntity)).thenReturn(locationDomain);
     when(zoneRepository.findById(zoneId)).thenReturn(Optional.of(new ZoneEntity()));
 
     Location result = locationService.update(locationId, locationDomain);
 
     assertThat(result).isNotNull();
-    verify(locationRepository).save(locationEntity);
+    verify(locationRepository).saveAndFlush(locationEntity);
   }
 
   @Test

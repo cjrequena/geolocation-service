@@ -1,6 +1,7 @@
 package com.cjrequena.sample.service;
 
 import com.cjrequena.sample.configuration.CacheConfigurationProperties;
+import com.cjrequena.sample.domain.exception.RegionNotFoundException;
 import com.cjrequena.sample.domain.mapper.RegionMapper;
 import com.cjrequena.sample.domain.model.Region;
 import com.cjrequena.sample.persistence.entity.RegionEntity;
@@ -102,7 +103,7 @@ public class RegionService extends BaseService<RegionEntity, Region> {
     return createdRegion;
   }
 
-  public Optional<Region> findById(UUID id) {
+  public Region findById(UUID id) {
     log.debug("Finding region by ID: {}", id);
 
     // Try cache first (cache-aside pattern)
@@ -111,7 +112,7 @@ public class RegionService extends BaseService<RegionEntity, Region> {
         Optional<Region> cachedRegion = regionCacheRedisHashOpsRepository.retrieveById(id);
         if (cachedRegion.isPresent()) {
           log.debug("Region found in cache: {}", id);
-          return cachedRegion;
+          return cachedRegion.get();
         }
         log.debug("Region not found in cache, querying database: {}", id);
       } catch (Exception e) {
@@ -120,12 +121,15 @@ public class RegionService extends BaseService<RegionEntity, Region> {
     }
 
     // Cache miss or disabled - query database
-    Optional<Region> region = regionRepository.findById(id).map(regionMapper::toDomain);
+    Region region = regionRepository
+      .findById(id)
+      .map(regionMapper::toDomain)
+      .orElseThrow(() -> new RegionNotFoundException("Region not found with ID: %s".formatted(id)));
 
     // Update cache on successful database hit
-    if (cacheConfigurationProperties.isCacheEnabled() && region.isPresent()) {
+    if (cacheConfigurationProperties.isCacheEnabled()) {
       try {
-        regionCacheRedisHashOpsRepository.save(region.get());
+        regionCacheRedisHashOpsRepository.save(region);
         log.debug("Region cached after database query: {}", id);
       } catch (Exception e) {
         log.warn("Failed to cache region after database query: {}", id, e);

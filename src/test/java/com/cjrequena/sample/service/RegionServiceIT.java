@@ -1,5 +1,6 @@
 package com.cjrequena.sample.service;
 
+import com.cjrequena.sample.domain.exception.RegionNotFoundException;
 import com.cjrequena.sample.domain.model.Country;
 import com.cjrequena.sample.domain.model.Region;
 import com.cjrequena.sample.domain.model.enums.RegionType;
@@ -16,7 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -78,10 +78,8 @@ class RegionServiceIT {
   void shouldFindById() {
     Region created = regionService.create(createRegionDomain("Catalonia", countryId, RegionType.AUTONOMOUS_COMMUNITY, true));
 
-    Optional<Region> result = regionService.findById(created.getId());
-
-    assertThat(result).isPresent();
-    assertThat(result.get().getName()).isEqualTo("Catalonia");
+    Region result = regionService.findById(created.getId());
+    assertThat(result.getName()).isEqualTo("Catalonia");
   }
 
 //  @Test
@@ -174,7 +172,9 @@ class RegionServiceIT {
 
     regionService.deleteById(created.getId());
 
-    assertThat(regionService.findById(created.getId())).isEmpty();
+    assertThatThrownBy(() -> regionService.findById(UUID.randomUUID()))
+      .isInstanceOf(RegionNotFoundException.class)
+      .hasMessageContaining("Region not found");
   }
 
 //  @Test

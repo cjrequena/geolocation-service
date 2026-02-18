@@ -15,7 +15,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,19 +67,16 @@ class CountryServiceIT {
   @DisplayName("Should find country by ID")
   void shouldFindById() {
     Country created = countryService.create(createCountryDomain("Spain", "ES", "ESP", true));
-
-    Optional<Country> result = countryService.findById(created.getId());
-
-    assertThat(result).isPresent();
-    assertThat(result.get().getName()).isEqualTo("Spain");
+    Country result = countryService.findById(created.getId());
+    assertThat(result.getName()).isEqualTo("Spain");
   }
 
   @Test
-  @DisplayName("Should return empty when country not found by ID")
-  void shouldReturnEmptyWhenNotFoundById() {
-    Optional<Country> result = countryService.findById(UUID.randomUUID());
-
-    assertThat(result).isEmpty();
+  @DisplayName("Should throw exception when country not found by ID")
+  void shouldThrownExceptionWhenNotFoundById() {
+    assertThatThrownBy(() -> countryService.findById(UUID.randomUUID()))
+      .isInstanceOf(CountryNotFoundException.class)
+      .hasMessageContaining("Country not found");
   }
 
 //  @Test
@@ -214,14 +210,16 @@ class CountryServiceIT {
 
     countryService.deleteById(created.getId());
 
-    assertThat(countryService.findById(created.getId())).isEmpty();
+    assertThatThrownBy(() -> countryService.findById(created.getId()))
+      .isInstanceOf(CountryNotFoundException.class)
+      .hasMessageContaining("Country not found");
   }
 
   @Test
   @DisplayName("Should throw exception when deleting non-existent country")
   void shouldThrowExceptionWhenDeletingNonExistent() {
     assertThatThrownBy(() -> countryService.deleteById(UUID.randomUUID()))
-      .isInstanceOf(IllegalArgumentException.class)
+      .isInstanceOf(CountryNotFoundException.class)
       .hasMessageContaining("Country not found");
   }
 

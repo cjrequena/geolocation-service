@@ -20,7 +20,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -130,11 +129,8 @@ class AreaServiceIT {
   @DisplayName("Should find area by ID")
   void shouldFindById() {
     Area created = areaService.create(createAreaDomain("Example", cityId, AreaType.DISTRICT, true));
-
-    Optional<Area> result = areaService.findById(created.getId());
-
-    assertThat(result).isPresent();
-    assertThat(result.get().getName()).isEqualTo("Example");
+    Area result = areaService.findById(created.getId());
+    assertThat(result.getName()).isEqualTo("Example");
   }
 
   @Test

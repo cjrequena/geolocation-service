@@ -2,8 +2,10 @@ package com.cjrequena.sample.controller;
 
 import com.cjrequena.sample.controller.dto.CityRequestDTO;
 import com.cjrequena.sample.controller.dto.CityResponseDTO;
+import com.cjrequena.sample.controller.exception.BadRequestException;
 import com.cjrequena.sample.controller.exception.ConflictException;
-import com.cjrequena.sample.domain.exception.UniqueConstraintException;
+import com.cjrequena.sample.controller.exception.NotFoundException;
+import com.cjrequena.sample.domain.exception.*;
 import com.cjrequena.sample.domain.mapper.CityMapper;
 import com.cjrequena.sample.domain.model.City;
 import com.cjrequena.sample.service.CityService;
@@ -61,10 +63,13 @@ public class CityController {
     description = "Creates a new city within a region"
   )
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "201", description = "City created successfully",
-      content = @Content(schema = @Schema(implementation = CityResponseDTO.class))),
+    @ApiResponse(
+      responseCode = "201",
+      description = "City created successfully",
+      content = @Content(schema = @Schema(implementation = CityResponseDTO.class))
+    ),
     @ApiResponse(responseCode = "400", description = "Invalid request data"),
-    @ApiResponse(responseCode = "404", description = "Parent region not found")
+    @ApiResponse(responseCode = "409", description = "Unique constraint violation")
   })
   public ResponseEntity<CityResponseDTO> create(@Valid @RequestBody CityRequestDTO requestDTO) {
     try {
@@ -85,6 +90,12 @@ public class CityController {
         .created(URI.create(ENDPOINT + created.getId()))
         .header("Accept-Version", VND_SAMPLE_SERVICE_V1)
         .body(responseDTO);
+    } catch (RegionNotFoundException ex) {
+      throw new BadRequestException("City with ID %s was not found".formatted(requestDTO.getRegionId()), ex);
+    } catch (GeoShapeNotFoundException ex) {
+      throw new BadRequestException("GeoShape with ID %s was not found".formatted(requestDTO.getGeoShapeId()), ex);
+    } catch (RegionRequiredException ex) {
+      throw new BadRequestException(ex.getMessage());
     } catch (UniqueConstraintException ex) {
       throw new ConflictException(ex.getMessage());
     }
@@ -99,20 +110,23 @@ public class CityController {
   @GetMapping("/{id}")
   @Operation(summary = "Get city by ID", description = "Retrieves a city by its unique identifier")
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "City found",
-      content = @Content(schema = @Schema(implementation = CityResponseDTO.class))),
+    @ApiResponse(
+      responseCode = "200",
+      description = "City found",
+      content = @Content(schema = @Schema(implementation = CityResponseDTO.class))
+    ),
     @ApiResponse(responseCode = "404", description = "City not found")
   })
   public ResponseEntity<CityResponseDTO> retrieveById(
     @Parameter(description = "City ID", required = true)
     @PathVariable UUID id) {
-
-    log.debug("Getting city by ID: {}", id);
-
-    return cityService.findById(id)
-      .map(cityMapper::domainToResponseDTO)
-      .map(ResponseEntity::ok)
-      .orElse(ResponseEntity.notFound().build());
+    try {
+      log.debug("Getting city by ID: {}", id);
+      City city = cityService.findById(id);
+      return ResponseEntity.ok(this.cityMapper.domainToResponseDTO(city));
+    } catch (CityNotFoundException ex) {
+      throw new NotFoundException("City with ID %s was not found".formatted(id), ex);
+    }
   }
 
   /**
@@ -135,8 +149,6 @@ public class CityController {
     return ResponseEntity.ok(cities);
   }
 
-
-
   /**
    * Update a city.
    *
@@ -147,29 +159,41 @@ public class CityController {
   @PutMapping("/{id}")
   @Operation(summary = "Update a city", description = "Updates an existing city")
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "City updated successfully",
-      content = @Content(schema = @Schema(implementation = CityResponseDTO.class))),
+    @ApiResponse(
+      responseCode = "200",
+      description = "City updated successfully",
+      content = @Content(schema = @Schema(implementation = CityResponseDTO.class))
+    ),
     @ApiResponse(responseCode = "404", description = "City not found"),
-    @ApiResponse(responseCode = "400", description = "Invalid request data")
+    @ApiResponse(responseCode = "400", description = "Invalid request data"),
+    @ApiResponse(responseCode = "409", description = "Unique constraint violation")
   })
   public ResponseEntity<CityResponseDTO> update(
     @Parameter(description = "City ID", required = true)
     @PathVariable UUID id,
     @Valid @RequestBody CityRequestDTO requestDTO) {
 
-    log.info("Updating city with ID: {}", id);
+    try {
+      log.info("Updating city with ID: {}", id);
 
-    // Convert DTO to domain model
-    City city = this.cityMapper.requestDTOtoDomain(requestDTO);
-    // Update via service
-    City updated = cityService.update(id, city);
+      // Convert DTO to domain model
+      City city = this.cityMapper.requestDTOtoDomain(requestDTO);
+      // Update via service
+      City updated = cityService.update(id, city);
 
-    // Convert to response DTO
-    CityResponseDTO responseDTO = cityMapper.domainToResponseDTO(updated);
+      // Convert to response DTO
+      CityResponseDTO responseDTO = cityMapper.domainToResponseDTO(updated);
 
-    log.info("City updated with ID: {}", id);
+      log.info("City updated with ID: {}", id);
 
-    return ResponseEntity.ok(responseDTO);
+      return ResponseEntity.ok(responseDTO);
+    } catch (CityNotFoundException ex) {
+      throw new NotFoundException("City with ID %s was not found".formatted(id), ex);
+    } catch (GeoShapeNotFoundException ex) {
+      throw new BadRequestException("GeoShape with ID %s was not found".formatted(requestDTO.getGeoShapeId()), ex);
+    } catch (UniqueConstraintException ex) {
+      throw new ConflictException(ex.getMessage());
+    }
   }
 
   /**
@@ -188,19 +212,23 @@ public class CityController {
     @Parameter(description = "City ID", required = true)
     @PathVariable UUID id) {
 
-    log.info("Deleting city with ID: {}", id);
+    try {
+      log.info("Deleting city with ID: {}", id);
 
-    cityService.deleteById(id);
+      cityService.deleteById(id);
 
-    log.info("City deleted with ID: {}", id);
+      log.info("City deleted with ID: {}", id);
 
-    return ResponseEntity.noContent().build();
+      return ResponseEntity.noContent().build();
+    } catch (CityNotFoundException ex) {
+      throw new NotFoundException("City with ID %s was not found".formatted(id), ex);
+    }
   }
 
   /**
 
 
-  /**
+   /**
    * Check if a city exists by ID.
    *
    * @param id the city ID

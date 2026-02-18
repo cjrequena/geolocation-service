@@ -35,7 +35,7 @@ class AreaServiceTest {
   private CityRepository cityRepository;
 
   @Mock
-  private  GeoShapeRepository geoShapeRepository;
+  private GeoShapeRepository geoShapeRepository;
 
   @Mock
   private AreaCacheRedisHashOpsRepository areaCacheRedisHashOpsRepository;
@@ -77,7 +77,6 @@ class AreaServiceTest {
     when(areaMapper.toDomain(areaEntity)).thenReturn(areaDomain);
     when(cityRepository.findById(cityId)).thenReturn(Optional.of(new CityEntity()));
 
-
     Area result = areaService.create(areaDomain);
 
     assertThat(result).isNotNull();
@@ -90,9 +89,8 @@ class AreaServiceTest {
     when(areaRepository.findById(areaId)).thenReturn(Optional.of(areaEntity));
     when(areaMapper.toDomain(areaEntity)).thenReturn(areaDomain);
 
-    Optional<Area> result = areaService.findById(areaId);
-
-    assertThat(result).isPresent();
+    Area result = areaService.findById(areaId);
+    assertThat(result).isNotNull();
   }
 
   @Test

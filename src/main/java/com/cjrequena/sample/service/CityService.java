@@ -90,7 +90,7 @@ public class CityService extends BaseService<CityEntity, City> {
     if (city.getRegionId() != null) {
       regionRepository
         .findById(city.getRegionId())
-        .orElseThrow(() -> new AreaNotFoundException("Region not found with ID: %s".formatted(city.getRegionId())));
+        .orElseThrow(() -> new RegionNotFoundException("Region not found with ID: %s".formatted(city.getRegionId())));
     } else {
       throw new RegionRequiredException("Region ID is required for creating a zone");
     }
@@ -125,7 +125,7 @@ public class CityService extends BaseService<CityEntity, City> {
     }
   }
 
-  public Optional<City> findById(UUID id) {
+  public City findById(UUID id) {
     log.debug("Finding city by ID: {}", id);
 
     // Try cache first (cache-aside pattern)
@@ -134,7 +134,7 @@ public class CityService extends BaseService<CityEntity, City> {
         Optional<City> cachedCity = cityCacheRedisHashOpsRepository.retrieveById(id);
         if (cachedCity.isPresent()) {
           log.debug("City found in cache: {}", id);
-          return cachedCity;
+          return cachedCity.get();
         }
         log.debug("City not found in cache, querying database: {}", id);
       } catch (Exception e) {
@@ -158,7 +158,7 @@ public class CityService extends BaseService<CityEntity, City> {
       }
     }
 
-    return Optional.of(city);
+    return city;
   }
 
   public List<City> findAll() {
@@ -225,7 +225,7 @@ public class CityService extends BaseService<CityEntity, City> {
 
     CityEntity existingEntity = cityRepository
       .findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("City not found with ID: " + id));
+      .orElseThrow(() -> new CityNotFoundException("City not found with ID: %s".formatted(id)));
 
     try {
       CityEntity updatedEntity = cityMapper.toEntity(city);

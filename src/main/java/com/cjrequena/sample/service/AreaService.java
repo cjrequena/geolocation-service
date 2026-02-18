@@ -126,7 +126,7 @@ public class AreaService extends BaseService<AreaEntity, Area> {
     }
   }
 
-  public Optional<Area> findById(UUID id) {
+  public Area findById(UUID id) {
     log.debug("Finding area by ID: {}", id);
 
     // Try cache first (cache-aside pattern)
@@ -135,7 +135,7 @@ public class AreaService extends BaseService<AreaEntity, Area> {
         Optional<Area> cachedArea = areaCacheRedisHashOpsRepository.retrieveById(id);
         if (cachedArea.isPresent()) {
           log.debug("Area found in cache: {}", id);
-          return cachedArea;
+          return cachedArea.get();
         }
         log.debug("Area not found in cache, querying database: {}", id);
       } catch (Exception e) {
@@ -159,7 +159,7 @@ public class AreaService extends BaseService<AreaEntity, Area> {
       }
     }
 
-    return Optional.of(area);
+    return area;
   }
 
   public List<Area> findAll() {

@@ -69,7 +69,7 @@ public class AreaController {
         content = @Content(schema = @Schema(implementation = AreaResponseDTO.class))
       ),
       @ApiResponse(responseCode = "400", description = "Invalid request data"),
-      @ApiResponse(responseCode = "404", description = "Parent city not found")
+      @ApiResponse(responseCode = "409", description = "Unique constraint violation")
     }
   )
   public ResponseEntity<AreaResponseDTO> create(@Valid @RequestBody AreaRequestDTO requestDTO) {
@@ -92,9 +92,9 @@ public class AreaController {
         .header("Accept-Version", ACCEPT_VERSION)
         .body(responseDTO);
     } catch (CityNotFoundException ex) {
-      throw new NotFoundException("City with ID %s was not found".formatted(requestDTO.getCityId()), ex);
+      throw new BadRequestException("City with ID %s was not found".formatted(requestDTO.getCityId()), ex);
     } catch (GeoShapeNotFoundException ex) {
-      throw new NotFoundException("GeoShape with ID %s was not found".formatted(requestDTO.getGeoShapeId()), ex);
+      throw new BadRequestException("GeoShape with ID %s was not found".formatted(requestDTO.getGeoShapeId()), ex);
     } catch (CityRequiredException ex) {
       throw new BadRequestException(ex.getMessage());
     } catch (UniqueConstraintException ex) {
@@ -115,7 +115,8 @@ public class AreaController {
       @ApiResponse(
         responseCode = "200",
         description = "Area found",
-        content = @Content(schema = @Schema(implementation = AreaResponseDTO.class))),
+        content = @Content(schema = @Schema(implementation = AreaResponseDTO.class))
+      ),
       @ApiResponse(responseCode = "404", description = "Area not found")
     }
   )
@@ -124,12 +125,8 @@ public class AreaController {
     @PathVariable UUID id) {
     try {
       log.debug("Getting area by ID: {}", id);
-
-      return areaService
-        .findById(id)
-        .map(areaMapper::domainToResponseDTO)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
+      Area area = areaService.findById(id);
+      return ResponseEntity.ok(this.areaMapper.domainToResponseDTO(area));
     } catch (AreaNotFoundException ex) {
       throw new NotFoundException("Area with ID %s was not found".formatted(id), ex);
     }
@@ -168,11 +165,14 @@ public class AreaController {
     description = "Updates an existing area"
   )
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Area updated successfully",
+    @ApiResponse(
+      responseCode = "200",
+      description = "Area updated successfully",
       content = @Content(schema = @Schema(implementation = AreaResponseDTO.class))
     ),
     @ApiResponse(responseCode = "404", description = "Area not found"),
-    @ApiResponse(responseCode = "400", description = "Invalid request data")
+    @ApiResponse(responseCode = "400", description = "Invalid request data"),
+    @ApiResponse(responseCode = "409", description = "Unique constraint violation")
   })
   public ResponseEntity<AreaResponseDTO> update(
     @Parameter(description = "Area ID", required = true)
@@ -197,7 +197,7 @@ public class AreaController {
     } catch (AreaNotFoundException ex) {
       throw new NotFoundException("Area with ID %s was not found".formatted(id), ex);
     } catch (GeoShapeNotFoundException ex) {
-      throw new NotFoundException("GeoShape with ID %s was not found".formatted(requestDTO.getGeoShapeId()), ex);
+      throw new BadRequestException("GeoShape with ID %s was not found".formatted(requestDTO.getGeoShapeId()), ex);
     } catch (UniqueConstraintException ex) {
       throw new ConflictException(ex.getMessage());
     }
@@ -226,7 +226,7 @@ public class AreaController {
       log.info("Area deleted with ID: {}", id);
 
       return ResponseEntity.noContent().build();
-    } catch (ZoneNotFoundException ex) {
+    } catch (AreaNotFoundException ex) {
       throw new NotFoundException("Area with ID %s was not found".formatted(id), ex);
     }
   }

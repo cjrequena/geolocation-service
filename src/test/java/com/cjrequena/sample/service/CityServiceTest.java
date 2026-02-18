@@ -85,9 +85,8 @@ class CityServiceTest {
     when(cityRepository.findById(cityId)).thenReturn(Optional.of(cityEntity));
     when(cityMapper.toDomain(cityEntity)).thenReturn(cityDomain);
 
-    Optional<City> result = cityService.findById(cityId);
-
-    assertThat(result).isPresent();
+    City result = cityService.findById(cityId);
+    assertThat(result).isNotNull();
   }
 
 

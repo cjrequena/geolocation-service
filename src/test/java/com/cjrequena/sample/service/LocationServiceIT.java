@@ -18,7 +18,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
@@ -79,10 +78,8 @@ class LocationServiceIT {
   void shouldFindById() {
     Location created = locationService.create(createLocationDomain("123 Main St", 40.4168, -3.7038, true));
 
-    Optional<Location> result = locationService.findById(created.getId());
-
-    assertThat(result).isPresent();
-    assertThat(result.get().getAddress()).isEqualTo("123 Main St");
+    Location result = locationService.findById(created.getId());
+    assertThat(result.getAddress()).isEqualTo("123 Main St");
   }
 
 //  @Test

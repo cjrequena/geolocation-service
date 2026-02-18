@@ -130,7 +130,7 @@ public class ZoneService extends BaseService<ZoneEntity, Zone> {
     }
   }
 
-  public Optional<Zone> findById(UUID id) {
+  public Zone findById(UUID id) {
     log.debug("Finding zone by ID: {}", id);
 
     // Try cache first (cache-aside pattern)
@@ -139,7 +139,7 @@ public class ZoneService extends BaseService<ZoneEntity, Zone> {
         Optional<Zone> cachedZone = zoneCacheRedisHashOpsRepository.retrieveById(id);
         if (cachedZone.isPresent()) {
           log.debug("Zone found in cache: {}", id);
-          return cachedZone;
+          return cachedZone.get();
         }
         log.debug("Zone not found in cache, querying database: {}", id);
       } catch (Exception e) {
@@ -163,7 +163,7 @@ public class ZoneService extends BaseService<ZoneEntity, Zone> {
       }
     }
 
-    return Optional.of(zone);
+    return zone;
   }
 
   public List<Zone> findAll() {

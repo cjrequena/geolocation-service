@@ -2,6 +2,10 @@ package com.cjrequena.sample.controller;
 
 import com.cjrequena.sample.controller.dto.RegionRequestDTO;
 import com.cjrequena.sample.controller.dto.RegionResponseDTO;
+import com.cjrequena.sample.controller.exception.BadRequestException;
+import com.cjrequena.sample.controller.exception.ConflictException;
+import com.cjrequena.sample.controller.exception.NotFoundException;
+import com.cjrequena.sample.domain.exception.*;
 import com.cjrequena.sample.domain.mapper.RegionMapper;
 import com.cjrequena.sample.domain.model.Region;
 import com.cjrequena.sample.service.RegionService;
@@ -53,33 +57,48 @@ public class RegionController {
    * @return the created region with 201 status
    */
   @PostMapping
-  @Operation(summary = "Create a new region", description = "Creates a new region within a country")
+  @Operation(
+    summary = "Create a new region",
+    description = "Creates a new region within a country"
+  )
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "201", description = "Region created successfully",
-      content = @Content(schema = @Schema(implementation = RegionResponseDTO.class))),
+    @ApiResponse(
+      responseCode = "201",
+      description = "Region created successfully",
+      content = @Content(schema = @Schema(implementation = RegionResponseDTO.class))
+    ),
     @ApiResponse(responseCode = "400", description = "Invalid request data"),
-    @ApiResponse(responseCode = "404", description = "Parent country not found")
+    @ApiResponse(responseCode = "409", description = "Unique constraint violation")
   })
-  public ResponseEntity<RegionResponseDTO> create(
-    @Valid @RequestBody RegionRequestDTO requestDTO) {
+  public ResponseEntity<RegionResponseDTO> create(@Valid @RequestBody RegionRequestDTO requestDTO) {
 
-    log.info("Creating region: {} in country: {}", requestDTO.getName(), requestDTO.getCountryId());
+    try {
+      log.info("Creating region: {} in country: {}", requestDTO.getName(), requestDTO.getCountryId());
 
-    // Convert DTO to domain model
-    Region region = this.regionMapper.requestDTOtoDomain(requestDTO);
+      // Convert DTO to domain model
+      Region region = this.regionMapper.requestDTOtoDomain(requestDTO);
 
-    // Create via service
-    Region created = regionService.create(region);
+      // Create via service
+      Region created = regionService.create(region);
 
-    // Convert to response DTO
-    RegionResponseDTO responseDTO = regionMapper.domainToResponseDTO(created);
+      // Convert to response DTO
+      RegionResponseDTO responseDTO = regionMapper.domainToResponseDTO(created);
 
-    log.info("Region created with ID: {}", created.getId());
+      log.info("Region created with ID: {}", created.getId());
 
-    return ResponseEntity
-      .created(URI.create(ENDPOINT + created.getId()))
-      .header("Accept-Version", VND_SAMPLE_SERVICE_V1)
-      .body(responseDTO);
+      return ResponseEntity
+        .created(URI.create(ENDPOINT + created.getId()))
+        .header("Accept-Version", VND_SAMPLE_SERVICE_V1)
+        .body(responseDTO);
+    } catch (CountryNotFoundException ex) {
+      throw new BadRequestException("Country with ID %s was not found".formatted(requestDTO.getCountryId()), ex);
+    } catch (GeoShapeNotFoundException ex) {
+      throw new BadRequestException("GeoShape with ID %s was not found".formatted(requestDTO.getGeoShapeId()), ex);
+    } catch (CountryRequiredException ex) {
+      throw new BadRequestException(ex.getMessage());
+    } catch (UniqueConstraintException ex) {
+      throw new ConflictException(ex.getMessage());
+    }
   }
 
   /**
@@ -91,20 +110,23 @@ public class RegionController {
   @GetMapping("/{id}")
   @Operation(summary = "Get region by ID", description = "Retrieves a region by its unique identifier")
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Region found",
-      content = @Content(schema = @Schema(implementation = RegionResponseDTO.class))),
+    @ApiResponse(
+      responseCode = "200",
+      description = "Region found",
+      content = @Content(schema = @Schema(implementation = RegionResponseDTO.class))
+    ),
     @ApiResponse(responseCode = "404", description = "Region not found")
   })
   public ResponseEntity<RegionResponseDTO> retrieveById(
     @Parameter(description = "Region ID", required = true)
     @PathVariable UUID id) {
-
-    log.debug("Getting region by ID: {}", id);
-
-    return regionService.findById(id)
-      .map(regionMapper::domainToResponseDTO)
-      .map(ResponseEntity::ok)
-      .orElse(ResponseEntity.notFound().build());
+    try {
+      log.debug("Getting region by ID: {}", id);
+      Region region = regionService.findById(id);
+      return ResponseEntity.ok(this.regionMapper.domainToResponseDTO(region));
+    } catch (RegionNotFoundException ex) {
+      throw new NotFoundException("Region with ID %s was not found".formatted(id), ex);
+    }
   }
 
   /**
@@ -130,7 +152,6 @@ public class RegionController {
     return ResponseEntity.ok(regions);
   }
 
-
   /**
    * Update a region.
    *
@@ -141,10 +162,14 @@ public class RegionController {
   @PutMapping("/{id}")
   @Operation(summary = "Update a region", description = "Updates an existing region")
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Region updated successfully",
-      content = @Content(schema = @Schema(implementation = RegionResponseDTO.class))),
+    @ApiResponse(
+      responseCode = "200",
+      description = "Region updated successfully",
+      content = @Content(schema = @Schema(implementation = RegionResponseDTO.class))
+    ),
     @ApiResponse(responseCode = "404", description = "Region not found"),
-    @ApiResponse(responseCode = "400", description = "Invalid request data")
+    @ApiResponse(responseCode = "400", description = "Invalid request data"),
+    @ApiResponse(responseCode = "409", description = "Unique constraint violation")
   })
   public ResponseEntity<RegionResponseDTO> update(
     @Parameter(description = "Region ID", required = true)
@@ -152,20 +177,28 @@ public class RegionController {
     @Valid @RequestBody RegionRequestDTO requestDTO
   ) {
 
-    log.info("Updating region with ID: {}", id);
+    try {
+      log.info("Updating region with ID: {}", id);
 
-    // Convert DTO to domain model
-    Region region = this.regionMapper.requestDTOtoDomain(requestDTO);
+      // Convert DTO to domain model
+      Region region = this.regionMapper.requestDTOtoDomain(requestDTO);
 
-    // Update via service
-    Region updated = regionService.update(id, region);
+      // Update via service
+      Region updated = regionService.update(id, region);
 
-    // Convert to response DTO
-    RegionResponseDTO responseDTO = regionMapper.domainToResponseDTO(updated);
+      // Convert to response DTO
+      RegionResponseDTO responseDTO = regionMapper.domainToResponseDTO(updated);
 
-    log.info("Region updated with ID: {}", id);
+      log.info("Region updated with ID: {}", id);
 
-    return ResponseEntity.ok(responseDTO);
+      return ResponseEntity.ok(responseDTO);
+    } catch (RegionNotFoundException ex) {
+      throw new NotFoundException("Region with ID %s was not found".formatted(id), ex);
+    } catch (GeoShapeNotFoundException ex) {
+      throw new BadRequestException("GeoShape with ID %s was not found".formatted(requestDTO.getGeoShapeId()), ex);
+    } catch (UniqueConstraintException ex) {
+      throw new ConflictException(ex.getMessage());
+    }
   }
 
   /**
@@ -184,13 +217,17 @@ public class RegionController {
     @Parameter(description = "Region ID", required = true)
     @PathVariable UUID id) {
 
-    log.info("Deleting region with ID: {}", id);
+    try {
+      log.info("Deleting region with ID: {}", id);
 
-    regionService.deleteById(id);
+      regionService.deleteById(id);
 
-    log.info("Region deleted with ID: {}", id);
+      log.info("Region deleted with ID: {}", id);
 
-    return ResponseEntity.noContent().build();
+      return ResponseEntity.noContent().build();
+    } catch (RegionNotFoundException ex) {
+      throw new NotFoundException("Region with ID %s was not found".formatted(id), ex);
+    }
   }
 
   /**

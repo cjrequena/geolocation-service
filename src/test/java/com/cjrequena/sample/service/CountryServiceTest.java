@@ -96,20 +96,19 @@ class CountryServiceTest {
     when(countryRepository.findById(countryId)).thenReturn(Optional.of(countryEntity));
     when(countryMapper.toDomain(countryEntity)).thenReturn(countryDomain);
 
-    Optional<Country> result = countryService.findById(countryId);
+   Country result = countryService.findById(countryId);
 
-    assertThat(result).isPresent();
-    assertThat(result.get().getId()).isEqualTo(countryId);
+    assertThat(result.getId()).isEqualTo(countryId);
   }
 
   @Test
-  @DisplayName("Should return empty when country not found by ID")
-  void shouldReturnEmptyWhenNotFoundById() {
-    when(countryRepository.findById(countryId)).thenReturn(Optional.empty());
+  @DisplayName("Should throw CountryNotFoundException when country not found by ID")
+  void shouldThrowExceptionWhenNotFoundById() {
+    when(countryRepository.findById(countryId)).thenThrow(new CountryNotFoundException("Country not found with ID: %s".formatted(countryId)));
 
-    Optional<Country> result = countryService.findById(countryId);
-
-    assertThat(result).isEmpty();
+    assertThatThrownBy(() -> countryService.findById(countryId))
+      .isInstanceOf(CountryNotFoundException.class)
+      .hasMessageContaining("Country not found");
   }
 
 //  @Test
@@ -280,7 +279,7 @@ class CountryServiceTest {
     when(countryRepository.existsById(countryId)).thenReturn(false);
 
     assertThatThrownBy(() -> countryService.deleteById(countryId))
-      .isInstanceOf(IllegalArgumentException.class)
+      .isInstanceOf(CountryNotFoundException.class)
       .hasMessageContaining("Country not found");
   }
 

@@ -65,7 +65,7 @@ public class ZoneController {
         content = @Content(schema = @Schema(implementation = ZoneResponseDTO.class))
       ),
       @ApiResponse(responseCode = "400", description = "Invalid request data"),
-      @ApiResponse(responseCode = "404", description = "Parent area not found")
+      @ApiResponse(responseCode = "409", description = "Unique constraint violation")
     }
   )
   public ResponseEntity<ZoneResponseDTO> create(@Valid @RequestBody ZoneRequestDTO requestDTO) {
@@ -88,9 +88,9 @@ public class ZoneController {
         .header("Accept-Version", ACCEPT_VERSION)
         .body(responseDTO);
     } catch (AreaNotFoundException ex) {
-      throw new NotFoundException("Area with ID %s was not found".formatted(requestDTO.getAreaId()), ex);
+      throw new BadRequestException("Area with ID %s was not found".formatted(requestDTO.getAreaId()), ex);
     } catch (GeoShapeNotFoundException ex) {
-      throw new NotFoundException("GeoShape with ID %s was not found".formatted(requestDTO.getGeoShapeId()), ex);
+      throw new BadRequestException("GeoShape with ID %s was not found".formatted(requestDTO.getGeoShapeId()), ex);
     } catch (AreaRequiredException ex) {
       throw new BadRequestException(ex.getMessage());
     } catch (UniqueConstraintException ex) {
@@ -111,7 +111,8 @@ public class ZoneController {
       @ApiResponse(
         responseCode = "200",
         description = "Zone found",
-        content = @Content(schema = @Schema(implementation = ZoneResponseDTO.class))),
+        content = @Content(schema = @Schema(implementation = ZoneResponseDTO.class))
+      ),
       @ApiResponse(responseCode = "404", description = "Zone not found")
     }
   )
@@ -120,12 +121,8 @@ public class ZoneController {
     @PathVariable UUID id) {
     try {
       log.debug("Getting zone by ID: {}", id);
-
-      return zoneService
-        .findById(id)
-        .map(zoneMapper::domainToResponseDTO)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
+       Zone zone = zoneService.findById(id);
+      return ResponseEntity.ok(this.zoneMapper.domainToResponseDTO(zone));
     } catch (ZoneNotFoundException ex) {
       throw new NotFoundException("Zone with ID %s was not found".formatted(id), ex);
     }
@@ -163,10 +160,14 @@ public class ZoneController {
   @PutMapping("/{id}")
   @Operation(summary = "Update a zone", description = "Updates an existing zone")
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Zone updated successfully",
-      content = @Content(schema = @Schema(implementation = ZoneResponseDTO.class))),
+    @ApiResponse(
+      responseCode = "200",
+      description = "Zone updated successfully",
+      content = @Content(schema = @Schema(implementation = ZoneResponseDTO.class))
+    ),
     @ApiResponse(responseCode = "404", description = "Zone not found"),
-    @ApiResponse(responseCode = "400", description = "Invalid request data")
+    @ApiResponse(responseCode = "400", description = "Invalid request data"),
+    @ApiResponse(responseCode = "409", description = "Unique constraint violation")
   })
   public ResponseEntity<ZoneResponseDTO> update(
     @Parameter(description = "Zone ID", required = true)
@@ -190,7 +191,7 @@ public class ZoneController {
     } catch (ZoneNotFoundException ex) {
       throw new NotFoundException("Zone with ID %s was not found".formatted(id), ex);
     } catch (GeoShapeNotFoundException ex) {
-      throw new NotFoundException("GeoShape with ID %s was not found".formatted(requestDTO.getGeoShapeId()), ex);
+      throw new BadRequestException("GeoShape with ID %s was not found".formatted(requestDTO.getGeoShapeId()), ex);
     } catch (UniqueConstraintException ex) {
       throw new ConflictException(ex.getMessage());
     }

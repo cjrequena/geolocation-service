@@ -2,6 +2,7 @@ package com.cjrequena.sample.service;
 
 import com.cjrequena.sample.configuration.CacheConfigurationProperties;
 import com.cjrequena.sample.domain.exception.LocationNotFoundException;
+import com.cjrequena.sample.domain.exception.UniqueConstraintException;
 import com.cjrequena.sample.domain.exception.ZoneNotFoundException;
 import com.cjrequena.sample.domain.mapper.LocationMapper;
 import com.cjrequena.sample.domain.model.Location;
@@ -14,6 +15,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -98,25 +100,31 @@ public class LocationService extends BaseService<LocationEntity, Location> {
         .orElseThrow(() -> new ZoneNotFoundException("Zone not found with ID: %s".formatted(location.getZoneId())));
     }
 
-    LocationEntity entity = locationMapper.toEntity(location);
-    LocationEntity savedEntity = locationRepository.save(entity);
-    Location createdLocation = locationMapper.toDomain(savedEntity);
+    try {
+      LocationEntity entity = locationMapper.toEntity(location);
+      LocationEntity savedEntity = locationRepository.saveAndFlush(entity);
+      Location createdLocation = locationMapper.toDomain(savedEntity);
 
-    // Update cache
-    if (cacheConfigurationProperties.isCacheEnabled()) {
-      try {
-        locationCacheRedisHashOpsRepository.save(createdLocation);
-        log.debug("Location cached with ID: {}", createdLocation.getId());
-      } catch (Exception e) {
-        log.warn("Failed to cache location on create: {}", createdLocation.getId(), e);
+      // Update cache
+      if (cacheConfigurationProperties.isCacheEnabled()) {
+        try {
+          locationCacheRedisHashOpsRepository.save(createdLocation);
+          log.debug("Location cached with ID: {}", createdLocation.getId());
+        } catch (Exception e) {
+          log.warn("Failed to cache location on create: {}", createdLocation.getId(), e);
+        }
       }
-    }
 
-    log.info("Location created with ID: {}", savedEntity.getId());
-    return createdLocation;
+      log.info("Location created with ID: {}", savedEntity.getId());
+      return createdLocation;
+    } catch (DataIntegrityViolationException ex) {
+      final String message = String.format("Unique constraint violation while creating location: %s", location.getName());
+      log.warn(message);
+      throw new UniqueConstraintException(message, ex);
+    }
   }
 
-  public Optional<Location> findById(UUID id) {
+  public Location findById(UUID id) {
     log.debug("Finding location by ID: {}", id);
 
     // Try cache first (cache-aside pattern)
@@ -125,7 +133,7 @@ public class LocationService extends BaseService<LocationEntity, Location> {
         Optional<Location> cachedLocation = locationCacheRedisHashOpsRepository.retrieveById(id);
         if (cachedLocation.isPresent()) {
           log.debug("Location found in cache: {}", id);
-          return cachedLocation;
+          return cachedLocation.get();
         }
         log.debug("Location not found in cache, querying database: {}", id);
       } catch (Exception e) {
@@ -139,7 +147,6 @@ public class LocationService extends BaseService<LocationEntity, Location> {
       .map(locationMapper::toDomain)
       .orElseThrow(() -> new LocationNotFoundException("Location not found with id: %s".formatted(id)));
 
-
     // Update cache on successful database hit
     if (cacheConfigurationProperties.isCacheEnabled()) {
       try {
@@ -150,7 +157,7 @@ public class LocationService extends BaseService<LocationEntity, Location> {
       }
     }
 
-    return Optional.of(location);
+    return location;
   }
 
   /**
@@ -215,6 +222,7 @@ public class LocationService extends BaseService<LocationEntity, Location> {
   @Transactional
   public Location update(UUID id, Location location) {
     log.debug("Updating location with ID: {}", id);
+
     LocationEntity existingEntity = locationRepository
       .findById(id)
       .orElseThrow(() -> new LocationNotFoundException("Location not found with ID: " + id));
@@ -225,25 +233,31 @@ public class LocationService extends BaseService<LocationEntity, Location> {
         .orElseThrow(() -> new ZoneNotFoundException("Zone not found with ID: %s".formatted(location.getZoneId())));
     }
 
-    LocationEntity updatedEntity = locationMapper.toEntity(location);
-    updatedEntity.setId(existingEntity.getId());
-    updatedEntity.setCreatedAt(existingEntity.getCreatedAt());
+    try {
+      LocationEntity updatedEntity = locationMapper.toEntity(location);
+      updatedEntity.setId(existingEntity.getId());
+      updatedEntity.setCreatedAt(existingEntity.getCreatedAt());
 
-    LocationEntity savedEntity = locationRepository.save(updatedEntity);
-    Location updatedLocation = locationMapper.toDomain(savedEntity);
+      LocationEntity savedEntity = locationRepository.saveAndFlush(updatedEntity);
+      Location updatedLocation = locationMapper.toDomain(savedEntity);
 
-    // Update cache
-    if (cacheConfigurationProperties.isCacheEnabled()) {
-      try {
-        locationCacheRedisHashOpsRepository.save(updatedLocation);
-        log.debug("Location cache updated with ID: {}", updatedLocation.getId());
-      } catch (Exception e) {
-        log.warn("Failed to update cache for location: {}", updatedLocation.getId(), e);
+      // Update cache
+      if (cacheConfigurationProperties.isCacheEnabled()) {
+        try {
+          locationCacheRedisHashOpsRepository.save(updatedLocation);
+          log.debug("Location cache updated with ID: {}", updatedLocation.getId());
+        } catch (Exception e) {
+          log.warn("Failed to update cache for location: {}", updatedLocation.getId(), e);
+        }
       }
-    }
 
-    log.info("Location updated with ID: {}", savedEntity.getId());
-    return updatedLocation;
+      log.info("Location updated with ID: {}", savedEntity.getId());
+      return updatedLocation;
+    } catch (DataIntegrityViolationException ex) {
+      final String message = String.format("Unique constraint violation while updating location: %s", location.getName());
+      log.warn(message);
+      throw new UniqueConstraintException(message, ex);
+    }
   }
 
   @Transactional

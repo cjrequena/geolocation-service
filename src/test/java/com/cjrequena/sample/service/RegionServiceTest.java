@@ -85,9 +85,8 @@ class RegionServiceTest {
     when(regionRepository.findById(regionId)).thenReturn(Optional.of(regionEntity));
     when(regionMapper.toDomain(regionEntity)).thenReturn(regionDomain);
 
-    Optional<Region> result = regionService.findById(regionId);
-
-    assertThat(result).isPresent();
+    Region result = regionService.findById(regionId);
+    assertThat(result).isNotNull();
   }
 
 //  @Test

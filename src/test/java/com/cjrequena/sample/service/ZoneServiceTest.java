@@ -96,10 +96,8 @@ class ZoneServiceTest {
   void shouldFindById() {
     when(zoneRepository.findById(zoneId)).thenReturn(Optional.of(zoneEntity));
     when(zoneMapper.toDomain(zoneEntity)).thenReturn(zoneDomain);
-
-    Optional<Zone> result = zoneService.findById(zoneId);
-
-    assertThat(result).isPresent();
+    Zone result = zoneService.findById(zoneId);
+    assertThat(result).isNotNull();
   }
 
 //  @Test

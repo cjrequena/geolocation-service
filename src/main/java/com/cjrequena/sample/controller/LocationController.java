@@ -125,14 +125,10 @@ public class LocationController {
     @Parameter(description = "Location ID", required = true)
     @PathVariable UUID id
   ) {
-    log.debug("Getting location by ID: {}", id);
-
     try {
-      return locationService
-        .findById(id)
-        .map(locationMapper::domainToResponseDTO)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
+      log.debug("Getting location by ID: {}", id);
+      Location location = locationService.findById(id);
+      return ResponseEntity.ok(this.locationMapper.domainToResponseDTO(location));
     } catch (LocationNotFoundException ex) {
       throw new NotFoundException("Location with ID %s was not found".formatted(id), ex);
     }
