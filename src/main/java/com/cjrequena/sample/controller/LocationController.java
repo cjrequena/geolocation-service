@@ -3,8 +3,10 @@ package com.cjrequena.sample.controller;
 import com.cjrequena.sample.controller.dto.LocationRequestDTO;
 import com.cjrequena.sample.controller.dto.LocationResponseDTO;
 import com.cjrequena.sample.controller.exception.BadRequestException;
+import com.cjrequena.sample.controller.exception.ConflictException;
 import com.cjrequena.sample.controller.exception.NotFoundException;
 import com.cjrequena.sample.domain.exception.LocationNotFoundException;
+import com.cjrequena.sample.domain.exception.UniqueConstraintException;
 import com.cjrequena.sample.domain.exception.ZoneNotFoundException;
 import com.cjrequena.sample.domain.mapper.LocationMapper;
 import com.cjrequena.sample.domain.model.Location;
@@ -72,32 +74,33 @@ public class LocationController {
       content = @Content(schema = @Schema(implementation = LocationResponseDTO.class))
     ),
     @ApiResponse(responseCode = "400", description = "Invalid request data"),
-    @ApiResponse(responseCode = "404", description = "Parent zone not found")
+    @ApiResponse(responseCode = "409", description = "Unique constraint violation")
   })
   public ResponseEntity<LocationResponseDTO> create(@Valid @RequestBody LocationRequestDTO requestDTO) {
 
-    log.info("Creating location: {} at ({}, {})", requestDTO.getName(), requestDTO.getLatitude(), requestDTO.getLongitude());
-
-    // Convert DTO to domain model
-    Location location = this.locationMapper.requestDTOtoDomain(requestDTO);
-
-    // Create via service
-    Location created = null;
     try {
-      created = locationService.create(location);
+      log.info("Creating location: {} at ({}, {})", requestDTO.getName(), requestDTO.getLatitude(), requestDTO.getLongitude());
+
+      // Convert DTO to domain model
+      Location location = this.locationMapper.requestDTOtoDomain(requestDTO);
+
+      // Create via service
+      Location created = locationService.create(location);
+
+      // Convert to response DTO
+      LocationResponseDTO responseDTO = locationMapper.domainToResponseDTO(created);
+
+      log.info("Location created with ID: {}", created.getId());
+
+      return ResponseEntity
+        .created(URI.create(ENDPOINT + created.getId()))
+        .header("Accept-Version", VND_SAMPLE_SERVICE_V1)
+        .body(responseDTO);
     } catch (ZoneNotFoundException ex) {
-      throw new BadRequestException("Invalid zoneId: %s :: The zone does not exists".formatted(requestDTO.getZoneId()), ex);
+      throw new BadRequestException(ex.getMessage());
+    } catch (UniqueConstraintException ex) {
+      throw new ConflictException(ex.getMessage());
     }
-
-    // Convert to response DTO
-    LocationResponseDTO responseDTO = locationMapper.domainToResponseDTO(created);
-
-    log.info("Location created with ID: {}", created.getId());
-
-    return ResponseEntity
-      .created(URI.create(ENDPOINT + created.getId()))
-      .header("Accept-Version", VND_SAMPLE_SERVICE_V1)
-      .body(responseDTO);
   }
 
   /**
@@ -228,7 +231,8 @@ public class LocationController {
       content = @Content(schema = @Schema(implementation = LocationResponseDTO.class))
     ),
     @ApiResponse(responseCode = "404", description = "Location not found"),
-    @ApiResponse(responseCode = "400", description = "Invalid request data")
+    @ApiResponse(responseCode = "400", description = "Invalid request data"),
+    @ApiResponse(responseCode = "409", description = "Unique constraint violation")
   })
   public ResponseEntity<LocationResponseDTO> update(
     @Parameter(description = "Location ID", required = true)
@@ -236,25 +240,33 @@ public class LocationController {
     @Valid @RequestBody LocationRequestDTO requestDTO
   ) {
 
-    log.info("Updating location with ID: {}", id);
-
-    // Convert DTO to domain model
-    Location location = this.locationMapper.requestDTOtoDomain(requestDTO);
-
-    // Update via service
-    Location updated = null;
     try {
-      updated = locationService.update(id, location);
+      log.info("Updating location with ID: {}", id);
+
+      // Convert DTO to domain model
+      Location location = this.locationMapper.requestDTOtoDomain(requestDTO);
+
+      // Update via service
+      Location updated = null;
+      try {
+        updated = locationService.update(id, location);
+      } catch (LocationNotFoundException ex) {
+        throw new NotFoundException("Location with ID %s was not found".formatted(id), ex);
+      }
+
+      // Convert to response DTO
+      LocationResponseDTO responseDTO = locationMapper.domainToResponseDTO(updated);
+
+      log.info("Location updated with ID: {}", id);
+
+      return ResponseEntity.ok(responseDTO);
     } catch (LocationNotFoundException ex) {
       throw new NotFoundException("Location with ID %s was not found".formatted(id), ex);
+    } catch (ZoneNotFoundException ex) {
+      throw new BadRequestException("Zone with ID %s was not found".formatted(requestDTO.getZoneId()), ex);
+    } catch (UniqueConstraintException ex) {
+      throw new ConflictException(ex.getMessage());
     }
-
-    // Convert to response DTO
-    LocationResponseDTO responseDTO = locationMapper.domainToResponseDTO(updated);
-
-    log.info("Location updated with ID: {}", id);
-
-    return ResponseEntity.ok(responseDTO);
   }
 
   /**
@@ -279,13 +291,17 @@ public class LocationController {
     @PathVariable UUID id
   ) {
 
-    log.info("Deleting location with ID: {}", id);
+    try {
+      log.info("Deleting location with ID: {}", id);
 
-    locationService.deleteById(id);
+      locationService.deleteById(id);
 
-    log.info("Location deleted with ID: {}", id);
+      log.info("Location deleted with ID: {}", id);
 
-    return ResponseEntity.noContent().build();
+      return ResponseEntity.noContent().build();
+    } catch (LocationNotFoundException ex) {
+      throw new NotFoundException("Location with ID %s was not found".formatted(id), ex);
+    }
   }
 
   /**
