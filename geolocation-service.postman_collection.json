@@ -1,0 +1,1851 @@
+{
+  "info": {
+    "_postman_id": "5dab2b4f-16e7-4ab4-9ac4-16dfd8795f1b",
+    "name": "geolocation-service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "213723"
+  },
+  "item": [
+    {
+      "name": "locations",
+      "item": [
+        {
+          "name": "locations :: create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Marin Headlands Lodge\",\n  \"location_type\": \"HOTEL\",\n  \"latitude\": 37.9347,\n  \"longitude\": -122.4230,\n  \"address\": \"Marin Headlands, Sausalito, CA\",\n  \"postal_code\": \"94965\",\n  \"active\": true\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/locations",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "locations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "locations :: retrieve :: byId",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/locations/be654978-c500-4207-a2ce-294047f8d5b4",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "locations",
+                "be654978-c500-4207-a2ce-294047f8d5b4"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "locations :: retrieve :: all",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/locations",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "locations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "locations :: retrieve :: paginated",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/locations?filters=active==true&sort=name,asc&offset=0&limit=6",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "locations"
+              ],
+              "query": [
+                {
+                  "key": "filters",
+                  "value": "active==true"
+                },
+                {
+                  "key": "sort",
+                  "value": "name,asc"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "6"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "locations :: update",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Alcatraz Island\",\n    \"location_type\": \"HOTEL\",\n    \"latitude\": 37.8267,\n    \"longitude\": -122.4230,\n    \"address\": \"Alcatraz Island, San Francisco, CA\",\n    \"postal_code\": \"94133\",\n    \"active\": false,\n    \"metadata\": {\n      \"type\": \"viewpoint\",\n      \"accessibility\": \"public\",\n      \"parking\": true,\n      \"updated\": true\n    }\n  }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/locations/be654978-c500-4207-a2ce-294047f8d5b4",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "locations",
+                "be654978-c500-4207-a2ce-294047f8d5b4"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "locations :: delete :: byId",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/locations/8d8eb6e9-6f08-4efc-8229-0879fef8a8ce",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "locations",
+                "8d8eb6e9-6f08-4efc-8229-0879fef8a8ce"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "locations :: retrieve :: Near a Point",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/locations/near?latitude=37.8199&longitude=-122.4783&radiusMeters=4927",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "locations",
+                "near"
+              ],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "37.8199"
+                },
+                {
+                  "key": "longitude",
+                  "value": "-122.4783"
+                },
+                {
+                  "key": "radiusMeters",
+                  "value": "4927"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "locations :: retrieve :: Within Radius",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/locations/near?latitude=39.478195&longitude=-0.3754&radiusMeters=600",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "locations",
+                "near"
+              ],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "39.478195"
+                },
+                {
+                  "key": "longitude",
+                  "value": "-0.3754"
+                },
+                {
+                  "key": "radiusMeters",
+                  "value": "600"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "locations :: retrieve :: Within Polygon",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/locations/within?wkt=POLYGON((-122.52%2037.75,%20-122.35%2037.75,%20-122.35%2037.85,%20-122.52%2037.85,%20-122.52%2037.75))",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "locations",
+                "within"
+              ],
+              "query": [
+                {
+                  "key": "wkt",
+                  "value": "POLYGON((-122.52%2037.75,%20-122.35%2037.75,%20-122.35%2037.85,%20-122.52%2037.85,%20-122.52%2037.75))"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "locations :: retrieve :: by address",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/locations?filters=address=='Alcatraz Island, San Francisco, CA'",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "locations"
+              ],
+              "query": [
+                {
+                  "key": "filters",
+                  "value": "address=='Alcatraz Island, San Francisco, CA'"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "locations :: exists :: byId",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/locations/4cc1c8d5-cac1-46a4-ab74-7d0712349d46/exists",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "locations",
+                "4cc1c8d5-cac1-46a4-ab74-7d0712349d46",
+                "exists"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "locations :: count",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/locations/count",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "locations",
+                "count"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "geoshapes",
+      "item": [
+        {
+          "name": "geoshapes :: create :: polygon",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"GeoShape-Test-001\",\n  \"geometry_type\": \"POLYGON\",\n  \"geometry_wkt\": \"POLYGON((-122.4250 37.8280, -122.4210 37.8280, -122.4210 37.8250, -122.4250 37.8250, -122.4250 37.8280))\",\n  \"active\": true,\n  \"metadata\": {\n    \"created_by\": \"carlos\"\n  }\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/geoshapes",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "geoshapes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "geoshapes :: create :: rectangle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rectangle-Test-001\",\n  \"geometry_type\": \"RECTANGLE\",\n  \"geometry_wkt\": \"POLYGON((0 0, 10 0, 10 5, 0 5, 0 0))\",\n  \"active\": true,\n  \"metadata\": {\n    \"created_by\": \"carlos\"\n  }\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/geoshapes",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "geoshapes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "geoshapes :: create :: circle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Circle-Test-002\",\n  \"geometry_type\": \"CIRCLE\",\n  \"geometry_wkt\": \"CIRCLE(-73.985428 40.748817 500.00)\",\n  \"active\": true,\n  \"metadata\": {\n    \"created_by\": \"carlos\"\n  }\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/geoshapes",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "geoshapes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "geoshapes :: retrieve :: byId",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/geoshapes/81675914-aafe-44ee-9f83-3f05181e1fd9",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "geoshapes",
+                "81675914-aafe-44ee-9f83-3f05181e1fd9"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "geoshapes :: retrieve :: all",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/geoshapes",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "geoshapes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "geoshapes :: update",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"GeoShape-Test-001-UPDATED-AGAIN\",\n  \"geometry_type\": \"POLYGON\",\n  \"geometry_wkt\": \"POLYGON((-122.4250 37.8280, -122.4210 37.8280, -122.4210 37.8250, -122.4250 37.8250, -122.4250 37.8280))\",\n  \"active\": true,\n  \"metadata\": {\n    \"created_by\": \"carlos\"\n  }\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/geoshapes/f4404770-ee3c-4636-9dd5-17acda4eef2d",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "geoshapes",
+                "f4404770-ee3c-4636-9dd5-17acda4eef2d"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "geoshapes :: retrieve :: paginated",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/geoshapes?filters=active==true&sort=name,asc&offset=0&limit=10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "geoshapes"
+              ],
+              "query": [
+                {
+                  "key": "filters",
+                  "value": "active==true"
+                },
+                {
+                  "key": "sort",
+                  "value": "name,asc"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "geoshapes :: retrieve :: contains-point",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/geoshapes/contains-point?wkt=POINT(-73.985428 40.748817)",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "geoshapes",
+                "contains-point"
+              ],
+              "query": [
+                {
+                  "key": "wkt",
+                  "value": "POINT(-73.985428 40.748817)"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "geoshapes :: retrieve :: within-distance",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/geoshapes/within-distance?wkt=POINT(-73.985428 40.748817)&distance_meters=10000",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "geoshapes",
+                "within-distance"
+              ],
+              "query": [
+                {
+                  "key": "wkt",
+                  "value": "POINT(-73.985428 40.748817)"
+                },
+                {
+                  "key": "distance_meters",
+                  "value": "10000"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "countries",
+      "item": [
+        {
+          "name": "countries :: create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Germany\",\n  \"iso_code_alpha2\": \"DE\",\n  \"iso_code_alpha3\": \"DEU\",\n  \"iso_code_numeric\": \"276\",\n  \"phone_code\": \"+49\",\n  \"currency_code\": \"EUR\",\n  \"capital\": \"Berlin\",\n  \"population\": 83240525,\n  \"active\": true,\n  \"metadata\": {\n    \"region\": \"Europe\",\n    \"official_language\": \"German\",\n    \"eu_member\": true,\n    \"schengen_member\": true\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/countries",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "countries"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "countries :: retrieve :: by id",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/countries/a27dc613-87f9-4184-83e8-7956a761ceb2",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "countries",
+                "a27dc613-87f9-4184-83e8-7956a761ceb2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "countries :: retrieve :: all",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/countries",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "countries"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "countries :: retrieve :: paginated",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/countries?filters=active==true&sort=name,asc&offset=0&limit=10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "countries"
+              ],
+              "query": [
+                {
+                  "key": "filters",
+                  "value": "active==true"
+                },
+                {
+                  "key": "sort",
+                  "value": "name,asc"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "countries :: update",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Germany\",\n  \"iso_code_alpha2\": \"DE\",\n  \"iso_code_alpha3\": \"DEU\",\n  \"iso_code_numeric\": \"276\",\n  \"phone_code\": \"+49\",\n  \"currency_code\": \"EUR\",\n  \"capital\": \"Berlin\",\n  \"population\": 83240525,\n  \"active\": true,\n  \"metadata\": {\n    \"region\": \"Europe\",\n    \"official_language\": \"German\",\n    \"eu_member\": true,\n    \"schengen_member\": true,\n    \"test_update\":\"teste_update_001\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/countries/e8adbbb6-95b8-438a-88f3-6b345ce98e62",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "countries",
+                "e8adbbb6-95b8-438a-88f3-6b345ce98e62"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "regions",
+      "item": [
+        {
+          "name": "regions :: create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"country_id\": \"a27dc613-87f9-4184-83e8-7956a761ceb2\",\n  \"name\": \"California\",\n  \"code\": \"US-CA\",\n  \"region_type\": \"STATE\",\n  \"population\": 39538223,\n  \"time_zone\": \"America/Los_Angeles\",\n  \"active\": true,\n  \"metadata\": {\n    \"capital\": \"Sacramento\",\n    \"largest_city\": \"Los Angeles\",\n    \"coastal\": true,\n    \"founded_year\": 1850\n  }\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/regions",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "regions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "regions :: retrieve :: by id",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/regions/edd4262e-0d3d-4b90-8446-714f522a571d",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "regions",
+                "edd4262e-0d3d-4b90-8446-714f522a571d"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "regions :: retrieve :: all",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/regions",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "regions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "regions :: update",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"country_id\": \"a27dc613-87f9-4184-83e8-7956a761ceb2\",\n  \"name\": \"California\",\n  \"code\": \"US-CA\",\n  \"region_type\": \"STATE\",\n  \"population\": 39538223,\n  \"time_zone\": \"America/Los_Angeles\",\n  \"active\": true,\n  \"metadata\": {\n    \"capital\": \"Sacramento\",\n    \"largest_city\": \"Los Angeles\",\n    \"coastal\": true,\n    \"founded_year\": 1850,\n    \"test_update\":\"teste_update_001\"\n  }\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/regions/edd4262e-0d3d-4b90-8446-714f522a571d",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "regions",
+                "edd4262e-0d3d-4b90-8446-714f522a571d"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "cities",
+      "item": [
+        {
+          "name": "cities :: create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"San Diego\",\n  \"region_id\": \"edd4262e-0d3d-4b90-8446-714f522a571d\",\n  \"time_zone\": \"America/Los_Angeles\",\n  \"capital\": false,\n  \"population\": 1386932,\n  \"postal_code\": \"92101\",\n  \"active\": true,\n  \"metadata\": {\n    \"state\": \"California\",\n    \"county\": \"San Diego County\",\n    \"coastal\": true,\n    \"founded_year\": 1769\n  }\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/cities",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "cities"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "cities :: retrieve:: by id",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/cities/ed7230f8-6f26-4c7e-abbd-bd40f83b1d04",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "cities",
+                "ed7230f8-6f26-4c7e-abbd-bd40f83b1d04"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "cities :: retrieve :: all",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/cities",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "cities"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "cities :: update",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"San Diego\",\n  \"region_id\": \"edd4262e-0d3d-4b90-8446-714f522a571d\",\n  \"time_zone\": \"America/Los_Angeles\",\n  \"capital\": false,\n  \"population\": 1386932,\n  \"postal_code\": \"92101\",\n  \"active\": true,\n  \"metadata\": {\n    \"state\": \"California\",\n    \"county\": \"San Diego County\",\n    \"coastal\": true,\n    \"founded_year\": 1769,\n    \"updated_by\": \"Carlos\"\n  }\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/cities/ed7230f8-6f26-4c7e-abbd-bd40f83b1d04",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "cities",
+                "ed7230f8-6f26-4c7e-abbd-bd40f83b1d04"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "areas",
+      "item": [
+        {
+          "name": "areas :: create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"city_id\": \"ed7230f8-6f26-4c7e-abbd-bd40f83b1d04\",\n  \"name\": \"La Jolla\",\n  \"area_type\": \"DISTRICT\",\n  \"postal_code\": \"92037\",\n  \"population\": 46000,\n  \"active\": true,\n  \"metadata\": {\n    \"city\": \"San Diego\",\n    \"state\": \"California\",\n    \"coastal\": true,\n    \"known_for\": \"Beaches and UCSD\",\n    \"touristic_area\": true\n  }\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/areas",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "areas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "areas :: retrieve:: by id",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/cities/ed7230f8-6f26-4c7e-abbd-bd40f83b1d04",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "cities",
+                "ed7230f8-6f26-4c7e-abbd-bd40f83b1d04"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "areas :: retrieve :: all",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/areas",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "areas"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "zones",
+      "item": [
+        {
+          "name": "zones :: create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"area_id\": \"e3e0e50b-fc5d-4b19-ad4b-47498e282a08\",\n  \"name\": \"Gaslamp Quarter\",\n  \"zone_type\": \"COMMERCIAL\",\n  \"postal_code\": \"92101\",\n  \"active\": true,\n  \"metadata\": {\n    \"city\": \"San Diego\",\n    \"state\": \"California\",\n    \"historic_district\": true,\n    \"nightlife_area\": true,\n    \"touristic_zone\": true\n  }\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/zones",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "zones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "zones :: retrieve:: by id",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/zones/ed7230f8-6f26-4c7e-abbd-bd40f83b1d04",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "zones",
+                "ed7230f8-6f26-4c7e-abbd-bd40f83b1d04"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "zones :: retrieve :: all",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Version",
+                "value": "application/vnd.geolocation-service.v1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/geolocation-service/api/zones",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "geolocation-service",
+                "api",
+                "zones"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
