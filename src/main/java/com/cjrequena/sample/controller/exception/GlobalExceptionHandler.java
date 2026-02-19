@@ -27,21 +27,33 @@ public class GlobalExceptionHandler {
   @ExceptionHandler({ControllerException.class})
   @ResponseBody
   public ResponseEntity<ErrorDTO> handleControllerException(ControllerException ex) {
-    log.info("Exception: {}", ex.getMessage());
+    log.warn("Exception: {}", ex.getMessage());
     return buildErrorResponse(ex.getHttpStatus(), ex.getMessage());
   }
 
   @ExceptionHandler({ControllerRuntimeException.class})
   @ResponseBody
   public ResponseEntity<ErrorDTO> handleControllerRuntimeException(ControllerRuntimeException ex) {
-    log.info("Exception: {}", ex.getMessage());
+    log.warn("Exception: {}", ex.getMessage());
     return buildErrorResponse(ex.getHttpStatus(), ex.getMessage());
+  }
+
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<ErrorDTO> handleIllegalArgumentException(IllegalArgumentException ex) {
+    log.warn("Illegal argument: {}", ex.getMessage());
+    return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+  }
+
+  @ExceptionHandler(IllegalStateException.class)
+  public ResponseEntity<ErrorDTO> handleIllegalStateException(IllegalStateException ex) {
+    log.warn("Illegal state: {}", ex.getMessage());
+    return buildErrorResponse(HttpStatus.CONFLICT, ex.getMessage());
   }
 
   @ExceptionHandler(HttpMessageNotReadableException.class)
   @ResponseBody
   public ResponseEntity<ErrorDTO> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
-    log.info("Exception: {}", ex.getMessage());
+    log.warn("Exception: {}", ex.getMessage());
 
     Throwable cause = ex.getCause();
     String message;
@@ -90,7 +102,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(MethodArgumentNotValidException.class)
   @ResponseBody
   public ResponseEntity<ErrorDTO> handleValidationException(MethodArgumentNotValidException ex) {
-    log.error("Validation error: {}", ex.getMessage());
+    log.warn("Validation error: {}", ex.getMessage());
     List<ValidationError> validationErrors = ex.getBindingResult()
       .getFieldErrors()
       .stream()
@@ -99,23 +111,10 @@ public class GlobalExceptionHandler {
     return buildErrorResponse(HttpStatus.BAD_REQUEST, "Validation failed for one or more fields", validationErrors);
   }
 
-  @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<ErrorDTO> handleIllegalArgumentException(IllegalArgumentException ex) {
-    log.error("Illegal argument: {}", ex.getMessage());
-    return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
-  }
-
-  @ExceptionHandler(IllegalStateException.class)
-  public ResponseEntity<ErrorDTO> handleIllegalStateException(IllegalStateException ex) {
-    log.error("Illegal state: {}", ex.getMessage());
-    return buildErrorResponse(HttpStatus.CONFLICT, ex.getMessage());
-  }
-
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorDTO> handleGenericException(Exception ex) {
     log.error("Unexpected error occurred", ex);
     return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
-
   }
 
   private ResponseEntity<ErrorDTO> buildErrorResponse(HttpStatus status, String message) {
