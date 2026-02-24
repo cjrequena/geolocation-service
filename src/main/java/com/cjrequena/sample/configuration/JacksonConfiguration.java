@@ -30,15 +30,12 @@ public class JacksonConfiguration {
   //  spring.jackson.mapper.ACCEPT_CASE_INSENSITIVE_PROPERTIES=true
   //  spring.jackson.defaultPropertyInclusion=NON_NULL
 
-  public static Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder() {
+  public static ObjectMapper buildObjectMapper() {
     final Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
     builder.indentOutput(false);
     builder.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    return builder;
-  }
 
-  public static ObjectMapper buildObjectMapper() {
-    ObjectMapper objectMapper = jackson2ObjectMapperBuilder()
+    ObjectMapper objectMapper = builder
       .serializationInclusion(NON_NULL)
       .serializationInclusion(NON_EMPTY)
       .failOnEmptyBeans(false)
@@ -55,8 +52,8 @@ public class JacksonConfiguration {
     return objectMapper;
   }
 
-  @Bean(name = {"objectMapper"})
   @Primary
+  @Bean(name = {"objectMapper"})
   public ObjectMapper objectMapper() {
     return buildObjectMapper();
   }
@@ -67,7 +64,11 @@ public class JacksonConfiguration {
    */
   @Bean(name = "redisObjectMapper")
   public ObjectMapper redisObjectMapper() {
-    ObjectMapper objectMapper = jackson2ObjectMapperBuilder()
+    final Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
+    builder.indentOutput(false);
+    builder.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+    ObjectMapper objectMapper = builder
       .serializationInclusion(NON_NULL)
       .failOnEmptyBeans(false)
       .failOnUnknownProperties(false)
@@ -86,7 +87,6 @@ public class JacksonConfiguration {
       ObjectMapper.DefaultTyping.NON_FINAL,
       com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
     );
-
 
     return objectMapper;
   }

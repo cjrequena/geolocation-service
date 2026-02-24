@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -34,6 +35,7 @@ import javax.sql.DataSource;
 )
 public class PostgresConfiguration {
 
+  @Primary
   @Bean(name = "dataSourcePostgres", destroyMethod = "")
   @Validated
   @ConfigurationProperties(prefix = "spring.datasource.postgres")
@@ -42,6 +44,7 @@ public class PostgresConfiguration {
     return new HikariDataSource();
   }
 
+  @Primary
   @Bean("entityManagerFactoryPostgres")
   public LocalContainerEntityManagerFactoryBean entityManagerFactoryPostgres(EntityManagerFactoryBuilder builder, @Qualifier("dataSourcePostgres") DataSource dataSource) {
     return builder
@@ -51,6 +54,7 @@ public class PostgresConfiguration {
       .build();
   }
 
+  @Primary
   @Bean("transactionManagerPostgres")
   public PlatformTransactionManager transactionManagerPostgres(@Qualifier("entityManagerFactoryPostgres") EntityManagerFactory entityManagerFactoryPostgres) {
     return new JpaTransactionManager(entityManagerFactoryPostgres);
