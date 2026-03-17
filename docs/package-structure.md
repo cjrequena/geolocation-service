@@ -1,9 +1,37 @@
 # Package Structure & Naming Conventions
 
+## Project Root Structure
+
+```
+{project-name}/
+├── .docker/                               # Docker infrastructure
+│   ├── provision/                         # Provisioning scripts & seed data
+│   ├── .env                               # Docker environment variables
+│   └── docker-compose.yml                 # Docker Compose services definition
+├── docs/                                  # Project documentation (markdown)
+├── src/
+│   ├── main/
+│   │   ├── java/                          # Application source code
+│   │   └── resources/
+│   │       ├── db/
+│   │       │   └── migration/             # Flyway database migration scripts
+│   │       ├── application.yml            # Default application configuration
+│   │       └── application-{profile}.yml  # Profile-specific configuration
+│   └── test/
+│       ├── java/                          # Test source code
+│       └── resources/                     # Test resources
+├── .gitignore                             # Git ignore rules
+├── LICENSE                                # Project license
+├── pom.xml                                # Maven project descriptor
+└── README.md                              # Project documentation entry point
+```
+
+---
+
 ## Package Tree Structure
 
 ```
-com.cjrequena.sample
+{groupId}.{project}
 ├── configuration                          # Spring configuration beans
 ├── controller                             # REST controllers (API layer)
 │   ├── dto                                # Data Transfer Objects (request/response)
@@ -17,7 +45,7 @@ com.cjrequena.sample
 ├── persistence                            # Data access layer
 │   ├── entity                             # JPA entities
 │   └── repository                         # Spring Data JPA repositories
-│       └── cache                          # Redis cache repositories
+│       └── cache                          # Cache repositories (e.g. Redis)
 ├── service                                # Service layer (business logic)
 │   └── base                               # Base/abstract service classes
 └── shared                                 # Cross-cutting concerns
@@ -28,7 +56,7 @@ com.cjrequena.sample
 ### Test Package Structure
 
 ```
-com.cjrequena.sample
+{groupId}.{project}
 ├── configuration                          # Test configuration
 ├── domain
 │   └── mapper                             # Mapper unit tests & integration tests
@@ -42,26 +70,28 @@ com.cjrequena.sample
 
 ## Class Naming Conventions
 
+In the table below, `{Entity}` represents any domain concept (e.g. `Order`, `Customer`, `Product`).
+
 | Layer | Pattern | Examples |
 |---|---|---|
-| Configuration | `{Purpose}Configuration` / `{Purpose}ConfigurationProperties` | `RedisConfiguration`, `CacheConfigurationProperties` |
-| Controller | `{Entity}Controller` | `CountryController`, `LocationController` |
-| Request DTO | `{Entity}RequestDTO` | `CountryRequestDTO`, `LocationRequestDTO` |
-| Response DTO | `{Entity}ResponseDTO` | `CountryResponseDTO`, `LocationResponseDTO` |
+| Configuration | `{Purpose}Configuration` / `{Purpose}ConfigurationProperties` | `SecurityConfiguration`, `CacheConfigurationProperties` |
+| Controller | `{Entity}Controller` | `OrderController`, `CustomerController` |
+| Request DTO | `{Entity}RequestDTO` | `OrderRequestDTO`, `CustomerRequestDTO` |
+| Response DTO | `{Entity}ResponseDTO` | `OrderResponseDTO`, `CustomerResponseDTO` |
 | Controller Exception | `{HttpStatus}Exception` | `NotFoundException`, `ConflictException`, `BadRequestException` |
-| Domain Model | `{Entity}` | `Country`, `Location`, `GeoShape` |
-| Domain Exception | `{Entity}{Reason}Exception` | `CountryNotFoundException`, `UniqueConstraintException` |
-| Value Object | `{Concept}VO` | `CoordinateVO`, `AltitudeVO`, `MetadataVO` |
-| Enum | `{Concept}Type` | `LocationType`, `GeometryType`, `ZoneType` |
-| Mapper | `{Entity}Mapper` | `CountryMapper`, `LocationMapper` |
-| JPA Entity | `{Entity}Entity` | `CountryEntity`, `LocationEntity` |
-| Repository | `{Entity}Repository` | `CountryRepository`, `LocationRepository` |
-| Cache Repository | `{Entity}CacheRedisHashOpsRepository` | `CountryCacheRedisHashOpsRepository` |
-| Service | `{Entity}Service` | `CountryService`, `LocationService` |
-| Base Service | `Base{Role}` | `BaseService` |
-| Utility | `{Purpose}Util` / `{Purpose}Utils` | `JsonUtil`, `SortUtils`, `WKTParserUtil` |
-| Unit Test | `{Class}Test` | `CountryServiceTest`, `CountryEntityTest` |
-| Integration Test | `{Class}IT` | `CountryServiceIT`, `CountryRepositoryIT` |
+| Domain Model | `{Entity}` | `Order`, `Customer`, `Product` |
+| Domain Exception | `{Entity}{Reason}Exception` | `OrderNotFoundException`, `UniqueConstraintException` |
+| Value Object | `{Concept}VO` | `AddressVO`, `MoneyVO`, `DateRangeVO` |
+| Enum | `{Concept}Type` | `OrderType`, `StatusType`, `PriorityType` |
+| Mapper | `{Entity}Mapper` | `OrderMapper`, `CustomerMapper` |
+| JPA Entity | `{Entity}Entity` | `OrderEntity`, `CustomerEntity` |
+| Repository | `{Entity}Repository` | `OrderRepository`, `CustomerRepository` |
+| Cache Repository | `{Entity}Cache{Provider}Repository` | `OrderCacheRedisRepository` |
+| Service | `{Entity}Service` | `OrderService`, `CustomerService` |
+| Base Service | `Base{Role}` | `BaseService`, `BaseRepository` |
+| Utility | `{Purpose}Util` / `{Purpose}Utils` | `JsonUtil`, `DateUtils`, `StringUtil` |
+| Unit Test | `{Class}Test` | `OrderServiceTest`, `OrderEntityTest` |
+| Integration Test | `{Class}IT` | `OrderServiceIT`, `OrderRepositoryIT` |
 
 ---
 
@@ -70,9 +100,9 @@ com.cjrequena.sample
 The same entity name flows consistently through all layers:
 
 ```
-CountryController → CountryService → CountryRepository → CountryEntity
-       ↕                  ↕
- CountryRequestDTO    Country (domain)
- CountryResponseDTO       ↕
-                     CountryMapper
+{Entity}Controller → {Entity}Service → {Entity}Repository → {Entity}Entity
+       ↕                   ↕
+ {Entity}RequestDTO    {Entity} (domain model)
+ {Entity}ResponseDTO       ↕
+                      {Entity}Mapper
 ```
