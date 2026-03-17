@@ -962,6 +962,7 @@ curl --location 'http://localhost:8080/geolocation-service/api/locations?filters
 
 ### Documentation Files
 - [Architecture Overview](docs/architecture.md) - Detailed architecture diagrams and explanations
+- [Package Structure & Naming Conventions](docs/package-structure.md) - Package tree structure and class naming conventions
 - [Security](docs/security.md) - Overview of security measures and best practices implemented in the service
 - [Monitoring](docs/monitoring.md) - Instructions for monitoring the service in production
 - [Data Model](docs/data-model.md) - Detailed data model diagrams and explanations
