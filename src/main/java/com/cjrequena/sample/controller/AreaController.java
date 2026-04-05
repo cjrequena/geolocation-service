@@ -52,6 +52,10 @@ public class AreaController {
   private final AreaService areaService;
   private final AreaMapper areaMapper;
 
+  // ================================================================
+  // CRUD Standard Operations
+  // ================================================================
+
   /**
    * Create a new area.
    *
@@ -288,6 +292,10 @@ public class AreaController {
       throw new NotFoundException("Area with ID %s was not found".formatted(id), ex);
     }
   }
+
+  // ================================================================
+  // Other Operations
+  // ================================================================
 
   /**
    * Check if an area exists by ID.
