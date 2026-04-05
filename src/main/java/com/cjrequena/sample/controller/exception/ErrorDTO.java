@@ -12,10 +12,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ErrorDTO {
-    
-    private String timestamp;
-    private int status;
-    private String errorCode;
-    private String message;
-    private List<ValidationError> validationErrors;
+
+  private String timestamp;
+  private int status;
+  private String errorCode;
+  private String message;
+  private List<ValidationError> validationErrors;
 }

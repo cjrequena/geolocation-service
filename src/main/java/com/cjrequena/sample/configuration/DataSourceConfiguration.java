@@ -33,7 +33,7 @@ import javax.sql.DataSource;
   transactionManagerRef = "transactionManagerPostgres",
   basePackages = {"com.cjrequena.sample.persistence.repository"}
 )
-public class PostgresConfiguration {
+public class DataSourceConfiguration {
 
   @Primary
   @Bean(name = "dataSourcePostgres", destroyMethod = "")

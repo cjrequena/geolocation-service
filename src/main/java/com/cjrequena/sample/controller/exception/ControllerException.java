@@ -11,6 +11,7 @@ public abstract class ControllerException extends Exception {
 
   /**
    * Constructor
+   *
    * @param httpStatus status code
    */
   public ControllerException(HttpStatus httpStatus) {
@@ -20,8 +21,9 @@ public abstract class ControllerException extends Exception {
 
   /**
    * Constructor
+   *
    * @param httpStatus status code
-   * @param message Custom message
+   * @param message    Custom message
    */
   public ControllerException(HttpStatus httpStatus, String message) {
     super(message);
@@ -30,9 +32,10 @@ public abstract class ControllerException extends Exception {
 
   /**
    * Constructor
+   *
    * @param httpStatus status code
-   * @param message custom message
-   * @param throwable Exception
+   * @param message    custom message
+   * @param throwable  Exception
    */
   public ControllerException(HttpStatus httpStatus, String message, Throwable throwable) {
     super(message, throwable);
