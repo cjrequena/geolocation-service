@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest
 @ActiveProfiles("integrationTest")
 @DisplayName("RegionService Integration Tests")
-class RegionServiceIT {
+class RegionServiceIT extends com.cjrequena.sample.configuration.TestcontainersConfiguration {
 
   @Autowired
   private RegionService regionService;

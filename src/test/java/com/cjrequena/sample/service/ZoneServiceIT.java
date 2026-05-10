@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest
 @ActiveProfiles("integrationTest")
 @DisplayName("ZoneService Integration Tests")
-class ZoneServiceIT {
+class ZoneServiceIT extends com.cjrequena.sample.configuration.TestcontainersConfiguration {
 
   @Autowired
   private ZoneService zoneService;

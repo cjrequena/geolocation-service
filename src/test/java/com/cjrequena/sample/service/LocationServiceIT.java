@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest
 @ActiveProfiles("integrationTest")
 @DisplayName("LocationService Integration Tests")
-class LocationServiceIT {
+class LocationServiceIT extends com.cjrequena.sample.configuration.TestcontainersConfiguration {
 
   @Autowired
   private LocationService locationService;

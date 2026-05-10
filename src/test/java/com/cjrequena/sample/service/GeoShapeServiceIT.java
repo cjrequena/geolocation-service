@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest
 @ActiveProfiles("integrationTest")
 @DisplayName("GeoShapeService Integration Tests")
-class GeoShapeServiceIT {
+class GeoShapeServiceIT extends com.cjrequena.sample.configuration.TestcontainersConfiguration {
 
   @Autowired
   private GeoShapeService geoShapeService;

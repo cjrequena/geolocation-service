@@ -25,31 +25,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
-  # -------------------------------------------------------
-  # PostgreSQL + PostGIS - Integration Tests
-  # -------------------------------------------------------
-  postgis-db-it:
-    image: postgis/postgis:15-3.4
-    container_name: postgis-db-it
-    hostname: postgis-db-it
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-postgres}
-      PGDATA: /data/postgres
-    volumes:
-      - postgres-data-it:/data/postgres
-    ports:
-      - "6432:5432"
-    networks:
-      - local-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+
   # -------------------------------------------------------
   # PostgreSQL - SonarQube Database
   # -------------------------------------------------------
@@ -153,7 +129,6 @@ networks:
   # -------------------------------------------------------
 volumes:
   postgres-data-local:
-  postgres-data-it:
   sonarqube-db-data:
   sonarqube-data:
   sonarqube-extensions:

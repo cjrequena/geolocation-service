@@ -21,17 +21,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link RegionRepository}.
- * Uses PostgreSQL for testing repository queries.
- *
- * Prerequisites:
- * - PostgreSQL must be running
- * - Use docker-compose-test.yml to start test database
- * - Ensure application-local.properties has correct database configuration
+ * Uses Testcontainers with PostGIS for testing repository queries.
  */
 @SpringBootTest
 @ActiveProfiles("integrationTest")
 @DisplayName("RegionRepository Integration Tests")
-class RegionRepositoryIT {
+class RegionRepositoryIT extends com.cjrequena.sample.configuration.TestcontainersConfiguration {
 
   @Autowired
   private RegionRepository repository;

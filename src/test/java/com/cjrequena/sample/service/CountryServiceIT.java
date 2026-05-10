@@ -22,14 +22,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Integration tests for {@link CountryService}.
- * Tests the service layer with real database and mapper interactions.
  *
  * @author cjrequena
  */
 @SpringBootTest
 @ActiveProfiles("integrationTest")
 @DisplayName("CountryService Integration Tests")
-class CountryServiceIT {
+class CountryServiceIT extends com.cjrequena.sample.configuration.TestcontainersConfiguration {
 
   @Autowired
   private CountryService countryService;

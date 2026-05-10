@@ -24,17 +24,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link LocationRepository}.
- * Uses PostgreSQL with PostGIS for testing spatial queries.
- *
- * Prerequisites:
- * - PostgreSQL with PostGIS extension must be running
- * - Use docker-compose-test.yml to start test database
- * - Ensure application-local.properties has correct database configuration
+ * Uses Testcontainers with PostGIS for testing spatial queries.
  */
 @SpringBootTest
 @ActiveProfiles("integrationTest")
 @DisplayName("LocationRepository Integration Tests")
-class LocationRepositoryIT {
+class LocationRepositoryIT extends com.cjrequena.sample.configuration.TestcontainersConfiguration {
 
   @Autowired
   private LocationRepository repository;

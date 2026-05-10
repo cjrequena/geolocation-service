@@ -23,9 +23,8 @@
         <maven.version>3.9.9</maven.version>
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies -->
         <spring-boot-dependencies.version>3.5.11</spring-boot-dependencies.version>
-        <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-dependencies -->
-        <spring-cloud-dependencies.version>2025.0.1</spring-cloud-dependencies.version>
-        <!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webflux-ui -->
+
+        <!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
         <org.springdoc.version>2.8.13</org.springdoc.version>
         <!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct -->
         <mapstruct.version>1.6.3</mapstruct.version>
@@ -42,11 +41,14 @@
         <com.github.f4b6a3.uuid-creator.version>6.1.1</com.github.f4b6a3.uuid-creator.version>
         <!-- https://mvnrepository.com/artifact/com.querydsl/querydsl-jpa -->
         <querydsl.version>5.1.0</querydsl.version>
+        <!-- https://mvnrepository.com/artifact/net.jqwik/jqwik -->
+        <jqwik.version>1.9.3</jqwik.version>
+        <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
+        <testcontainers.version>1.21.4</testcontainers.version>
         <!-- https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
         <!-- Sonar Configuration -->
         <sonar.host.url>http://localhost:9000</sonar.host.url>
-        <sonar.token>sonar-token</sonar.token>
         <sonar.projectKey>${project.artifactId}</sonar.projectKey>
         <sonar.projectName>${project.artifactId}</sonar.projectName>
         <sonar.language>java</sonar.language>
@@ -63,7 +65,7 @@
             **/dto/**,
             **/entity/**,
             **/exception/**,
-            **/*Application.java
+            **/*Application.java,
             **/*Mock*.java
         </sonar.exclusions>
         <sonar.coverage.exclusions>
@@ -85,35 +87,12 @@
         <skipUnitTests>false</skipUnitTests>
         <skipIntegrationTests>false</skipIntegrationTests>
         <!-- -->
-        <main-class>com.cjrequena.command.handler.CommandHandlerMainApplication</main-class>
+        <main-class>com.cjrequena.sample.MainApplication</main-class>
     </properties>
-    <profiles>
-        <profile>
-            <id>coverage</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud-dependencies.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+
     <!-- -->
     <dependencies>
-        <!-- spring boot -->
+        <!-- Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -139,10 +118,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.boot</groupId>-->
-        <!--            <artifactId>spring-boot-starter-webflux</artifactId>-->
-        <!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -167,31 +142,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-log4j2</artifactId>
         </dependency>
-        <!-- spring cloud -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-config-client</artifactId>
-        </dependency>
-        <!-- Spring Cloud -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-stream-binder-kafka</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-stream-binder-kafka-streams</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-stream-kafka</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${org.springdoc.version}</version>
         </dependency>
         <dependency>
@@ -332,7 +286,6 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/jakarta.json/jakarta.json-api -->
         <dependency>
             <groupId>jakarta.json</groupId>
             <artifactId>jakarta.json-api</artifactId>
@@ -343,9 +296,40 @@
             <artifactId>johnzon-core</artifactId>
             <version>${johnzon-core.version}</version>
         </dependency>
+        <!-- ===== Testing ===== -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.jqwik</groupId>
+            <artifactId>jqwik</artifactId>
+            <version>${jqwik.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -403,7 +387,7 @@
                         <path>
                             <groupId>jakarta.persistence</groupId>
                             <artifactId>jakarta.persistence-api</artifactId>
-                            <version>3.1.0</version>
+                            <version>${jakarta-persistence.version}</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

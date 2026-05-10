@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("GeoShapeMapper Integration Tests")
 @ActiveProfiles("integrationTest")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-class GeoShapeMapperIT {
+class GeoShapeMapperIT extends com.cjrequena.sample.configuration.TestcontainersConfiguration {
 
   private final GeoShapeMapper geoShapeMapper;
   private GeometryFactory geometryFactory;

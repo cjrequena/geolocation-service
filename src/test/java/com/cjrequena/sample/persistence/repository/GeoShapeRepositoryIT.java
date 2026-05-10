@@ -23,12 +23,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link GeoShapeRepository}.
- * Uses an actual database (H2 or PostgreSQL with PostGIS) to test spatial queries.
+ * Uses Testcontainers with PostGIS for testing spatial queries.
  */
 @SpringBootTest
 @ActiveProfiles("integrationTest")
 @DisplayName("GeoShapeRepository Integration Tests")
-class GeoShapeRepositoryIT {
+class GeoShapeRepositoryIT extends com.cjrequena.sample.configuration.TestcontainersConfiguration {
 
   @Autowired
   private GeoShapeRepository repository;
